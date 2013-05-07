@@ -1,0 +1,13 @@
+{
+    "name": "auth",
+    "version": "1.4",
+    "desc": "form auth component for kissy",
+    "cover": "",
+    "author": {
+        "name": "zhangting(Harry Chen)",
+        "email": "zhangting@taobao.com",
+        "page": "https://github.com/czy88840616"
+    },
+    "type": "kissy-pie",
+    "type-url": "http://abc.alibaba-inc.com/r/kissy-pie"
+}
