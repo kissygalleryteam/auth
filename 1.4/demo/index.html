@@ -2,22 +2,19 @@
 <html>
 <head>
     <meta charset="utf-8"/>
-    <title>KF/Auth</title>
-    <link rel="shortcut icon" href="http://docs.kissyui.com/kissy-dpl/base/assets/favicon.ico"/>
-    <link rel="stylesheet" type="text/css" href="http://www.36ria.com/demo/gal/gallery/form/1.2/demo/assets/bootstrap.min.css"/>
-    <link rel="stylesheet" type="text/css" href="http://www.36ria.com/demo/gal/gallery/form/1.2/demo/assets/bootstrap-responsive.css"/>
-    <link rel="stylesheet" type="text/css" href="http://www.36ria.com/demo/gal/gallery/form/1.2/demo/assets/docs.css"/>
-    <script src="http://a.tbcdn.cn/s/kissy/1.2.0/kissy.js" charset="utf-8"></script>
-    <script src="http://www.36ria.com/demo/gal/gallery/form/1.2/demo/assets/feedback.js" charset="utf-8"></script>
+    <title>KISSY-Auth</title>
+    <link rel="stylesheet" type="text/css" href="http://bootswatch.com/slate/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="http://bootswatch.com/default/bootstrap-responsive.min.css"/>
+    <link href="http://bootswatch.com/css/font-awesome.min.css" rel="stylesheet">
+    <link href="http://bootswatch.com/css/bootswatch.css" rel="stylesheet">
+    <script src="http://a.tbcdn.cn/s/kissy/1.3.0/kissy.js" charset="utf-8"></script>
     <script src="http://bootswatch.com/assets/js/jquery.js" charset="utf-8"></script>
-    <script src="http://bootswatch.com/assets/js/bootstrap-dropdown.js" charset="utf-8"></script>
-    <script src="http://bootswatch.com/assets/js/bootstrap-scrollspy.js" charset="utf-8"></script>
-    <script src="http://www.36ria.com/demo/gal/gallery/form/1.2/demo/assets/app.js" charset="utf-8"></script>
+    <script src="http://bootswatch.com/js/bootstrap.min.js" charset="utf-8"></script>
+    <script src="http://bootswatch.com/js/bootswatch.js" charset="utf-8"></script>
 
-    <link rel="stylesheet" type="text/css" href="http://www.36ria.com/demo/gal/gallery/form/1.2/demo/../auth/style.css"/>
-    <script src="http://www.36ria.com/demo/gal/gallery/form/1.2/demo/../auth/index.js" charset="utf-8"></script>
+    <link rel="stylesheet" type="text/css" href="../lib/style.css"/>
 </head>
-<body>
+<body class="preview" id="top">
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container">
@@ -26,61 +23,53 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </a>
-            <a class="brand" href="http://www.36ria.com/demo/gal/gallery/form/1.2/demo.html" id="logo">KF(kissy-form)</a>
+            <a class="brand" href="http://www.36ria.com/demo/gal/gallery/form/1.2/demo.html" id="logo">KISSY-Auth</a>
 
             <div class="nav-collapse">
-
                 <ul class="nav">
-                    <li><a href="http://docs.kissyui.com/kissy-gallery/gallery/form/1.2/demo.html">首页</a></li>
-                    <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">组件 <b
-                            class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="http://www.36ria.com/demo/gal/gallery/form/1.2/demo/form/uploader/index.html">Uploader</a>
-                            </li>
-                            <li class=""><a
-                                    href="http://www.36ria.com/demo/gal/gallery/form/1.2/demo/form/limiter/index.html">Limiter</a>
-                            </li>
-                            <li><a href="http://www.36ria.com/demo/gal/gallery/form/1.2/demo/form/spinbox/index.html">SpinBox</a>
-                            </li>
-                            <li>
-                                <a href="http://www.36ria.com/demo/gal/gallery/form/1.2/demo/form/auth/index.html">Auth</a>
-                            </li>
-                            <li class=""><a
-                                    href="http://www.36ria.com/demo/gal/gallery/form/1.2/demo/form/checkbox/index.html">checkbox</a>
-                            </li>
-                            <li class=""><a
-                                    href="http://www.36ria.com/demo/gal/gallery/form/1.2/demo/form/radio/index.html">radio</a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li><a href="https://github.com/kissyteam/kissy-gallery/tree/master/gallery/form">源码</a></li>
-                    <li><a href="http://www.36ria.com/demo/gal/gallery/form/1.2/doc/index.html">API文档</a></li>
+                    <li><a href="#">首页</a></li>
+                    <li><a href="https://github.com/czy88840616/kissy-auth">源码</a></li>
+                    <li><a href="#" target="_blank">Cdn</a></li>
                 </ul>
                 <ul class="nav pull-right">
-                    <li><a rel="tooltip" target="_blank" href="http://docs.kissyui.com/kissy-gallery/index.html">kissy
-                        gallery</a></li>
+                    <li><a rel="tooltip" target="_blank" href="http://docs.kissyui.com/kissy-gallery/index.html">Kissy Gallery <i class="icon-share-alt"></i></a></li>
                 </ul>
             </div>
         </div>
     </div>
 </div>
 <div class="container">
-    <header id="header" class="jumbotron subhead">
-        <h1 class="title-h1">Auth
-            <small>表单验证组件</small>
-        </h1>
-        <div class="dec">
-            <ul>
-                <li>作者：<b>张挺</b></li>
-                <li>接口文档：<a href="http://www.36ria.com/demo/gal/gallery/form/1.2/doc/symbols/Auth.html" target="_blank">Auth</a></li>
+    <header class="jumbotron subhead" >
+        <div class="row">
+            <div class="span6">
+                <h1>KISSY-Auth</h1>
+                <p class="lead">做最简单的表单验证组件</p>
+            </div>
+            <div class="span6">
+                <div class="bsa well">
+                    <div id="bsap_1277971" class="bsarocks bsap_c466df00a3cd5ee8568b5c4983b6bb19"></div>
+                </div>
+            </div>
+        </div>
+        <div class="subnav">
+            <ul class="nav nav-pills">
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#base">Base</a></li>
+                <li><a href="#custom">Custom</a></li>
             </ul>
         </div>
     </header>
-    <div id="content">
-        <h2>示例 - 用户注册</h2>
+
+    <section id="overview">
+        <div class="page-header">
+            <h1>Overview</h1>
+        </div>
+
+        <!-- Headings & Paragraph Copy -->
         <div class="row">
+
             <div class="span6">
-                <form method="post" id="J_form_eg1" class="form-horizontal well" style="width:550px;">
+                <form method="post" id="J_form_eg1" class="form-horizontal well">
                     <div class="control-group">
                         <label class="control-label" for="username">用户名</label>
                         <div class="controls">
@@ -166,7 +155,7 @@
             <div class="span6">
                 <h3>初始化组件</h3>
                 <pre class='brush: js; '>
-                    KISSY.use("gallery/form/1.2/auth/index", function (S, Auth) {
+                    KISSY.use("gallery/auth/1.4/index", function (S, Auth) {
                         var form = new Auth('#J_form_eg1', {
                             msg:{
                                 tpl:'<div class="msg {prefixCls}"><p class="{style}">{msg}</p></div>',
@@ -212,24 +201,38 @@
                 });
                 </pre>
             </div>
-        </div>
 
-    </div>
+        </div>
+    </section>
+
+    <section id="base">
+        <div class="page-header">
+            <h1>Base</h1>
+        </div>
+    </section>
+    <section id="custom">
+        <div class="page-header">
+            <h1>Custom</h1>
+        </div>
+    </section>
 </div>
 <div class="eg">
     <script>
+        var S = KISSY;
         //http://www.w3.org/TR/html5/constraints.html#the-constraint-validation-api
+        var srcPath = "../../../";
+
         KISSY.config({
             packages:[
                 {
-                    name:'gallery',
-                    path:'http://www.36ria.com/demo/gal/gallery/form/1.2/demo/http://www.36ria.com/demo/gal/gallery/form/1.2/demo/http://www.36ria.com/demo/gal/gallery/form/1.2/demo/',
-                    tag:'test',
-                    charset:'utf-8'
+                    name:"gallery",
+                    path:srcPath,
+                    charset:"utf-8",
+                    ignorePackageNameInUri:true
                 }
             ]
         });
-        KISSY.use("gallery/form/1.2/auth/index", function (S, Auth) {
+        KISSY.use("gallery/auth/1.4/index", function (S, Auth) {
 
             var form = new Auth('#J_form_eg1', {
                 autoBind:true,
