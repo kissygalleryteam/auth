@@ -101,7 +101,7 @@ KISSY.add('gallery/auth/1.4/lib/rule/base', function(S, Base, undefined) {
         'base'
     ]
 });
-﻿/**
+/**
  * @fileoverview
  * @author 张挺 <zhangting@taobao.com>
  *
