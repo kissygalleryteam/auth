@@ -103,7 +103,7 @@ KISSY.add('gallery/auth/1.4/lib/rule/base', function(S, Base, undefined) {
 });
 /**
  * @fileoverview
- * @author 张挺 <zhangting@taobao.com>
+ * @author  : <zhangting@taobao.com>
  *
  */
 KISSY.add('gallery/auth/1.4/lib/utils', function (S, DOM, undefined) {
@@ -706,15 +706,15 @@ KISSY.add('gallery/auth/1.4/lib/field/field', function (S, Event, Base, JSON, DO
         '../utils'
     ]
 });
-﻿/**
- * @fileoverview 表单验证类
+/**
+ * @fileoverview hU��{
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
 KISSY.add('gallery/auth/1.4/lib/base', function (S, JSON, Base, Field, Factory, Utils, undefined) {
 
     /**
-     * 默认配置
+     * ؤMn
      * @type {Object}
      */
     var defaultConfig = {
@@ -729,9 +729,9 @@ KISSY.add('gallery/auth/1.4/lib/base', function (S, JSON, Base, Field, Factory, 
 
     /**
      * @name Auth
-     * @class Auth组件入口，表明
+     * @class Auth��e�h
      * @version 1.2
-     * @param el {selector|htmlElement} form元素
+     * @param el {selector|htmlElement} formC 
      * @param config {object}
      * @return Auth
      * @constructor
@@ -756,7 +756,7 @@ KISSY.add('gallery/auth/1.4/lib/base', function (S, JSON, Base, Field, Factory, 
 
     S.extend(Auth, Base, /** @lends Auth.prototype*/ {
         /**
-         * 初始化auth
+         * �auth
          * @param el
          * @param config
          * @private
@@ -781,17 +781,17 @@ KISSY.add('gallery/auth/1.4/lib/base', function (S, JSON, Base, Field, Factory, 
             //save config
             self.AuthConfig = config;
 
-            //如果是form模式，需要屏蔽html5本身的校验，放在最后是为了html5的校验能生效
+            //��/form! �O=html5,��!�>( /:�html5�!��H
             if (self.mode === AUTH_MODE.FORM) {
                 S.one(el).attr('novalidate', 'novalidate');
             }
 
         },
         /**
-         * 添加一个需要校验的表单域
+         * �� * �!��hU�
          *
-         * @param field {Field|string|htmlElement} 表单域对象或html表单元素
-         * @param config {object} 可选的配置，如果传的是field对象，就无需此配置
+         * @param field {Field|string|htmlElement} hU��ahtmlhUC 
+         * @param config {object} �	�Mn�� �/field�a1� dMn
          * @return {*}
          */
         add:function (field, config) {
@@ -815,7 +815,7 @@ KISSY.add('gallery/auth/1.4/lib/base', function (S, JSON, Base, Field, Factory, 
             return self;
         },
         /**
-         * 根据key返回field对象
+         * 9nkey��field�a
          * @param name
          * @return {*}
          */
@@ -823,7 +823,8 @@ KISSY.add('gallery/auth/1.4/lib/base', function (S, JSON, Base, Field, Factory, 
             return this._storages[name];
         },
         /**
-         * 对Auth注册一个新的规则，当前上下文可用
+         * �Auth�� *���SM
+��(
          * @param name
          * @param rule
          */
