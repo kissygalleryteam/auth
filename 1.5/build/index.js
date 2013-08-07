@@ -1,16 +1,16 @@
 /*
 combined files : 
 
-gallery/auth/1.4/lib/rule/base
-gallery/auth/1.4/lib/utils
-gallery/auth/1.4/lib/rule/html/propertyRule
-gallery/auth/1.4/lib/rule/rule
-gallery/auth/1.4/lib/rule/ruleFactory
-gallery/auth/1.4/lib/msg/base
-gallery/auth/1.4/lib/field/field
-gallery/auth/1.4/lib/base
-gallery/auth/1.4/lib/index
-gallery/auth/1.4/index
+gallery/auth/1.5/lib/rule/base
+gallery/auth/1.5/lib/utils
+gallery/auth/1.5/lib/rule/html/propertyRule
+gallery/auth/1.5/lib/rule/rule
+gallery/auth/1.5/lib/rule/ruleFactory
+gallery/auth/1.5/lib/msg/base
+gallery/auth/1.5/lib/field/field
+gallery/auth/1.5/lib/base
+gallery/auth/1.5/lib/index
+gallery/auth/1.5/index
 
 */
 /**
@@ -18,7 +18,7 @@ gallery/auth/1.4/index
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('gallery/auth/1.4/lib/rule/base', function(S, Base, undefined) {
+KISSY.add('gallery/auth/1.5/lib/rule/base',function(S, Base, undefined) {
 
     var RULE_SUCCESS = 'success',
         RULE_ERROR = 'error',
@@ -57,18 +57,18 @@ KISSY.add('gallery/auth/1.4/lib/rule/base', function(S, Base, undefined) {
         validate: function() {
             var self = this;
 
-            var args = [].slice.call(arguments);
-            var validated = self.validation.apply(self, args.length ? args: self._args);
+            self.fire('beforeValidate');
 
+            var args = [].slice.call(arguments);
+            args = self._setArgs(args);
+            //调用验证方法
+            var validated = self.validation.apply(self, args);
             var msg;
             if(self._msg) {
                 msg = validated ? self._msg[RULE_SUCCESS] : self._msg[RULE_ERROR];
             } else {
                 msg = validated ? self._msg[RULE_SUCCESS] : '';
             }
-
-            self.fire('beforeValidate');
-
             //Deprecated
             self.fire(validated ? RULE_SUCCESS:RULE_ERROR, {
                 msg:msg
@@ -83,14 +83,42 @@ KISSY.add('gallery/auth/1.4/lib/rule/base', function(S, Base, undefined) {
             self.fire('afterValidate');
 
             return validated;
+        },
+        /**
+         * 设置验证函数的参数值
+         * @param {Array} args 参数值数组
+         * @return {Array}
+         * @private
+         */
+        _setArgs:function(args){
+            var self = this;
+            args = args.length ? args: self._args;
+            //过滤掉无用的参数
+            args = S.filter(args,function(val){
+                return !S.isUndefined(val);
+            });
+            var field = self.get('field');
+            if(field != '') args.push(field);
+            return  args;
         }
     }, {
         ATTRS: {
+            /**
+             * 验证消息
+             * @type {String}
+             */
             msg:{
                 value:'',
                 setter:function(msg) {
                     this._msg = S.merge(this._msg, msg);
                 }
+            },
+            /**
+             * 规则对应的表单域（指向会变化）
+             * @type {Field}
+             */
+            field:{
+                value:''
             }
         }
     });
@@ -106,7 +134,7 @@ KISSY.add('gallery/auth/1.4/lib/rule/base', function(S, Base, undefined) {
  * @author  : <zhangting@taobao.com>
  *
  */
-KISSY.add('gallery/auth/1.4/lib/utils', function (S, DOM, undefined) {
+KISSY.add('gallery/auth/1.5/lib/utils',function (S, DOM, undefined) {
     var Utils = {
         toJSON:function (cfg) {
             cfg = cfg.replace(/'/g, '"');
@@ -167,7 +195,7 @@ KISSY.add('gallery/auth/1.4/lib/utils', function (S, DOM, undefined) {
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('gallery/auth/1.4/lib/rule/html/propertyRule', function(S, BaseRule, Utils, undefined) {
+KISSY.add('gallery/auth/1.5/lib/rule/html/propertyRule',function(S, BaseRule, Utils, undefined) {
 
     /**
      * 属性规则
@@ -222,7 +250,7 @@ KISSY.add('gallery/auth/1.4/lib/rule/html/propertyRule', function(S, BaseRule, U
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('gallery/auth/1.4/lib/rule/rule', function(S, BaseRule, Utils, undefined) {
+KISSY.add('gallery/auth/1.5/lib/rule/rule',function(S, BaseRule, Utils, undefined) {
 
     /**
      * 属性规则
@@ -276,7 +304,8 @@ KISSY.add('gallery/auth/1.4/lib/rule/rule', function(S, BaseRule, Utils, undefin
  * @author 张挺 <zhangting@taobao.com>
  *
  */
-KISSY.add('gallery/auth/1.4/lib/rule/ruleFactory', function (S, Base, PropertyRule, Rule, undefined) {
+KISSY.add('gallery/auth/1.5/lib/rule/ruleFactory',function (S, Node,Base, PropertyRule, Rule, undefined) {
+    var $ = Node.all;
     var RuleFactory = function () {
         var self = this;
 
@@ -287,21 +316,32 @@ KISSY.add('gallery/auth/1.4/lib/rule/ruleFactory', function (S, Base, PropertyRu
 
     //第一个参数一定是属性的value，后面的才是真正的参数
     S.mix(RuleFactory.rules, {
-        required:function (pv, value) {
-            if(S.isArray(value)) {
-                return value.length>0;
+        required:function (pv, value,field) {
+            var uploader = field.get('uploader');
+            if(uploader){
+                //异步文件上传 required验证的特殊处理
+                return uploader.testRequired();
+            }else{
+                if(S.isArray(value)) {
+                    return value.length>0;
+                }
+                return !!value;
             }
-
-            return !!value;
         },
         pattern:function (pv, value) {
             return new RegExp(pv).test(value);
         },
-        max:function (pv, value) {
-            if (!S.isNumber(value)) {
-                return false;
+        max:function (pv, value,field) {
+            var uploader = field.get('uploader');
+            if(uploader){
+                //异步文件上传max验证的特殊处理
+                return uploader.testMax();
+            }else{
+                if (!S.isNumber(value)) {
+                    return false;
+                }
+                return value <= pv;
             }
-            return value <= pv;
         },
         min:function (pv, value) {
             if (!S.isNumber(value)) {
@@ -339,7 +379,14 @@ KISSY.add('gallery/auth/1.4/lib/rule/ruleFactory', function (S, Base, PropertyRu
         register:function(name, rule) {
             RuleFactory.rules[name] = rule;
         },
+        /**
+         * 实例化Rule类
+         * @param {String} ruleName 规则名称
+         * @param  {Object} cfg 配置
+         * @return {*}
+         */
         create:function (ruleName, cfg) {
+            if(!cfg.msg) cfg.msg = {};
             if(S.inArray(ruleName, RuleFactory.HTML_PROPERTY)) {
                 return new PropertyRule(ruleName, RuleFactory.rules[ruleName], cfg);
             } else if(RuleFactory.rules[ruleName]) {
@@ -353,6 +400,7 @@ KISSY.add('gallery/auth/1.4/lib/rule/ruleFactory', function (S, Base, PropertyRu
 
 }, {
     requires:[
+        'node',
         'base',
         './html/propertyRule',
         './rule'
@@ -363,63 +411,101 @@ KISSY.add('gallery/auth/1.4/lib/rule/ruleFactory', function (S, Base, PropertyRu
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('gallery/auth/1.4/lib/msg/base', function (S, Base) {
+KISSY.add('gallery/auth/1.5/lib/msg/base',function (S, Base,Node,XTemplate) {
+    var $ = Node.all;
+    var MSG_HOOK = '.J_AuthMsg';
 
-    /**
-     * msg cls
-     * @type {String}
-     */
-    var AUTH_MSG_CLS = 'kf-msg';
-
-    var Msg = function (srcNode, cfg) {
+    function Msg(target, config) {
         var self = this;
-
-        self._init(srcNode, cfg);
-
-        Msg.superclass.constructor.call(self);
+        if(!config) config = {};
+        target && S.mix(config,{target:target});
+        Msg.superclass.constructor.call(self,config);
+        self._init();
     };
 
 
     S.extend(Msg, Base, {
         /**
          * init msg
-         * @param srcNode {htmlElement|String}
-         * @param cfg {Object}
          * @private
          */
-        _init:function (srcNode, cfg) {
+        _init:function () {
             var self = this;
-            self._el = S.one(srcNode);
-            self.set('tpl', cfg.tpl);
-            self.set('args', cfg.args);
-
-            self._msgContainer = S.one('.' + AUTH_MSG_CLS, self._el.parent());
-
-            if(!self._msgContainer) {
-                self._msgContainer = S.one('<div class="' + AUTH_MSG_CLS +'" style="display: none"></div>');
-                self._el.parent().append(self._msgContainer);
-            }
-
+            var $target = self.get('target');
+            if(!$target.length) return false;
+            self.set('wrapper',self._getWrapper());
         },
         hide:function () {
-            this._msgContainer.hide();
-        },
-        show:function (o) {
             var self = this;
-            o = S.merge(self.get('args'), o);
-
+            var $wrapper = self.get('wrapper');
             S.buffer(function () {
-                self._msgContainer.html(S.substitute(self.get('tpl'), o));
-                self._msgContainer.show();
+                $wrapper.hide();
             }, 50)();
+        },
+        /**
+         * 显示消息层
+         * @param data
+         */
+        show:function (data) {
+            var self = this;
+            var args =self.get('args');
+            var tpl = self.get('tpl');
+            var $wrapper = self.get('wrapper');
+            S.buffer(function () {
+                if(!$wrapper.children('.auth-msg').length || data.reCreate){
+                    var html = new XTemplate(tpl).render(data);
+                    $wrapper.html(html);
+                }
+                $wrapper.show();
+            }, 50)();
+        },
+        /**
+         * 获取消息层容器
+         * @private
+         */
+        _getWrapper:function(){
+            var self = this;
+            var $wrapper = self.get('wrapper');
+            var $target = self.get('target');
+            if(!$target.length) return self;
+            //html标签属性上存在消息层
+            var wrapperHook = $target.attr('msg-wrapper');
+            if(wrapperHook) $wrapper = $(wrapperHook);
+
+            if(!$wrapper || !$wrapper.length){
+                $wrapper = $target.parent().all(MSG_HOOK);
+            }
+            return $wrapper;
         }
     }, {
         ATTRS:{
+            target:{
+                value:'',
+                getter:function(v){
+                    return $(v);
+                }
+            },
+            /**
+             * 消息层模版
+             * @type String
+             * @default ''
+             */
             tpl:{
-                value:''
+                value:'<p class="auth-msg {{style}}">{{msg}}</p>'
             },
             args:{
                 value:{}
+            },
+            /**
+             * 消息层容器
+             * @type String
+             * @default ''
+             */
+            wrapper:{
+                value:'',
+                getter:function(v){
+                    return $(v);
+                }
             }
         }
     });
@@ -428,16 +514,23 @@ KISSY.add('gallery/auth/1.4/lib/msg/base', function (S, Base) {
 
 }, {
     requires:[
-        'base'
+        'base',
+        'node',
+        'xtemplate'
     ]
 });
+/**
+ * changelog
+ * v1.5 by 明河
+ *  -重构消息提示
+ *
+ * */
 /**
  * @fileoverview
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('gallery/auth/1.4/lib/field/field', function (S, Event, Base, JSON, DOM, Factory,
-                                                         Rule, PropertyRule, Msg, Utils, undefined) {
+KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, JSON, DOM, Factory, Rule, PropertyRule, Msg, Utils) {
 
     var EMPTY = '',
         CONFIG_NAME = 'data-valid';
@@ -485,8 +578,7 @@ KISSY.add('gallery/auth/1.4/lib/field/field', function (S, Event, Base, JSON, DO
 
         self._init(el);
 
-        Field.superclass.constructor.call(self);
-
+        Field.superclass.constructor.call(self,config);
         return self;
     };
 
@@ -516,36 +608,33 @@ KISSY.add('gallery/auth/1.4/lib/field/field', function (S, Event, Base, JSON, DO
                 self.fire('afterFieldValidation');
             };
 
-            //msg init
-            if (self._cfg.msg) {
-                self._msg = new Msg(_el, self._cfg.msg);
-                var style = self._cfg.style;
+            self._msg = new Msg(_el, self._cfg.msg);
+            self.set('oMsg',self._msg);
+            var style = self._cfg.style;
+            self.on('afterRulesValidate', function (ev) {
+                //TODO:多次触发的问题
+                var result = ev.result,
+                    curRule = ev.curRule,
+                    msg = self._cache[curRule].msg || EMPTY;
 
-                self.on('afterRulesValidate', function (ev) {
-                    var result = ev.result,
-                        curRule = ev.curRule,
-                        msg = self._cache[curRule].msg || EMPTY;
-
-                    //这里的value还没被当前覆盖
-                    if (self.get('result') !== result || self.get('msg') !== msg) {
-                        if (msg) {
-                            self._msg.show({
-                                style:result ? style['success'] : style['error'],
-                                msg:msg
-                            });
-                        } else {
-                            self._msg.hide();
-                        }
+                //这里的value还没被当前覆盖
+                if (self.get('result') !== result || self.get('msg') !== msg) {
+                    if (msg) {
+                        self._msg.show({
+                            style:result ? style['success'] : style['error'],
+                            msg:msg
+                        });
+                    } else {
+                        self._msg.hide();
                     }
-                });
-            }
+                }
+            });
 
             //监听校验结果
             self.on('afterRulesValidate', function (ev) {
                 var result = ev.result,
                     curRule = ev.curRule,
                     msg = self._cache[curRule].msg || EMPTY;
-
                 self.set('result', result);
                 self.set('message', msg);
 
@@ -560,31 +649,39 @@ KISSY.add('gallery/auth/1.4/lib/field/field', function (S, Event, Base, JSON, DO
                 resetAfterValidate();
             });
 
-            //add html property
-            S.each(Factory.HTML_PROPERTY, function (item) {
+            var type = _el.attr('type');
+            //排除掉异步上传组件的属性规则添加
+            if(type != 'image-uploader' && type != 'file'){
+                //add html property
+                S.each(Factory.HTML_PROPERTY, function (item) {
 
-                if (_el.hasAttr(item)) {
-                    //从工厂中创建属性规则
-                    var rule = Factory.create(item, {
-                        //属性的value必须在这里初始化
-                        propertyValue:_el.attr(item),
-                        el:self.get('el'), //bugfix for change value
-                        msg:_ruleCfg[item]
-                    });
+                    if (_el.hasAttr(item)) {
+                        //从工厂中创建属性规则
+                        var rule = Factory.create(item, {
+                            //属性的value必须在这里初始化
+                            propertyValue:_el.attr(item),
+                            el:self.get('el'), //bugfix for change value
+                            msg:_ruleCfg[item]
+                        });
 
-                    self.add(item, rule);
-                }
-            });
+                        self.add(item, rule);
+                    }
+                });
+            }
 
             //add custom rule
             S.each(_ruleCfg, function(ruleCfg, name){
                 if(!self._storage[name] && Factory.rules[name]) {
-                    //如果集合里没有，但是有配置，可以认定是自定义属性，入口为form.add
-                    var rule = Factory.create(name, {
+
+                    var ruleConfig = {
                         el:self.get('el'), //bugfix for change value
                         msg:ruleCfg
-                    });
-
+                    };
+                    if(ruleCfg.propertyValue){
+                        S.mix(ruleConfig,{args:[ruleCfg.propertyValue]});
+                    }
+                    //如果集合里没有，但是有配置，可以认定是自定义属性，入口为form.add
+                    var rule = Factory.create(name, ruleConfig);
                     self.add(name, rule);
                 }
             });
@@ -592,16 +689,17 @@ KISSY.add('gallery/auth/1.4/lib/field/field', function (S, Event, Base, JSON, DO
             //element event bind
             if (_cfg.event != 'none') {
                 Event.on(self.get('el'), _cfg.event || Utils.getEvent(_el), function (ev) {
-                    self.validate();
+                    //增加个延迟，确保原生表单改变完成
+                    S.later(function(){
+                        self.validate();
+                    })
                 });
             }
 
         },
-
         add:function (name, rule, cfg) {
             var self = this,
                 _storage = self._storage;
-
             if (rule instanceof PropertyRule || rule instanceof Rule) {
                 _storage[name] = rule;
             } else if(S.isFunction(rule)) {
@@ -610,7 +708,7 @@ KISSY.add('gallery/auth/1.4/lib/field/field', function (S, Event, Base, JSON, DO
                     //TODO args
                 });
             }
-
+            self.set('oRules',_storage);
             if(_storage[name]) {
                 _storage[name].on('validate', function (ev) {
                     S.log('[after rule validate]: name:' + ev.name + ',result:' + ev.result + ',msg:' + ev.msg);
@@ -624,12 +722,16 @@ KISSY.add('gallery/auth/1.4/lib/field/field', function (S, Event, Base, JSON, DO
 
             return self;
         },
-
+        /**
+         * 删除规则
+         * @param name
+         * @return {*}
+         */
         remove:function (name) {
             var _storage = this._storage;
             delete _storage[name];
             delete this._cache[name];
-
+            self.set('oRules',_storage);
             return this;
         },
 
@@ -645,25 +747,24 @@ KISSY.add('gallery/auth/1.4/lib/field/field', function (S, Event, Base, JSON, DO
         validate:function (name, cfg) {
             var result = true,
                 self = this,
-                _storage = self._storage,
                 cfg = cfg||{},
                 curRule = EMPTY;
-
+            var rules = self.get('oRules');
+            //校验开始
+            self.fire('beforeValidate');
             if (name) {
-                if (_storage[name]) {
-                    //校验开始
-                    self.fire('beforeValidate');
-
-                    result = _storage[name].validate(cfg.args);
+                if (rules[name]) {
+                    result = rules[name].validate(cfg.args);
                     curRule = name;
                 }
             } else {
-                //校验开始
-                self.fire('beforeValidate');
-
-                for (var key in _storage) {
-                    curRule = key;
-                    if (!_storage[key].validate(cfg.args)) {
+                var isPass;
+                for (var key in rules) {
+                    curRule =  key;
+                    var oRule = rules[key];
+                    oRule.set('field',self);
+                    isPass =  oRule.validate(cfg.args);
+                    if (!isPass) {
                         result = false;
                         break;
                     }
@@ -688,7 +789,17 @@ KISSY.add('gallery/auth/1.4/lib/field/field', function (S, Event, Base, JSON, DO
                 value:EMPTY
             },
             result:{},
-            el:{}
+            el:{},
+            /**
+             *  绑定在域上的所有规则实例
+             *  @type {Object}
+             */
+            oRules:{ value:{} },
+            /**
+             * 验证消息类
+             * @type {Object}
+             */
+            oMsg:{value:''}
         }
     });
 
@@ -711,7 +822,7 @@ KISSY.add('gallery/auth/1.4/lib/field/field', function (S, Event, Base, JSON, DO
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('gallery/auth/1.4/lib/base', function (S, JSON, Base, Field, Factory, Utils, undefined) {
+KISSY.add('gallery/auth/1.5/lib/base',function (S, JSON, Base, Field, Factory, Utils) {
 
     /**
      * ؤMn
@@ -737,20 +848,20 @@ KISSY.add('gallery/auth/1.4/lib/base', function (S, JSON, Base, Field, Factory, 
      * @constructor
      */
     var Auth = function (el, config) {
-        var form = S.get(el),
-            self = this;
+        var form = S.get(el);
+        var self = this;
 
         self._storages = {};
 
-        if (!form) {
-            S.log('[Auth]:form element not exist');
-        } else {
+        config = S.merge(defaultConfig, config);
+        self.AuthConfig = config;
+
+        if(form){
             self.mode = AUTH_MODE.FORM;
-            self._init(form, S.merge(defaultConfig, config));
+            self._init(form, config);
         }
 
         Auth.superclass.constructor.call(self);
-
         return self;
     };
 
@@ -796,23 +907,67 @@ KISSY.add('gallery/auth/1.4/lib/base', function (S, JSON, Base, Field, Factory, 
          */
         add:function (field, config) {
             var el, key, self = this;
-
+            var authField = '';
+            // e�/Field���
             if (field instanceof Field) {
-                //add field
                 el = field.get('el');
-                key = S.one(el).attr('id') || S.one(el).attr('name');
-                self._storages[key || Utils.guid()] = field;
+                key = self.getName(el);
+                authField = self._storages[key || Utils.guid()] = field;
             } else {
-                //add html element
                 el = S.one(field);
-                if (el) {
-                    key = S.one(el).attr('id') || S.one(el).attr('name');
-                    var filedConfig = S.merge(self.AuthConfig, {event:self.AuthConfig.autoBind ? Utils.getEvent(el) : 'none'}, config);
-                    self._storages[key || Utils.guid()] = new Field(el, filedConfig);
-                }
+                if(!el.length) return false;
+
+                key = self.getName(el);
+                var filedConfig  = self.mergeConfig(el,config);
+                authField = self._storages[key] = new Field(el, filedConfig);
             }
 
-            return self;
+            return authField;
+        },
+        /**
+         * vhU߄��Mn
+         * @param {HTMLElement} el
+         * @param {Object} config Mn
+         * @return {Object|Boolean}
+         */
+        mergeConfig:function(el,config){
+            if(!el || !el.length) return false;
+            var self = this;
+            var filedConfig = S.merge(self.AuthConfig, {event:self.AuthConfig.autoBind ? Utils.getEvent(el) : 'none'}, config);
+            var rules  = self.getFieldAttrRules(el);
+            //v��I�Mn
+            if(!S.isEmptyObject(rules)){
+                filedConfig.rules = S.merge(rules, filedConfig.rules);
+            }
+            return filedConfig;
+        },
+        /**
+         * ��C �id��0��name
+         * @param $el
+         * @return {String}
+         */
+        getName:function ($el) {
+            if (!$el || !$el.length) return '';
+            return $el.attr('id') || $el.attr('name') || Utils.guid();
+        },
+        /**
+         * �htmlC �^'-���Mn
+         * @param {NodeList} $field hU�C 
+         * @return {Object} rules
+         */
+        getFieldAttrRules:function ($field) {
+            var allRules = Factory.rules;
+            var rules = {};
+            S.each(allRules, function (rule,ruleName) {
+                if ($field.attr(ruleName)) {
+                    rules[ruleName] = {
+                        error:$field.attr(ruleName + '-msg'),
+                        success:$field.attr(ruleName + '-success-msg') || '',
+                        propertyValue:$field.attr(ruleName)
+                    };
+                }
+            });
+            return rules;
         },
         /**
          * 9nkey��field�a
@@ -830,7 +985,6 @@ KISSY.add('gallery/auth/1.4/lib/base', function (S, JSON, Base, Field, Factory, 
          */
         register:function (name, rule) {
             Factory.register(name, rule);
-
             return this;
         },
         validate:function (group) {
@@ -887,7 +1041,7 @@ KISSY.add('gallery/auth/1.4/lib/base', function (S, JSON, Base, Field, Factory, 
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('gallery/auth/1.4/lib/index', function(S, Auth){
+KISSY.add('gallery/auth/1.5/lib/index',function(S, Auth){
     return Auth;
 }, {
     requires:[
@@ -899,7 +1053,7 @@ KISSY.add('gallery/auth/1.4/lib/index', function(S, Auth){
  * @author zhangting@taobao.com<zhangting@taobao.com>
  * @module auth
  **/
-KISSY.add('gallery/auth/1.4/index',function (S, Auth) {
+KISSY.add('gallery/auth/1.5/index',function (S, Auth) {
     return Auth;
 }, {requires:['./lib/index']});
 

@@ -1,10 +1,10 @@
 {
     "name": "auth",
-    "version": "1.4",
-    "desc": "form auth component for kissy",
+    "version": "1.5",
+    "desc": "表单验证组件",
     "cover": "",
     "author": {
-        "name": "Harry Chen",
+        "name": "张挺",
         "email": "zhangting@taobao.com",
         "page": "https://github.com/czy88840616"
     },
