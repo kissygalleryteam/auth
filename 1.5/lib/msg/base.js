@@ -67,7 +67,8 @@ KISSY.add(function (S, Base,Node,XTemplate) {
             if(wrapperHook) $wrapper = $(wrapperHook);
 
             if(!$wrapper || !$wrapper.length){
-                $wrapper = $target.parent().all(MSG_HOOK);
+                var $parent = $($target.parent());
+                $wrapper = $parent.all(MSG_HOOK);
             }
             return $wrapper;
         }

@@ -167,6 +167,14 @@ KISSY.add(function (S, JSON, Base, Field, Factory, Utils) {
             Factory.register(name, rule);
             return this;
         },
+        /**
+         * 触发所有表单元素的验证，validate的别名方法
+         * @param group
+         * @return {*}
+         */
+        test:function(group){
+          return this.validate(group);
+        },
         validate:function (group) {
             var self = this;
 
@@ -216,3 +224,9 @@ KISSY.add(function (S, JSON, Base, Field, Factory, Utils) {
         './utils'
     ]
 });
+/**
+ * changelog
+ * v1.5 by 明河
+ *  -增加validate的同名方法test
+ *
+ * */
