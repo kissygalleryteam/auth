@@ -25,13 +25,15 @@ KISSY.add(function (S, Base,Node,XTemplate) {
             var self = this;
             var $target = self.get('target');
             if(!$target.length) return false;
-            self.set('wrapper',self._getWrapper());
+            var $wrapper = self._getWrapper();
+            $wrapper.hide();
+            self.set('wrapper',$wrapper);
         },
         hide:function () {
             var self = this;
             var $wrapper = self.get('wrapper');
             S.buffer(function () {
-                $wrapper.hide();
+                $wrapper.slideUp(self.get('speed'));
             }, 50)();
         },
         /**
@@ -48,7 +50,7 @@ KISSY.add(function (S, Base,Node,XTemplate) {
                     var html = new XTemplate(tpl).render(data);
                     $wrapper.html(html);
                 }
-                $wrapper.show();
+                $wrapper.slideDown(self.get('speed'));
             }, 50)();
         },
         /**
@@ -83,10 +85,7 @@ KISSY.add(function (S, Base,Node,XTemplate) {
              * @default ''
              */
             tpl:{
-                value:'<p class="auth-msg {{style}}">{{msg}}</p>'
-            },
-            args:{
-                value:{}
+                value:'<p class="auth-msg auth-{{style}}">{{msg}}</p>'
             },
             /**
              * 消息层容器
@@ -98,7 +97,8 @@ KISSY.add(function (S, Base,Node,XTemplate) {
                 getter:function(v){
                     return $(v);
                 }
-            }
+            },
+            speed:{value:0.3}
         }
     });
 

@@ -31,16 +31,10 @@ KISSY.add(function (S, Node,Base, PropertyRule, Rule, undefined) {
             return new RegExp(pv).test(value);
         },
         max:function (pv, value,field) {
-            var uploader = field.get('uploader');
-            if(uploader){
-                //异步文件上传max验证的特殊处理
-                return uploader.testMax();
-            }else{
-                if (!S.isNumber(value)) {
-                    return false;
-                }
-                return value <= pv;
+            if (!S.isNumber(value)) {
+                return false;
             }
+            return value <= pv;
         },
         min:function (pv, value) {
             if (!S.isNumber(value)) {
