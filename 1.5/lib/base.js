@@ -3,7 +3,7 @@
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add(function (S, JSON, Base, Field, Factory, Utils) {
+KISSY.add(function (S, JSON, Base,Promise, Field, Factory, Utils) {
 
     /**
      * 默认配置
@@ -21,8 +21,8 @@ KISSY.add(function (S, JSON, Base, Field, Factory, Utils) {
 
     /**
      * @name Auth
-     * @class Auth组件入口，表明
-     * @version 1.2
+     * @class Auth组件入口
+     * @version 1.5
      * @param el {selector|htmlElement} form元素
      * @param config {object}
      * @return Auth
@@ -41,12 +41,15 @@ KISSY.add(function (S, JSON, Base, Field, Factory, Utils) {
             self.mode = AUTH_MODE.FORM;
             self._init(form, config);
         }
-
-        Auth.superclass.constructor.call(self);
+        Auth.superclass.constructor.call(self,config);
         return self;
     };
 
-    S.extend(Auth, Base, /** @lends Auth.prototype*/ {
+    S.mix(Auth,{
+        _defer: new Promise.Defer()
+    })
+
+    S.extend(Auth,Base, /** @lends Auth.prototype*/ {
         /**
          * 初始化auth
          * @param el
@@ -202,7 +205,10 @@ KISSY.add(function (S, JSON, Base, Field, Factory, Utils) {
 
             self.fire('afterValidate');
 
-            return result;
+            var _defer = Auth._defer;
+            _defer[result && 'resolve' || 'reject'](result);
+
+            return _defer.promise;
         }
     }, {
         ATTRS:{
@@ -219,6 +225,7 @@ KISSY.add(function (S, JSON, Base, Field, Factory, Utils) {
     requires:[
         'json',
         'base',
+        'promise',
         './field/field',
         './rule/ruleFactory',
         './utils'
@@ -227,6 +234,7 @@ KISSY.add(function (S, JSON, Base, Field, Factory, Utils) {
 /**
  * changelog
  * v1.5 by 明河
- *  -增加validate的同名方法test
- *
+ *  - 增加validate的同名方法test
+ *  - 继承promise，支持链式调用
+ *  - 异步验证支持
  * */

@@ -3,7 +3,7 @@
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add(function (S, Event, Base, JSON, DOM, Factory, Rule, PropertyRule, Msg, Utils) {
+KISSY.add(function (S, Event, Base, JSON, DOM,Promise, Factory, Rule, PropertyRule, Msg, Utils) {
 
     var EMPTY = '',
         CONFIG_NAME = 'data-valid';
@@ -20,7 +20,14 @@ KISSY.add(function (S, Event, Base, JSON, DOM, Factory, Rule, PropertyRule, Msg,
         }
     };
 
-    var Field = function (el, config) {
+    /**
+     * 表单字段实例
+     * @param el
+     * @param config
+     * @return {*}
+     * @constructor
+     */
+    function Field(el, config) {
         var self = this;
 
         self._validateDone = {};
@@ -54,6 +61,11 @@ KISSY.add(function (S, Event, Base, JSON, DOM, Factory, Rule, PropertyRule, Msg,
         Field.superclass.constructor.call(self,config);
         return self;
     };
+
+
+    S.mix(Field,{
+        _defer: new Promise.Defer()
+    })
 
     S.extend(Field, Base, {
         _init:function (el) {
@@ -207,7 +219,15 @@ KISSY.add(function (S, Event, Base, JSON, DOM, Factory, Rule, PropertyRule, Msg,
             self.set('oRules',_storage);
             return this;
         },
-
+        /**
+         * validate同名方法，触发字段验证
+         * @param name
+         * @param cfg
+         * @return {Boolean}
+         */
+        test:function(name, cfg){
+           return this.validate(name, cfg);
+        },
         /**
          *
          * @param name
@@ -252,9 +272,10 @@ KISSY.add(function (S, Event, Base, JSON, DOM, Factory, Rule, PropertyRule, Msg,
                 });
             }
 
-            //TODO GROUPS
+            var _defer = Field._defer;
+            _defer[result && 'resolve' || 'reject'](result);
 
-            return result;
+            return _defer.promise;
         }
     }, {
         ATTRS:{
@@ -283,6 +304,7 @@ KISSY.add(function (S, Event, Base, JSON, DOM, Factory, Rule, PropertyRule, Msg,
         'base',
         'json',
         'dom',
+        'promise',
         '../rule/ruleFactory',
         '../rule/rule',
         '../rule/html/propertyRule',
@@ -290,3 +312,10 @@ KISSY.add(function (S, Event, Base, JSON, DOM, Factory, Rule, PropertyRule, Msg,
         '../utils'
     ]
 });
+/**
+ * changelog
+ * v1.5 by 明河
+ *  - 增加validate的同名方法test
+ *  - 继承promise，支持链式调用
+ *  - 异步验证支持
+ * */

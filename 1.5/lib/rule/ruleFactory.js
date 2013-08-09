@@ -16,16 +16,10 @@ KISSY.add(function (S, Node,Base, PropertyRule, Rule, undefined) {
     //第一个参数一定是属性的value，后面的才是真正的参数
     S.mix(RuleFactory.rules, {
         required:function (pv, value,field) {
-            var uploader = field.get('uploader');
-            if(uploader){
-                //异步文件上传 required验证的特殊处理
-                return uploader.testRequired();
-            }else{
-                if(S.isArray(value)) {
-                    return value.length>0;
-                }
-                return !!value;
+            if(S.isArray(value)) {
+                return value.length>0;
             }
+            return !!value;
         },
         pattern:function (pv, value) {
             return new RegExp(pv).test(value);
