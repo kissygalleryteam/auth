@@ -3,10 +3,9 @@
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add(function (S, Event, Base, JSON, DOM,Promise, Factory, Rule, PropertyRule, Msg, Utils) {
-
-    var EMPTY = '',
-        CONFIG_NAME = 'data-valid';
+KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRule, Msg, Utils) {
+    var $ = Node.all;
+    var EMPTY = '';
 
     /**
      * field默认配置
@@ -19,6 +18,44 @@ KISSY.add(function (S, Event, Base, JSON, DOM,Promise, Factory, Rule, PropertyRu
             'error':'error'
         }
     };
+    /**
+     * 从html元素的属性中拉取规则配置
+     * @param {NodeList} $field 表单域元素
+     * @return {Object} rules
+     */
+    function getFieldAttrRules($field){
+        var allRules = Factory.rules;
+        var rules = {};
+        S.each(allRules, function (rule,ruleName) {
+            if ($field.attr(ruleName)) {
+                rules[ruleName] = {
+                    error:$field.attr(ruleName + '-msg'),
+                    success:$field.attr(ruleName + '-success-msg') || '',
+                    propertyValue:$field.attr(ruleName)
+                };
+            }
+        });
+        return rules;
+    }
+
+    /**
+     * 获取html tag上的配置
+     * @param $field
+     * @return {{}}
+     */
+    function tagConfig($field){
+        var config = {};
+        $field = $($field);
+        if(!$field || !$field.length) return config;
+        var rules  = getFieldAttrRules($field);
+        //合并自定义规则配置
+        if(!S.isEmptyObject(rules)) config.rules = rules;
+        //验证事件
+        var attrEvent = $field.attr('auth-event');
+        if(attrEvent) config.event = attrEvent;
+
+        return config;
+    }
 
     /**
      * 表单字段实例
@@ -33,25 +70,9 @@ KISSY.add(function (S, Event, Base, JSON, DOM,Promise, Factory, Rule, PropertyRu
         self._validateDone = {};
         //储存上一次的校验结果
         self._cache = {};
-
-        /**
-         * 配置有3个地方，属性，new的参数，默认参数
-         */
-        //初始化json配置
-        if (el && DOM.attr(el, CONFIG_NAME)) {
-            var cfg = DOM.attr(el, CONFIG_NAME);
-
-            cfg = Utils.toJSON(cfg);
-            //把所有伪属性都当作rule处理
-            var propertyConfig = {
-                rules:cfg
-            };
-
-            config = S.merge(propertyConfig, config);
-        }
-
-        config = S.merge(defaultConfig, config);
-
+        //合并html tag上的配置
+        var tc = tagConfig(el);
+        config = S.merge(defaultConfig, config,tc);
         self._cfg = config || {};
         //保存rule的集合
         self._storage = {};
@@ -60,12 +81,12 @@ KISSY.add(function (S, Event, Base, JSON, DOM,Promise, Factory, Rule, PropertyRu
 
         Field.superclass.constructor.call(self,config);
         return self;
-    };
+    }
 
 
     S.mix(Field,{
         _defer: new Promise.Defer()
-    })
+    });
 
     S.extend(Field, Base, {
         _init:function (el) {
@@ -302,8 +323,8 @@ KISSY.add(function (S, Event, Base, JSON, DOM,Promise, Factory, Rule, PropertyRu
     requires:[
         'event',
         'base',
-        'json',
         'dom',
+        'node',
         'promise',
         '../rule/ruleFactory',
         '../rule/rule',
@@ -318,4 +339,6 @@ KISSY.add(function (S, Event, Base, JSON, DOM,Promise, Factory, Rule, PropertyRu
  *  - 增加validate的同名方法test
  *  - 继承promise，支持链式调用
  *  - 异步验证支持
+ *  - 新增html tag的处理
+ *  - 修改获取tag配置的方式
  * */
