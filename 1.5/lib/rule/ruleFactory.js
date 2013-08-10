@@ -74,12 +74,7 @@ KISSY.add(function (S, Node,Base, PropertyRule, Rule, undefined) {
          */
         create:function (ruleName, cfg) {
             if(!cfg.msg) cfg.msg = {};
-            if(S.inArray(ruleName, RuleFactory.HTML_PROPERTY)) {
-                return new PropertyRule(ruleName, RuleFactory.rules[ruleName], cfg);
-            } else if(RuleFactory.rules[ruleName]) {
-                return new Rule(ruleName, RuleFactory.rules[ruleName], cfg);
-            }
-            return undefined;
+            return new Rule(ruleName, RuleFactory.rules[ruleName], cfg);
         }
     });
 

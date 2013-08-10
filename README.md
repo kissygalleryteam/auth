@@ -10,6 +10,7 @@ v1.5 测试中，请勿使用
 
     [!] 重构消息类
     [!] tag config方式更改
+    [!] [Field] el配置改成target
     [+] 新增render()，不再new时马上初始化逻辑
     [+] 增加validate的同名方法test
     [+] 继承promise

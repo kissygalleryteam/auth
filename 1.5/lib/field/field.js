@@ -58,28 +58,29 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
     }
 
     /**
-     * 表单字段实例
-     * @param el
+     * 表单字段类
+     * @param target
      * @param config
      * @return {*}
      * @constructor
      */
-    function Field(el, config) {
+    function Field(target, config) {
         var self = this;
 
         self._validateDone = {};
         //储存上一次的校验结果
         self._cache = {};
         //合并html tag上的配置
-        var tc = tagConfig(el);
+        var tc = tagConfig(target);
         config = S.merge(defaultConfig, config,tc);
-        self._cfg = config || {};
+        self._cfg = config;
+        S.mix(config,{target:target});
         //保存rule的集合
         self._storage = {};
 
-        self._init(el);
-
         Field.superclass.constructor.call(self,config);
+
+        self._init();
         return self;
     }
 
@@ -89,32 +90,30 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
     });
 
     S.extend(Field, Base, {
-        _init:function (el) {
-            var self = this,
-                _cfg = self._cfg,
-                _el = S.one(el),
-                _ruleCfg = S.merge({}, _cfg.rules);
+        _init:function () {
+            var self = this;
+            var _cfg = self._cfg;
+            var $target = self.get('target');
+            var _ruleCfg = S.merge({}, _cfg.rules);
 
 
             //如果为checkbox/radio则保存为数组
-            if (S.inArray(_el.attr('type'), ['checkbox','radio'])) {
-                var form = _el.getDOMNode().form, elName = _el.attr('name');
+            if (S.inArray($target.attr('type'), ['checkbox','radio'])) {
+                var form = $target.getDOMNode().form, elName = $target.attr('name');
                 var els = [];
                 S.each(document.getElementsByName(elName), function(item) {
                     if (item.form == form) {
                         els.push(item);
                     }
                 });
-                self.set('el', els);
-            } else {
-                self.set('el', el);
+                self.set('target', els);
             }
 
             var resetAfterValidate = function () {
                 self.fire('afterFieldValidation');
             };
 
-            self._msg = new Msg(_el, self._cfg.msg);
+            self._msg = new Msg($target, self._cfg.msg);
             self.set('oMsg',self._msg);
             var style = self._cfg.style;
             self.on('afterRulesValidate', function (ev) {
@@ -155,46 +154,30 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
                 resetAfterValidate();
             });
 
-            var type = _el.attr('type');
-            //排除掉异步上传组件的属性规则添加
-            if(type != 'image-uploader' && type != 'file'){
-                //add html property
-                S.each(Factory.HTML_PROPERTY, function (item) {
-
-                    if (_el.hasAttr(item)) {
-                        //从工厂中创建属性规则
-                        var rule = Factory.create(item, {
-                            //属性的value必须在这里初始化
-                            propertyValue:_el.attr(item),
-                            el:self.get('el'), //bugfix for change value
-                            msg:_ruleCfg[item]
-                        });
-
-                        self.add(item, rule);
-                    }
-                });
-            }
+            //add html property
+            S.each(Factory.HTML_PROPERTY, function (attrName) {
+                if ($target.hasAttr(attrName)) {
+                    var rule = self._createRule(attrName,{
+                        //属性的value必须在这里初始化
+                        propertyValue:$target.attr(attrName),
+                        el:self.get('target'), //bugfix for change value
+                        msg:_ruleCfg[attrName]
+                    });
+                    self.add(attrName, rule);
+                }
+            });
 
             //add custom rule
             S.each(_ruleCfg, function(ruleCfg, name){
                 if(!self._storage[name] && Factory.rules[name]) {
-
-                    var ruleConfig = {
-                        el:self.get('el'), //bugfix for change value
-                        msg:ruleCfg
-                    };
-                    if(ruleCfg.propertyValue){
-                        S.mix(ruleConfig,{args:[ruleCfg.propertyValue]});
-                    }
-                    //如果集合里没有，但是有配置，可以认定是自定义属性，入口为form.add
-                    var rule = Factory.create(name, ruleConfig);
+                    var rule = self._createRule(name,ruleCfg);
                     self.add(name, rule);
                 }
             });
 
             //element event bind
             if (_cfg.event != 'none') {
-                Event.on(self.get('el'), _cfg.event || Utils.getEvent(_el), function (ev) {
+                Event.on(self.get('target'), _cfg.event || Utils.getEvent(_el), function (ev) {
                     //增加个延迟，确保原生表单改变完成
                     S.later(function(){
                         self.validate();
@@ -202,6 +185,29 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
                 });
             }
 
+        },
+        /**
+         * 创建规则实例
+         * @param name
+         * @param ruleCfg
+         * @return {Rule}
+         * @private
+         */
+        _createRule:function(name,ruleCfg){
+            var self = this;
+            var target = self.get('target');
+            var ruleConfig = {
+                //bugfix for change value
+                el:target,
+                //promise defer
+                _defer : Field._defer,
+                msg:ruleCfg
+            };
+            if(ruleCfg.propertyValue){
+                S.mix(ruleConfig,{args:[ruleCfg.propertyValue]});
+            }
+            //如果集合里没有，但是有配置，可以认定是自定义属性，入口为form.add
+            return Factory.create(name, ruleConfig);
         },
         add:function (name, rule, cfg) {
             var self = this,
@@ -264,9 +270,32 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
                 cfg = cfg||{},
                 curRule = EMPTY;
             var rules = self.get('oRules');
+            var _defer = Field._defer;
             //校验开始
             self.fire('beforeValidate');
-            if (name) {
+            rules = S.makeArray(rules);
+            var i = 0;
+            _testRule(rules[i]);
+            function _testRule(ruleData){
+                //获取Rule实例，其实只有一个
+                S.each(ruleData,function(oRule){
+                    oRule.set('field',self);
+                    var promise =  oRule.validate(cfg.args);
+                    i ++;
+                    promise.then(function(){
+                        if(i >= rules.length){
+                            _defer.resolve(self);
+                        }else{
+                            _testRule(rules[i]);
+                        }
+                    }).fail(function(){
+
+                    })
+                })
+
+            }
+
+            /*if (name) {
                 if (rules[name]) {
                     result = rules[name].validate(cfg.args);
                     curRule = name;
@@ -291,11 +320,7 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
                     result:result,
                     curRule:curRule
                 });
-            }
-
-            var _defer = Field._defer;
-            _defer[result && 'resolve' || 'reject'](result);
-
+            }*/
             return _defer.promise;
         }
     }, {
@@ -304,7 +329,15 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
                 value:EMPTY
             },
             result:{},
-            el:{},
+            /**
+             * 目标元素
+             */
+            target:{
+                value:'',
+                getter:function(v){
+                    return $(v);
+                }
+            },
             /**
              *  绑定在域上的所有规则实例
              *  @type {Object}
@@ -341,4 +374,5 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
  *  - 异步验证支持
  *  - 新增html tag的处理
  *  - 修改获取tag配置的方式
+ *  - el配置改成target
  * */

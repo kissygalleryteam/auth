@@ -81,7 +81,7 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
             var authField = '';
             //传入的是Field的实例
             if (field instanceof Field) {
-                el = field.get('el');
+                el = field.get('target');
                 key = self.getName(el);
                 authField = self._storages[key || Utils.guid()] = field;
             } else {

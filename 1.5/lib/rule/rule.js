@@ -6,27 +6,27 @@
 KISSY.add(function(S, BaseRule, Utils, undefined) {
 
     /**
-     * 属性规则
+     * 规则类
      *
-     * @param {String} ruleName
-     * @param {Function} ruleBody
-     * @param {Object} rule params and msg
+     * @param {String} ruleName 规则名称
+     * @param {Function} ruleFunction 规则函数
+     * @param {Object} ruleConfig params and msg 规则参数
      * @constructor
      */
-    var Rule = function() {
+    function Rule(ruleName,ruleFunction,ruleConfig) {
         var self = this;
-        var args = [].slice.call(arguments);
-        if(!args.length) {
-            S.log('please use a name to define rule');
-            return;
-        }
-        self._name = args[0];
-        var cfg = args[2]||{args:[]};
-
+        if(!S.isString(ruleName) || !S.isFunction(ruleFunction) ) return self;
+        //demo: required
+        self._name = ruleName;
+        var cfg = ruleConfig || {args:[]};
+        //规则配置的值，比如html中required="required"
+        //demo:["required"]
         self._initArgs = cfg.args;
         self._el = cfg.el;
+        //promise defer
+        self._defer = cfg._defer;
         //_propertyValue和_el如果要修改必须通过属性的修改
-        Rule.superclass.constructor.apply(self, args.slice(1));
+        Rule.superclass.constructor.apply(self, cfg.args.slice(1));
     };
 
     S.extend(Rule, BaseRule, /** @lends BaseRule.prototype*/{
