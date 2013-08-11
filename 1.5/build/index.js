@@ -1,12 +1,10 @@
 /*
 combined files : 
 
-gallery/auth/1.5/lib/rule/base
-gallery/auth/1.5/lib/utils
-gallery/auth/1.5/lib/rule/html/propertyRule
 gallery/auth/1.5/lib/rule/rule
 gallery/auth/1.5/lib/rule/ruleFactory
 gallery/auth/1.5/lib/msg/base
+gallery/auth/1.5/lib/utils
 gallery/auth/1.5/lib/field/field
 gallery/auth/1.5/lib/base
 gallery/auth/1.5/lib/index
@@ -14,121 +12,394 @@ gallery/auth/1.5/index
 
 */
 /**
- * @fileoverview 所有规则的基类
+ * @fileoverview 规则抽象类
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('gallery/auth/1.5/lib/rule/base',function(S, Base, undefined) {
+KISSY.add('gallery/auth/1.5/lib/rule/rule',function(S, Base,Promise) {
 
-    var RULE_SUCCESS = 'success',
-        RULE_ERROR = 'error',
-        DEFAULT_MSG = {
-            success:'',
-            error:''
-        };
+    /**
+     * 规则类
+     *
+     * @param {String} ruleName 规则名称
+     * @param {Function} ruleFunction 规则函数
+     * @param {Object} ruleConfig params and msg 规则参数
+     * @constructor
+     */
+    function Rule(ruleName,ruleFunction,ruleConfig) {
+        var self = this;
+        if(!S.isString(ruleName) || !S.isFunction(ruleFunction) ) return self;
+        if(!S.isObject(ruleConfig)) ruleConfig = {args:[]};
 
-    var BaseRule = function() {
-        var args = [].slice.call(arguments),
-            self = this;
+        //合并参数
+        S.mix(ruleConfig,{
+            name:ruleName,
+            validation: ruleFunction
+        })
 
-        self.validation = args[0] ? args[0]:function() {return true};
+        Rule.superclass.constructor.call(self,ruleConfig);
 
-        var cfg = S.merge({}, args[1]);
-
-        //save args
-        if(args[1]) {
-            self._args = S.isArray(cfg['args']) ? cfg['args'] : [cfg['args']];
-        }
-
-        //default is error message
-        if(!S.isPlainObject(cfg['msg'])) {
-            cfg['msg'] = {
-                error:cfg['msg']
-            };
-        }
-
-        //merge msg
-        self._msg = S.merge(DEFAULT_MSG, cfg['msg']);
-
-        BaseRule.superclass.constructor.call(self);
     };
 
-    S.extend(BaseRule, Base, /** @lends Base.prototype*/{
-        validate: function() {
+    S.extend(Rule, Base, /** @lends BaseRule.prototype*/{
+        /**
+         * 规则验证，留意返回的是Promise实例
+         * @return {Promise}
+         */
+        validate:function () {
             var self = this;
+            var validation = self.get('validation');
+            var args = self._getArgs();
 
-            self.fire('beforeValidate');
+            var _defer = self.get('_defer');
+            //调用验证方法，返回promise
+            var validatedApply = validation.apply(self, args);
 
-            var args = [].slice.call(arguments);
-            args = self._setArgs(args);
-            //调用验证方法
-            var validated = self.validation.apply(self, args);
-            var msg;
-            if(self._msg) {
-                msg = validated ? self._msg[RULE_SUCCESS] : self._msg[RULE_ERROR];
-            } else {
-                msg = validated ? self._msg[RULE_SUCCESS] : '';
+            //非异步，普通的验证函数
+            //validatedApply的值为true||false
+            //注入promise
+            if(S.isBoolean(validatedApply)){
+                var isPass = validatedApply;
+                validatedApply = _defer.promise;
+                _defer[isPass && 'resolve' || 'reject'](self);
+                return validatedApply;
             }
-            //Deprecated
-            self.fire(validated ? RULE_SUCCESS:RULE_ERROR, {
-                msg:msg
-            });
 
-            self.fire('validate', {
-                result: validated,
-                msg: msg,
-                name: self._name
-            });
-
-            self.fire('afterValidate');
-
-            return validated;
+            return validatedApply;
         },
         /**
          * 设置验证函数的参数值
-         * @param {Array} args 参数值数组
          * @return {Array}
          * @private
          */
-        _setArgs:function(args){
+        _getArgs:function(){
             var self = this;
-            args = args.length ? args: self._args;
-            //过滤掉无用的参数
-            args = S.filter(args,function(val){
-                return !S.isUndefined(val);
-            });
+            var _defer = new Promise.Defer();
             var field = self.get('field');
-            if(field != '') args.push(field);
+            var args = [
+                //目标值（指向目标表单元素的值）
+                self.get('value'),
+                //规则属性值
+                self.get('propertyValue'),
+                //promise
+                _defer,
+                field
+            ];
+            self.set('_defer',_defer);
             return  args;
         }
-    }, {
-        ATTRS: {
+    },{
+        ATTRS:{
             /**
-             * 验证消息
-             * @type {String}
+             * 规则名称
              */
-            msg:{
+            name:{value:''},
+            /**
+             * 需要规则验证的值
+             */
+            value:{
                 value:'',
-                setter:function(msg) {
-                    this._msg = S.merge(this._msg, msg);
+                getter:function(v){
+                    var target = this.get('target');
+                    if(!target.length) return v;
+                    return target.val();
                 }
             },
+            /**
+             * 规则属性的值
+             */
+            propertyValue:{
+                value:'',
+                getter:function(v){
+                    var target = this.get('target');
+                    if(!target.length) return v;
+
+                    return target.attr(this.name);
+                }
+            },
+            /**
+             * 消息配置
+             */
+            msg:{
+                value:{
+                    error:'',
+                    success:''
+                }
+            },
+            /**
+             * 验证函数
+             */
+            validation:{
+                value:function(){}
+            },
+            /**
+             * 目标元素
+             */
+            target:{ value: '',getter:function(v){return S.one(v)} },
             /**
              * 规则对应的表单域（指向会变化）
              * @type {Field}
              */
             field:{
                 value:''
-            }
+            },
+            _defer:{value:''}
         }
     });
 
-    return BaseRule;
+    return Rule;
 }, {
     requires:[
-        'base'
+        'base',
+        'promise'
     ]
 });
+/**
+ * changelog
+ * v1.5 by 明河
+ *  - 重构
+ *  - 去掉晦涩的arguments传参方式
+ *  - 使用get和set来获取设置属性
+ *  - 去掉基类继承
+ *  - 去掉utils引用
+ * */
+/**
+ * @fileoverview html 属性规则工厂
+ * @author 张挺 <zhangting@taobao.com>
+ *
+ */
+KISSY.add('gallery/auth/1.5/lib/rule/ruleFactory',function (S, Node,Base, Rule, undefined) {
+    var $ = Node.all;
+    var RuleFactory = function () {
+        var self = this;
+
+        RuleFactory.superclass.constructor.call(self);
+    };
+
+    RuleFactory.rules = {};
+
+    //第一个参数一定是属性的value，后面的才是真正的参数
+    S.mix(RuleFactory.rules, {
+        required:function (value,pv,field) {
+            if(S.isArray(value)) {
+                return value.length>0;
+            }
+            return !!value;
+        },
+        pattern:function (value,pv) {
+            return new RegExp(pv).test(value);
+        },
+        max:function (value,pv,field) {
+            if (!S.isNumber(value)) {
+                return false;
+            }
+            return value <= pv;
+        },
+        min:function (value,pv) {
+            if (!S.isNumber(value)) {
+                return false;
+            }
+            return value >= pv;
+        },
+        step:function (value,pv) {
+            if (!S.isNumber(value)) {
+                return false;
+            }
+            if(value == 0 || pv == 1) return true;
+
+            return value % pv;
+        },
+        //添加1个特殊的属性
+        equalTo:function(value,pv){
+            //number same
+            if (S.isNumber(value)) {
+                return pv === value;
+            }
+
+            //selector same
+            if(S.one(pv)) {
+                return S.one(pv).val() === value;
+            }
+
+            //string same
+            return pv === value;
+        }
+    });
+
+    S.mix(RuleFactory, {
+        HTML_PROPERTY:['required', 'pattern', 'max', 'min', 'step', 'equalTo'],
+        register:function(name, rule) {
+            RuleFactory.rules[name] = rule;
+        },
+        /**
+         * 实例化Rule类
+         * @param {String} ruleName 规则名称
+         * @param  {Object} cfg 配置
+         * @return {*}
+         */
+        create:function (ruleName, cfg) {
+            return new Rule(ruleName, RuleFactory.rules[ruleName], cfg);
+        }
+    });
+
+    return RuleFactory;
+
+}, {
+    requires:[
+        'node',
+        'base',
+        './rule'
+    ]
+});
+/**
+ * changelog
+ * v1.5 by 明河
+ *  - 去掉propertyRule
+ *  - 颠倒规则函数的value和pv
+ * */
+/**
+ * @fileoverview
+ * @author czy88840616 <czy88840616@gmail.com>
+ *
+ */
+KISSY.add('gallery/auth/1.5/lib/msg/base',function (S, Base,Node,XTemplate) {
+    var $ = Node.all;
+    var MSG_HOOK = '.J_AuthMsg';
+
+    function Msg(target, config) {
+        var self = this;
+        if(!config) config = {};
+        target && S.mix(config,{target:target});
+        Msg.superclass.constructor.call(self,config);
+        self._init();
+    };
+
+
+    S.extend(Msg, Base, {
+        /**
+         * init msg
+         * @private
+         */
+        _init:function () {
+            var self = this;
+            var $target = self.get('target');
+            if(!$target.length) return false;
+            var $wrapper = self._getWrapper();
+            $wrapper.hide();
+            self.set('wrapper',$wrapper);
+
+            var host = self.get('host');
+            host.on('error',function(ev){
+                var msg = ev.msg;
+                var style = ev.style || 'error';
+                self.show({style:style,msg:msg});
+            })
+            host.on('success',function(ev){
+                var msg = ev.msg;
+                var style = ev.style;
+                if(msg || style){
+                    style = ev.style || 'success';
+                    self.show({style:style,msg:msg});
+                }else{
+                    self.hide();
+                }
+            })
+        },
+        hide:function () {
+            var self = this;
+            var $wrapper = self.get('wrapper');
+            S.buffer(function () {
+                $wrapper.slideUp(self.get('speed'));
+            }, 50)();
+        },
+        /**
+         * 显示消息层
+         * @param data
+         */
+        show:function (data) {
+            var self = this;
+            var args =self.get('args');
+            var tpl = self.get('tpl');
+            var $wrapper = self.get('wrapper');
+            S.buffer(function () {
+                if(!$wrapper.children('.auth-msg').length || data.reCreate){
+                    var html = new XTemplate(tpl).render(data);
+                    $wrapper.html(html);
+                }
+                $wrapper.slideDown(self.get('speed'));
+            }, 50)();
+        },
+        /**
+         * 获取消息层容器
+         * @private
+         */
+        _getWrapper:function(){
+            var self = this;
+            var $wrapper = self.get('wrapper');
+            var $target = self.get('target');
+            if(!$target.length) return self;
+            //html标签属性上存在消息层
+            var wrapperHook = $target.attr('msg-wrapper');
+            if(wrapperHook) $wrapper = $(wrapperHook);
+
+            if(!$wrapper || !$wrapper.length){
+                var $parent = $($target.parent());
+                $wrapper = $parent.all(MSG_HOOK);
+            }
+            return $wrapper;
+        }
+    }, {
+        ATTRS:{
+            /**
+             * 宿主实例，一般是Field实例
+             */
+            host:{
+                value:''
+            },
+            target:{
+                value:'',
+                getter:function(v){
+                    return $(v);
+                }
+            },
+            /**
+             * 消息层模版
+             * @type String
+             * @default ''
+             */
+            tpl:{
+                value:'<p class="auth-msg auth-{{style}}">{{msg}}</p>'
+            },
+            /**
+             * 消息层容器
+             * @type String
+             * @default ''
+             */
+            wrapper:{
+                value:'',
+                getter:function(v){
+                    return $(v);
+                }
+            },
+            speed:{value:0.3}
+        }
+    });
+
+    return Msg;
+
+}, {
+    requires:[
+        'base',
+        'node',
+        'xtemplate'
+    ]
+});
+/**
+ * changelog
+ * v1.5 by 明河
+ *  -重构消息提示
+ *
+ * */
 /**
  * @fileoverview
  * @author  : <zhangting@taobao.com>
@@ -191,349 +462,13 @@ KISSY.add('gallery/auth/1.5/lib/utils',function (S, DOM, undefined) {
     ]
 });
 /**
- * @fileoverview 基于html属性的规则抽象类
- * @author czy88840616 <czy88840616@gmail.com>
- *
- */
-KISSY.add('gallery/auth/1.5/lib/rule/html/propertyRule',function(S, BaseRule, Utils, undefined) {
-
-    /**
-     * 属性规则
-     *
-     * @param {String} ruleName
-     * @param {Function} ruleBody
-     * @param {Object} rule params and msg
-     * @constructor
-     */
-    var ProPertyRule = function() {
-        var self = this;
-        var args = [].slice.call(arguments);
-        if(!args.length) {
-            S.log('please use a name to define property');
-            return;
-        }
-        self._name = args[0];
-        var cfg = args[2]||{args:[]};
-
-        self._initArgs = cfg.args;
-        //_propertyValue和_el如果要修改必须通过属性的修改
-        self._propertyValue = cfg.propertyValue;
-        self._el = cfg.el;
-        ProPertyRule.superclass.constructor.apply(self, args.slice(1));
-    };
-
-    S.extend(ProPertyRule, BaseRule, /** @lends BaseRule.prototype*/{
-        validate:function () {
-            var self = this;
-            if(S.isUndefined(arguments[0])) {
-                return ProPertyRule.superclass.validate.apply(this, [self._propertyValue, Utils.getValue(self._el)].concat(self._initArgs));
-            } else {
-                //bugfix for no args input
-                var args = [].slice.call(arguments);
-                //一旦传入过值之后，表示复写初始化的参数
-                self._initArgs = args;
-                //将属性的value作为第一个参数传进去，将当前元素的值当成第二个参数传入
-                return ProPertyRule.superclass.validate.apply(this, [self._propertyValue, Utils.getValue(self._el)].concat(args));
-            }
-        }
-    });
-
-    return ProPertyRule;
-}, {
-    requires:[
-        '../base',
-        '../../utils'
-    ]
-});
-/**
- * @fileoverview 规则抽象类
- * @author czy88840616 <czy88840616@gmail.com>
- *
- */
-KISSY.add('gallery/auth/1.5/lib/rule/rule',function(S, BaseRule, Utils, undefined) {
-
-    /**
-     * 属性规则
-     *
-     * @param {String} ruleName
-     * @param {Function} ruleBody
-     * @param {Object} rule params and msg
-     * @constructor
-     */
-    var Rule = function() {
-        var self = this;
-        var args = [].slice.call(arguments);
-        if(!args.length) {
-            S.log('please use a name to define rule');
-            return;
-        }
-        self._name = args[0];
-        var cfg = args[2]||{args:[]};
-
-        self._initArgs = cfg.args;
-        self._el = cfg.el;
-        //_propertyValue和_el如果要修改必须通过属性的修改
-        Rule.superclass.constructor.apply(self, args.slice(1));
-    };
-
-    S.extend(Rule, BaseRule, /** @lends BaseRule.prototype*/{
-        validate:function () {
-            var self = this;
-            if(S.isUndefined(arguments[0])) {
-                return Rule.superclass.validate.apply(this, [Utils.getValue(self._el)].concat(self._initArgs));
-            } else {
-                //bugfix for no args input
-                var args = [].slice.call(arguments);
-                //一旦传入过值之后，表示复写初始化的参数
-                self._initArgs = args;
-                //将当前元素的值当成第一个参数传入
-                return Rule.superclass.validate.apply(this, [Utils.getValue(self._el)].concat(args));
-            }
-        }
-    });
-
-    return Rule;
-}, {
-    requires:[
-        './base',
-        '../utils'
-    ]
-});
-/**
- * @fileoverview html 属性规则工厂
- * @author 张挺 <zhangting@taobao.com>
- *
- */
-KISSY.add('gallery/auth/1.5/lib/rule/ruleFactory',function (S, Node,Base, PropertyRule, Rule, undefined) {
-    var $ = Node.all;
-    var RuleFactory = function () {
-        var self = this;
-
-        RuleFactory.superclass.constructor.call(self);
-    };
-
-    RuleFactory.rules = {};
-
-    //第一个参数一定是属性的value，后面的才是真正的参数
-    S.mix(RuleFactory.rules, {
-        required:function (pv, value,field) {
-            var uploader = field.get('uploader');
-            if(uploader){
-                //异步文件上传 required验证的特殊处理
-                return uploader.testRequired();
-            }else{
-                if(S.isArray(value)) {
-                    return value.length>0;
-                }
-                return !!value;
-            }
-        },
-        pattern:function (pv, value) {
-            return new RegExp(pv).test(value);
-        },
-        max:function (pv, value,field) {
-            var uploader = field.get('uploader');
-            if(uploader){
-                //异步文件上传max验证的特殊处理
-                return uploader.testMax();
-            }else{
-                if (!S.isNumber(value)) {
-                    return false;
-                }
-                return value <= pv;
-            }
-        },
-        min:function (pv, value) {
-            if (!S.isNumber(value)) {
-                return false;
-            }
-            return value >= pv;
-        },
-        step:function (pv, value) {
-            if (!S.isNumber(value)) {
-                return false;
-            }
-            if(value == 0 || pv == 1) return true;
-
-            return value % pv;
-        },
-        //添加1个特殊的属性
-        equalTo:function(pv, value){
-            //number same
-            if (S.isNumber(value)) {
-                return pv === value;
-            }
-
-            //selector same
-            if(S.one(pv)) {
-                return S.one(pv).val() === value;
-            }
-
-            //string same
-            return pv === value;
-        }
-    });
-
-    S.mix(RuleFactory, {
-        HTML_PROPERTY:['required', 'pattern', 'max', 'min', 'step', 'equalTo'],
-        register:function(name, rule) {
-            RuleFactory.rules[name] = rule;
-        },
-        /**
-         * 实例化Rule类
-         * @param {String} ruleName 规则名称
-         * @param  {Object} cfg 配置
-         * @return {*}
-         */
-        create:function (ruleName, cfg) {
-            if(!cfg.msg) cfg.msg = {};
-            if(S.inArray(ruleName, RuleFactory.HTML_PROPERTY)) {
-                return new PropertyRule(ruleName, RuleFactory.rules[ruleName], cfg);
-            } else if(RuleFactory.rules[ruleName]) {
-                return new Rule(ruleName, RuleFactory.rules[ruleName], cfg);
-            }
-            return undefined;
-        }
-    });
-
-    return RuleFactory;
-
-}, {
-    requires:[
-        'node',
-        'base',
-        './html/propertyRule',
-        './rule'
-    ]
-});
-/**
  * @fileoverview
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('gallery/auth/1.5/lib/msg/base',function (S, Base,Node,XTemplate) {
+KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils) {
     var $ = Node.all;
-    var MSG_HOOK = '.J_AuthMsg';
-
-    function Msg(target, config) {
-        var self = this;
-        if(!config) config = {};
-        target && S.mix(config,{target:target});
-        Msg.superclass.constructor.call(self,config);
-        self._init();
-    };
-
-
-    S.extend(Msg, Base, {
-        /**
-         * init msg
-         * @private
-         */
-        _init:function () {
-            var self = this;
-            var $target = self.get('target');
-            if(!$target.length) return false;
-            self.set('wrapper',self._getWrapper());
-        },
-        hide:function () {
-            var self = this;
-            var $wrapper = self.get('wrapper');
-            S.buffer(function () {
-                $wrapper.hide();
-            }, 50)();
-        },
-        /**
-         * 显示消息层
-         * @param data
-         */
-        show:function (data) {
-            var self = this;
-            var args =self.get('args');
-            var tpl = self.get('tpl');
-            var $wrapper = self.get('wrapper');
-            S.buffer(function () {
-                if(!$wrapper.children('.auth-msg').length || data.reCreate){
-                    var html = new XTemplate(tpl).render(data);
-                    $wrapper.html(html);
-                }
-                $wrapper.show();
-            }, 50)();
-        },
-        /**
-         * 获取消息层容器
-         * @private
-         */
-        _getWrapper:function(){
-            var self = this;
-            var $wrapper = self.get('wrapper');
-            var $target = self.get('target');
-            if(!$target.length) return self;
-            //html标签属性上存在消息层
-            var wrapperHook = $target.attr('msg-wrapper');
-            if(wrapperHook) $wrapper = $(wrapperHook);
-
-            if(!$wrapper || !$wrapper.length){
-                $wrapper = $target.parent().all(MSG_HOOK);
-            }
-            return $wrapper;
-        }
-    }, {
-        ATTRS:{
-            target:{
-                value:'',
-                getter:function(v){
-                    return $(v);
-                }
-            },
-            /**
-             * 消息层模版
-             * @type String
-             * @default ''
-             */
-            tpl:{
-                value:'<p class="auth-msg {{style}}">{{msg}}</p>'
-            },
-            args:{
-                value:{}
-            },
-            /**
-             * 消息层容器
-             * @type String
-             * @default ''
-             */
-            wrapper:{
-                value:'',
-                getter:function(v){
-                    return $(v);
-                }
-            }
-        }
-    });
-
-    return Msg;
-
-}, {
-    requires:[
-        'base',
-        'node',
-        'xtemplate'
-    ]
-});
-/**
- * changelog
- * v1.5 by 明河
- *  -重构消息提示
- *
- * */
-/**
- * @fileoverview
- * @author czy88840616 <czy88840616@gmail.com>
- *
- */
-KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, JSON, DOM, Factory, Rule, PropertyRule, Msg, Utils) {
-
-    var EMPTY = '',
-        CONFIG_NAME = 'data-valid';
+    var EMPTY = '';
 
     /**
      * field默认配置
@@ -546,161 +481,160 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, JSON, DOM
             'error':'error'
         }
     };
+    /**
+     * 从html元素的属性中拉取规则配置
+     * @param {NodeList} $field 表单域元素
+     * @return {Object} rules
+     */
+    function getFieldAttrRules($field){
+        var allRules = Factory.rules;
+        var rules = {};
+        S.each(allRules, function (rule,ruleName) {
+            if ($field.attr(ruleName)) {
+                rules[ruleName] = {
+                    error:$field.attr(ruleName + '-msg'),
+                    success:$field.attr(ruleName + '-success-msg') || '',
+                    propertyValue:$field.attr(ruleName)
+                };
+            }
+        });
+        return rules;
+    }
 
-    var Field = function (el, config) {
+    /**
+     * 获取html tag上的配置
+     * @param $field
+     * @return {{}}
+     */
+    function tagConfig($field){
+        var config = {};
+        $field = $($field);
+        if(!$field || !$field.length) return config;
+        var rules  = getFieldAttrRules($field);
+        //合并自定义规则配置
+        if(!S.isEmptyObject(rules)) config.rules = rules;
+        //验证事件
+        var attrEvent = $field.attr('auth-event');
+        if(attrEvent) config.event = attrEvent;
+
+        return config;
+    }
+
+    /**
+     * 表单字段类
+     * @param target
+     * @param config
+     * @return {*}
+     * @constructor
+     */
+    function Field(target, config) {
         var self = this;
 
         self._validateDone = {};
         //储存上一次的校验结果
         self._cache = {};
-
-        /**
-         * 配置有3个地方，属性，new的参数，默认参数
-         */
-        //初始化json配置
-        if (el && DOM.attr(el, CONFIG_NAME)) {
-            var cfg = DOM.attr(el, CONFIG_NAME);
-
-            cfg = Utils.toJSON(cfg);
-            //把所有伪属性都当作rule处理
-            var propertyConfig = {
-                rules:cfg
-            };
-
-            config = S.merge(propertyConfig, config);
-        }
-
-        config = S.merge(defaultConfig, config);
-
-        self._cfg = config || {};
+        //合并html tag上的配置
+        var tc = tagConfig(target);
+        config = S.merge(defaultConfig, config,tc);
+        self._cfg = config;
+        S.mix(config,{target:target});
         //保存rule的集合
         self._storage = {};
 
-        self._init(el);
-
         Field.superclass.constructor.call(self,config);
+
+        self._init();
         return self;
-    };
+    }
+
+
+    S.mix(Field,{
+        _defer: new Promise.Defer()
+    });
 
     S.extend(Field, Base, {
-        _init:function (el) {
-            var self = this,
-                _cfg = self._cfg,
-                _el = S.one(el),
-                _ruleCfg = S.merge({}, _cfg.rules);
+        _init:function () {
+            var self = this;
+            var _cfg = self._cfg;
+            var $target = self.get('target');
+            var _ruleCfg = S.merge({}, _cfg.rules);
 
 
             //如果为checkbox/radio则保存为数组
-            if (S.inArray(_el.attr('type'), ['checkbox','radio'])) {
-                var form = _el.getDOMNode().form, elName = _el.attr('name');
+            if (S.inArray($target.attr('type'), ['checkbox','radio'])) {
+                var form = $target.getDOMNode().form, elName = $target.attr('name');
                 var els = [];
                 S.each(document.getElementsByName(elName), function(item) {
                     if (item.form == form) {
                         els.push(item);
                     }
                 });
-                self.set('el', els);
-            } else {
-                self.set('el', el);
+                self.set('target', els);
             }
 
-            var resetAfterValidate = function () {
-                self.fire('afterFieldValidation');
-            };
-
-            self._msg = new Msg(_el, self._cfg.msg);
+            var msgConfig = self._cfg.msg || {};
+            msgConfig.host = self;
+            self._msg = new Msg($target, msgConfig);
             self.set('oMsg',self._msg);
-            var style = self._cfg.style;
-            self.on('afterRulesValidate', function (ev) {
-                //TODO:多次触发的问题
-                var result = ev.result,
-                    curRule = ev.curRule,
-                    msg = self._cache[curRule].msg || EMPTY;
 
-                //这里的value还没被当前覆盖
-                if (self.get('result') !== result || self.get('msg') !== msg) {
-                    if (msg) {
-                        self._msg.show({
-                            style:result ? style['success'] : style['error'],
-                            msg:msg
-                        });
-                    } else {
-                        self._msg.hide();
-                    }
-                }
-            });
-
-            //监听校验结果
-            self.on('afterRulesValidate', function (ev) {
-                var result = ev.result,
-                    curRule = ev.curRule,
-                    msg = self._cache[curRule].msg || EMPTY;
-                self.set('result', result);
-                self.set('message', msg);
-
-                self.fire('validate', {
-                    result:result,
-                    msg:msg,
-                    errRule:result ? '' : curRule
-                });
-
-                //校验结束
-                self.fire('afterValidate');
-                resetAfterValidate();
-            });
-
-            var type = _el.attr('type');
-            //排除掉异步上传组件的属性规则添加
-            if(type != 'image-uploader' && type != 'file'){
-                //add html property
-                S.each(Factory.HTML_PROPERTY, function (item) {
-
-                    if (_el.hasAttr(item)) {
-                        //从工厂中创建属性规则
-                        var rule = Factory.create(item, {
-                            //属性的value必须在这里初始化
-                            propertyValue:_el.attr(item),
-                            el:self.get('el'), //bugfix for change value
-                            msg:_ruleCfg[item]
-                        });
-
-                        self.add(item, rule);
-                    }
-                });
-            }
-
-            //add custom rule
             S.each(_ruleCfg, function(ruleCfg, name){
                 if(!self._storage[name] && Factory.rules[name]) {
-
-                    var ruleConfig = {
-                        el:self.get('el'), //bugfix for change value
-                        msg:ruleCfg
-                    };
-                    if(ruleCfg.propertyValue){
-                        S.mix(ruleConfig,{args:[ruleCfg.propertyValue]});
-                    }
-                    //如果集合里没有，但是有配置，可以认定是自定义属性，入口为form.add
-                    var rule = Factory.create(name, ruleConfig);
+                    var rule = self._createRule(name,ruleCfg);
                     self.add(name, rule);
                 }
             });
 
-            //element event bind
-            if (_cfg.event != 'none') {
-                Event.on(self.get('el'), _cfg.event || Utils.getEvent(_el), function (ev) {
-                    //增加个延迟，确保原生表单改变完成
-                    S.later(function(){
-                        self.validate();
-                    })
-                });
-            }
+            var target = self.get('target').getDOMNode();
+            self._targetBind(_cfg.event || Utils.getEvent(target))
 
         },
-        add:function (name, rule, cfg) {
+        /**
+         * 给表单元素绑定验证事件
+         * @param v
+         * @private
+         */
+        _targetBind:function(v){
+            var self = this;
+            var $target = self.get('target');
+            if(!$target.length) return false;
+            $target.on(v,function(){
+                //增加个延迟，确保原生表单改变完成
+                S.later(function(){
+                    self.validate();
+                })
+            })
+            return self;
+        },
+        /**
+         * 创建规则实例
+         * @param name
+         * @param ruleCfg
+         * @return {Rule}
+         * @private
+         */
+        _createRule:function(name,ruleCfg){
+            var self = this;
+            var $target = self.get('target');
+
+            S.mix(ruleCfg,{
+                value: $target.val(),
+                target:$target,
+                msg:ruleCfg,
+                field:self
+            })
+            //如果集合里没有，但是有配置，可以认定是自定义属性，入口为form.add
+            return Factory.create(name, ruleCfg);
+        },
+        /**
+         * 向Field添加一个规则实例
+         * @param name
+         * @param rule
+         * @return {*}
+         */
+        add:function (name, rule) {
             var self = this,
                 _storage = self._storage;
-            if (rule instanceof PropertyRule || rule instanceof Rule) {
+            if (rule instanceof Rule) {
                 _storage[name] = rule;
             } else if(S.isFunction(rule)) {
                 _storage[name] = new Rule(name, rule, {
@@ -708,7 +642,7 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, JSON, DOM
                     //TODO args
                 });
             }
-            self.set('oRules',_storage);
+            self.set('rules',_storage);
             if(_storage[name]) {
                 _storage[name].on('validate', function (ev) {
                     S.log('[after rule validate]: name:' + ev.name + ',result:' + ev.result + ',msg:' + ev.msg);
@@ -731,57 +665,88 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, JSON, DOM
             var _storage = this._storage;
             delete _storage[name];
             delete this._cache[name];
-            self.set('oRules',_storage);
+            self.set('rules',_storage);
             return this;
         },
-
+        /**
+         * validate同名方法，触发字段验证
+         * @param name
+         * @return {Promise}
+         */
+        test:function(name){
+           return this.validate(name);
+        },
         /**
          *
          * @param name
-         * @param cfg {Object}
-         * @param cfg.args
-         * @param cfg.msg
          *
-         * @return {Boolean}
+         * @return {Promise}
          */
-        validate:function (name, cfg) {
-            var result = true,
-                self = this,
-                cfg = cfg||{},
-                curRule = EMPTY;
-            var rules = self.get('oRules');
+        validate:function (name) {
+            var self = this;
+
+            var aRule = [];
+            var rules = self.get('rules');
+            //只验证指定规则
+            if(S.isString(name)){
+                var needTestRules = name.split(',');
+                S.each(needTestRules,function(ruleName){
+                    rules[ruleName] && aRule.push(rules[ruleName]);
+                })
+            }else{
+                //验证所有规则
+                S.each(rules,function(oRule){
+                    aRule.push(oRule)
+                })
+            }
+
+            //排除指定的规则
+            var exclude = self.get('exclude');
+            if(exclude != ''){
+                var aExclude = exclude.split(',');
+                S.filter(aRule,function(rule){
+                    return !S.inArray(rule.get('name'),aExclude);
+                })
+            }
+
             //校验开始
-            self.fire('beforeValidate');
-            if (name) {
-                if (rules[name]) {
-                    result = rules[name].validate(cfg.args);
-                    curRule = name;
-                }
-            } else {
-                var isPass;
-                for (var key in rules) {
-                    curRule =  key;
-                    var oRule = rules[key];
-                    oRule.set('field',self);
-                    isPass =  oRule.validate(cfg.args);
-                    if (!isPass) {
-                        result = false;
-                        break;
-                    }
-                }
+            self.fire('beforeTest',{rules:aRule});
+            var _defer = Field._defer;
+
+            var i = 0;
+            var PROMISE;
+            _testRule(aRule[i]);
+            function _testRule(ruleData){
+                if(i >= aRule.length) return PROMISE;
+                var oRule = ruleData;
+                PROMISE =  oRule.validate();
+                i++;
+                PROMISE.then(function(){
+                    //单个规则验证成功，继续验证下一个规则
+                    _testRule(aRule[i]);
+                })
             }
-
-            // 保证有规则才触发
-            if (curRule) {
-                self.fire('afterRulesValidate', {
-                    result:result,
-                    curRule:curRule
-                });
-            }
-
-            //TODO GROUPS
-
-            return result;
+            //所有的规则都验证完毕
+            PROMISE.then(function(rule){
+                self._fireTestEvent('success',rule);
+                //所有规则验证通过
+                _defer.resolve(self);
+            }).fail(function(rule){
+                self._fireTestEvent('error',rule);
+                //有规则存在验证失败
+                _defer.reject(self);
+            });
+            return _defer.promise;
+        },
+        /**
+         * 派发验证后的成功或失败事件
+         * @param eventName
+         * @param oRule
+         * @private
+         */
+        _fireTestEvent:function(eventName,oRule){
+            var self = this;
+            return self.fire(eventName,{rule:oRule,msg:oRule.get(eventName),name:oRule.get('name')});
         }
     }, {
         ATTRS:{
@@ -789,12 +754,35 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, JSON, DOM
                 value:EMPTY
             },
             result:{},
-            el:{},
+            /**
+             * 目标元素
+             */
+            target:{
+                value:'',
+                getter:function(v){
+                    return $(v);
+                }
+            },
+            /**
+             * 对应的元素绑定的事件（用于触发验证）
+             */
+            event:{
+                value:'',
+                setter:function(v){
+                    var self = this;
+                    self._targetBind(v);
+                    return v;
+                }
+            },
+            /**
+             * 验证时排除的规则
+             */
+            exclude:{value:''},
             /**
              *  绑定在域上的所有规则实例
              *  @type {Object}
              */
-            oRules:{ value:{} },
+            rules:{ value:{} },
             /**
              * 验证消息类
              * @type {Object}
@@ -808,22 +796,33 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, JSON, DOM
     requires:[
         'event',
         'base',
-        'json',
         'dom',
+        'node',
+        'promise',
         '../rule/ruleFactory',
         '../rule/rule',
-        '../rule/html/propertyRule',
         '../msg/base',
         '../utils'
     ]
 });
 /**
+ * changelog
+ * v1.5 by 明河
+ *  - 增加validate的同名方法test
+ *  - 继承promise，支持链式调用
+ *  - 异步验证支持
+ *  - 新增html tag的处理
+ *  - 修改获取tag配置的方式
+ *  - el配置改成target
+ *  - 修改event配置
+ * */
+/**
  * @fileoverview hU��{
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('gallery/auth/1.5/lib/base',function (S, JSON, Base, Field, Factory, Utils) {
-
+KISSY.add('gallery/auth/1.5/lib/base',function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
+    var $ = Node.all;
     /**
      * ؤMn
      * @type {Object}
@@ -840,63 +839,53 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, JSON, Base, Field, Factory, U
 
     /**
      * @name Auth
-     * @class Auth��e�h
-     * @version 1.2
-     * @param el {selector|htmlElement} formC 
+     * @class Auth��e�
+     * @version 1.5
+     * @param target {selector|htmlElement} formC 
      * @param config {object}
      * @return Auth
      * @constructor
      */
-    var Auth = function (el, config) {
-        var form = S.get(el);
+    var Auth = function (target, config) {
         var self = this;
+        if(!config) config = {};
+        if(target) S.mix(config,{target:target});
 
         self._storages = {};
-
-        config = S.merge(defaultConfig, config);
         self.AuthConfig = config;
 
-        if(form){
-            self.mode = AUTH_MODE.FORM;
-            self._init(form, config);
-        }
-
-        Auth.superclass.constructor.call(self);
+        Auth.superclass.constructor.call(self,config);
         return self;
     };
 
-    S.extend(Auth, Base, /** @lends Auth.prototype*/ {
+    S.mix(Auth,{
+        _defer: new Promise.Defer()
+    })
+
+    S.extend(Auth,Base, /** @lends Auth.prototype*/ {
         /**
          * �auth
-         * @param el
-         * @param config
-         * @private
          */
-        _init:function (el, config) {
-            var forms = el.elements,
-                self = this;
+        render:function () {
+            var self = this;
+            var $form = self.get('target');
+            var forms = $form.getDOMNode().elements;
+            if(!forms.length) return self;
 
-            if (forms && forms.length) {
-                S.each(forms, function (el, idx) {
-                    var filedConfig = S.merge(config, {event:config.autoBind ? Utils.getEvent(el) : 'none'});
-                    var f = new Field(el, filedConfig);
-                    f.addTarget(self);
-                    f.publish('validate', {
-                        bubble:1
-                    });
-
-                    self.add(f);
-                });
-            }
-
-            //save config
-            self.AuthConfig = config;
+            var autoBind = self.get('autoBind');
+            S.each(forms, function (el) {
+                //�hUC ��њ��
+                var filedConfig = {event:autoBind ? Utils.getEvent(el) : 'none'};
+                var field = new Field(el, filedConfig);
+                field.addTarget(self);
+                field.publish('validate', { bubble: 1 });
+                self.add(field);
+            });
 
             //��/form! �O=html5,��!�>( /:�html5�!��H
-            if (self.mode === AUTH_MODE.FORM) {
-                S.one(el).attr('novalidate', 'novalidate');
-            }
+            $form.attr('novalidate', 'novalidate');
 
+            return self;
         },
         /**
          * �� * �!��hU�
@@ -910,7 +899,7 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, JSON, Base, Field, Factory, U
             var authField = '';
             // e�/Field���
             if (field instanceof Field) {
-                el = field.get('el');
+                el = field.get('target');
                 key = self.getName(el);
                 authField = self._storages[key || Utils.guid()] = field;
             } else {
@@ -918,28 +907,10 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, JSON, Base, Field, Factory, U
                 if(!el.length) return false;
 
                 key = self.getName(el);
-                var filedConfig  = self.mergeConfig(el,config);
-                authField = self._storages[key] = new Field(el, filedConfig);
+                authField = self._storages[key] = new Field(el, config);
             }
 
             return authField;
-        },
-        /**
-         * vhU߄��Mn
-         * @param {HTMLElement} el
-         * @param {Object} config Mn
-         * @return {Object|Boolean}
-         */
-        mergeConfig:function(el,config){
-            if(!el || !el.length) return false;
-            var self = this;
-            var filedConfig = S.merge(self.AuthConfig, {event:self.AuthConfig.autoBind ? Utils.getEvent(el) : 'none'}, config);
-            var rules  = self.getFieldAttrRules(el);
-            //v��I�Mn
-            if(!S.isEmptyObject(rules)){
-                filedConfig.rules = S.merge(rules, filedConfig.rules);
-            }
-            return filedConfig;
         },
         /**
          * ��C �id��0��name
@@ -951,34 +922,15 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, JSON, Base, Field, Factory, U
             return $el.attr('id') || $el.attr('name') || Utils.guid();
         },
         /**
-         * �htmlC �^'-���Mn
-         * @param {NodeList} $field hU�C 
-         * @return {Object} rules
-         */
-        getFieldAttrRules:function ($field) {
-            var allRules = Factory.rules;
-            var rules = {};
-            S.each(allRules, function (rule,ruleName) {
-                if ($field.attr(ruleName)) {
-                    rules[ruleName] = {
-                        error:$field.attr(ruleName + '-msg'),
-                        success:$field.attr(ruleName + '-success-msg') || '',
-                        propertyValue:$field.attr(ruleName)
-                    };
-                }
-            });
-            return rules;
-        },
-        /**
          * 9nkey��field�a
          * @param name
-         * @return {*}
+         * @return {Field}
          */
         getField:function (name) {
             return this._storages[name];
         },
         /**
-         * �Auth�� *���SM
+         * �� *�����SM
 ��(
          * @param name
          * @param rule
@@ -986,6 +938,14 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, JSON, Base, Field, Factory, U
         register:function (name, rule) {
             Factory.register(name, rule);
             return this;
+        },
+        /**
+         * ��@	hUC ���validate�+��
+         * @param group
+         * @return {*}
+         */
+        test:function(group){
+          return this.validate(group);
         },
         validate:function (group) {
             var self = this;
@@ -1014,11 +974,30 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, JSON, Base, Field, Factory, U
 
             self.fire('afterValidate');
 
-            return result;
+            var _defer = Auth._defer;
+            _defer[result && 'resolve' || 'reject'](result);
+
+            return _defer.promise;
         }
     }, {
         ATTRS:{
-            result:{}
+            /**
+             * hUC 
+             */
+            target:{
+                value:"",
+                getter:function(v){
+                    return $(v);
+                }
+            },
+            /**
+             * /&���hUC њ��
+             */
+            autoBind:{value:true},
+            /**
+             * S���/&\bb���
+             */
+            stopOnError:{value:false}
         }
     });
 
@@ -1029,13 +1008,22 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, JSON, Base, Field, Factory, U
     return Auth;
 }, {
     requires:[
+        'node',
         'json',
         'base',
+        'promise',
         './field/field',
         './rule/ruleFactory',
         './utils'
     ]
 });
+/**
+ * changelog
+ * v1.5 by �
+ *  - ��validate���test
+ *  - �promise/�(
+ *  - e��/
+ * */
 /**
  * @fileoverview auth入口
  * @author czy88840616 <czy88840616@gmail.com>

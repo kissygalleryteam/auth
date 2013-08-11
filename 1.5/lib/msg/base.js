@@ -28,6 +28,23 @@ KISSY.add(function (S, Base,Node,XTemplate) {
             var $wrapper = self._getWrapper();
             $wrapper.hide();
             self.set('wrapper',$wrapper);
+
+            var host = self.get('host');
+            host.on('error',function(ev){
+                var msg = ev.msg;
+                var style = ev.style || 'error';
+                self.show({style:style,msg:msg});
+            })
+            host.on('success',function(ev){
+                var msg = ev.msg;
+                var style = ev.style;
+                if(msg || style){
+                    style = ev.style || 'success';
+                    self.show({style:style,msg:msg});
+                }else{
+                    self.hide();
+                }
+            })
         },
         hide:function () {
             var self = this;
@@ -74,6 +91,12 @@ KISSY.add(function (S, Base,Node,XTemplate) {
         }
     }, {
         ATTRS:{
+            /**
+             * 宿主实例，一般是Field实例
+             */
+            host:{
+                value:''
+            },
             target:{
                 value:'',
                 getter:function(v){

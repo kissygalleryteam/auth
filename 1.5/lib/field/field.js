@@ -3,7 +3,7 @@
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRule, Msg, Utils) {
+KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils) {
     var $ = Node.all;
     var EMPTY = '';
 
@@ -109,65 +109,11 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
                 self.set('target', els);
             }
 
-            var resetAfterValidate = function () {
-                self.fire('afterFieldValidation');
-            };
-
-            self._msg = new Msg($target, self._cfg.msg);
+            var msgConfig = self._cfg.msg || {};
+            msgConfig.host = self;
+            self._msg = new Msg($target, msgConfig);
             self.set('oMsg',self._msg);
-            var style = self._cfg.style;
-            self.on('afterRulesValidate', function (ev) {
-                //TODO:多次触发的问题
-                var result = ev.result,
-                    curRule = ev.curRule,
-                    msg = self._cache[curRule].msg || EMPTY;
 
-                //这里的value还没被当前覆盖
-                if (self.get('result') !== result || self.get('msg') !== msg) {
-                    if (msg) {
-                        self._msg.show({
-                            style:result ? style['success'] : style['error'],
-                            msg:msg
-                        });
-                    } else {
-                        self._msg.hide();
-                    }
-                }
-            });
-
-            //监听校验结果
-            self.on('afterRulesValidate', function (ev) {
-                var result = ev.result,
-                    curRule = ev.curRule,
-                    msg = self._cache[curRule].msg || EMPTY;
-                self.set('result', result);
-                self.set('message', msg);
-
-                self.fire('validate', {
-                    result:result,
-                    msg:msg,
-                    errRule:result ? '' : curRule
-                });
-
-                //校验结束
-                self.fire('afterValidate');
-                resetAfterValidate();
-            });
-
-            //add html property
-            S.each(Factory.HTML_PROPERTY, function (attrName) {
-                if ($target.hasAttr(attrName)) {
-                    var rule = self._createRule(attrName,{
-                        //属性的value必须在这里初始化
-                        propertyValue:$target.attr(attrName),
-                        el:self.get('target'), //bugfix for change value
-                        msg:_ruleCfg[attrName]
-                    });
-                    self.add(attrName, rule);
-                }
-            });
-
-            //add custom rule
             S.each(_ruleCfg, function(ruleCfg, name){
                 if(!self._storage[name] && Factory.rules[name]) {
                     var rule = self._createRule(name,ruleCfg);
@@ -175,16 +121,26 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
                 }
             });
 
-            //element event bind
-            if (_cfg.event != 'none') {
-                Event.on(self.get('target'), _cfg.event || Utils.getEvent(_el), function (ev) {
-                    //增加个延迟，确保原生表单改变完成
-                    S.later(function(){
-                        self.validate();
-                    })
-                });
-            }
+            var target = self.get('target').getDOMNode();
+            self._targetBind(_cfg.event || Utils.getEvent(target))
 
+        },
+        /**
+         * 给表单元素绑定验证事件
+         * @param v
+         * @private
+         */
+        _targetBind:function(v){
+            var self = this;
+            var $target = self.get('target');
+            if(!$target.length) return false;
+            $target.on(v,function(){
+                //增加个延迟，确保原生表单改变完成
+                S.later(function(){
+                    self.validate();
+                })
+            })
+            return self;
         },
         /**
          * 创建规则实例
@@ -195,24 +151,27 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
          */
         _createRule:function(name,ruleCfg){
             var self = this;
-            var target = self.get('target');
-            var ruleConfig = {
-                //bugfix for change value
-                el:target,
-                //promise defer
-                _defer : Field._defer,
-                msg:ruleCfg
-            };
-            if(ruleCfg.propertyValue){
-                S.mix(ruleConfig,{args:[ruleCfg.propertyValue]});
-            }
+            var $target = self.get('target');
+
+            S.mix(ruleCfg,{
+                value: $target.val(),
+                target:$target,
+                msg:ruleCfg,
+                field:self
+            })
             //如果集合里没有，但是有配置，可以认定是自定义属性，入口为form.add
-            return Factory.create(name, ruleConfig);
+            return Factory.create(name, ruleCfg);
         },
-        add:function (name, rule, cfg) {
+        /**
+         * 向Field添加一个规则实例
+         * @param name
+         * @param rule
+         * @return {*}
+         */
+        add:function (name, rule) {
             var self = this,
                 _storage = self._storage;
-            if (rule instanceof PropertyRule || rule instanceof Rule) {
+            if (rule instanceof Rule) {
                 _storage[name] = rule;
             } else if(S.isFunction(rule)) {
                 _storage[name] = new Rule(name, rule, {
@@ -220,7 +179,7 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
                     //TODO args
                 });
             }
-            self.set('oRules',_storage);
+            self.set('rules',_storage);
             if(_storage[name]) {
                 _storage[name].on('validate', function (ev) {
                     S.log('[after rule validate]: name:' + ev.name + ',result:' + ev.result + ',msg:' + ev.msg);
@@ -243,85 +202,88 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
             var _storage = this._storage;
             delete _storage[name];
             delete this._cache[name];
-            self.set('oRules',_storage);
+            self.set('rules',_storage);
             return this;
         },
         /**
          * validate同名方法，触发字段验证
          * @param name
-         * @param cfg
-         * @return {Boolean}
+         * @return {Promise}
          */
-        test:function(name, cfg){
-           return this.validate(name, cfg);
+        test:function(name){
+           return this.validate(name);
         },
         /**
          *
          * @param name
-         * @param cfg {Object}
-         * @param cfg.args
-         * @param cfg.msg
          *
-         * @return {Boolean}
+         * @return {Promise}
          */
-        validate:function (name, cfg) {
-            var result = true,
-                self = this,
-                cfg = cfg||{},
-                curRule = EMPTY;
-            var rules = self.get('oRules');
-            var _defer = Field._defer;
-            //校验开始
-            self.fire('beforeValidate');
-            rules = S.makeArray(rules);
-            var i = 0;
-            _testRule(rules[i]);
-            function _testRule(ruleData){
-                //获取Rule实例，其实只有一个
-                S.each(ruleData,function(oRule){
-                    oRule.set('field',self);
-                    var promise =  oRule.validate(cfg.args);
-                    i ++;
-                    promise.then(function(){
-                        if(i >= rules.length){
-                            _defer.resolve(self);
-                        }else{
-                            _testRule(rules[i]);
-                        }
-                    }).fail(function(){
+        validate:function (name) {
+            var self = this;
 
-                    })
+            var aRule = [];
+            var rules = self.get('rules');
+            //只验证指定规则
+            if(S.isString(name)){
+                var needTestRules = name.split(',');
+                S.each(needTestRules,function(ruleName){
+                    rules[ruleName] && aRule.push(rules[ruleName]);
                 })
-
+            }else{
+                //验证所有规则
+                S.each(rules,function(oRule){
+                    aRule.push(oRule)
+                })
             }
 
-            /*if (name) {
-                if (rules[name]) {
-                    result = rules[name].validate(cfg.args);
-                    curRule = name;
-                }
-            } else {
-                var isPass;
-                for (var key in rules) {
-                    curRule =  key;
-                    var oRule = rules[key];
-                    oRule.set('field',self);
-                    isPass =  oRule.validate(cfg.args);
-                    if (!isPass) {
-                        result = false;
-                        break;
-                    }
-                }
+            //排除指定的规则
+            var exclude = self.get('exclude');
+            if(exclude != ''){
+                var aExclude = exclude.split(',');
+                S.filter(aRule,function(rule){
+                    return !S.inArray(rule.get('name'),aExclude);
+                })
             }
 
-            // 保证有规则才触发
-            if (curRule) {
-                self.fire('afterRulesValidate', {
-                    result:result,
-                    curRule:curRule
-                });
-            }*/
+            //校验开始
+            self.fire('beforeTest',{rules:aRule});
+            var _defer = Field._defer;
+
+            var i = 0;
+            var PROMISE;
+            _testRule(aRule[i]);
+            function _testRule(ruleData){
+                if(i >= aRule.length) return PROMISE;
+                var oRule = ruleData;
+                PROMISE =  oRule.validate();
+                i++;
+                PROMISE.then(function(){
+                    //单个规则验证成功，继续验证下一个规则
+                    _testRule(aRule[i]);
+                })
+            }
+            //所有的规则都验证完毕
+            PROMISE.then(function(rule){
+                self._fireTestEvent('success',rule);
+                //所有规则验证通过
+                _defer.resolve(self);
+            }).fail(function(rule){
+                self._fireTestEvent('error',rule);
+                //有规则存在验证失败
+                _defer.reject(self);
+            });
             return _defer.promise;
+        },
+        /**
+         * 派发验证后的成功或失败事件
+         * @param eventName
+         * @param oRule
+         * @private
+         */
+        _fireTestEvent:function(eventName,oRule){
+            var self = this;
+            return self.fire(eventName,{rule:oRule,msg:oRule.get(eventName),name:oRule.get('name')});
         }
     }, {
         ATTRS:{
@@ -339,10 +301,25 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
                 }
             },
             /**
+             * 对应的元素绑定的事件（用于触发验证）
+             */
+            event:{
+                value:'',
+                setter:function(v){
+                    var self = this;
+                    self._targetBind(v);
+                    return v;
+                }
+            },
+            /**
+             * 验证时排除的规则
+             */
+            exclude:{value:''},
+            /**
              *  绑定在域上的所有规则实例
              *  @type {Object}
              */
-            oRules:{ value:{} },
+            rules:{ value:{} },
             /**
              * 验证消息类
              * @type {Object}
@@ -361,7 +338,6 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
         'promise',
         '../rule/ruleFactory',
         '../rule/rule',
-        '../rule/html/propertyRule',
         '../msg/base',
         '../utils'
     ]
@@ -375,4 +351,5 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, PropertyRul
  *  - 新增html tag的处理
  *  - 修改获取tag配置的方式
  *  - el配置改成target
+ *  - 修改event配置
  * */

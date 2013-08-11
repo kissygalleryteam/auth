@@ -3,7 +3,7 @@
  * @author 张挺 <zhangting@taobao.com>
  *
  */
-KISSY.add(function (S, Node,Base, PropertyRule, Rule, undefined) {
+KISSY.add(function (S, Node,Base, Rule, undefined) {
     var $ = Node.all;
     var RuleFactory = function () {
         var self = this;
@@ -15,28 +15,28 @@ KISSY.add(function (S, Node,Base, PropertyRule, Rule, undefined) {
 
     //第一个参数一定是属性的value，后面的才是真正的参数
     S.mix(RuleFactory.rules, {
-        required:function (pv, value,field) {
+        required:function (value,pv,field) {
             if(S.isArray(value)) {
                 return value.length>0;
             }
             return !!value;
         },
-        pattern:function (pv, value) {
+        pattern:function (value,pv) {
             return new RegExp(pv).test(value);
         },
-        max:function (pv, value,field) {
+        max:function (value,pv,field) {
             if (!S.isNumber(value)) {
                 return false;
             }
             return value <= pv;
         },
-        min:function (pv, value) {
+        min:function (value,pv) {
             if (!S.isNumber(value)) {
                 return false;
             }
             return value >= pv;
         },
-        step:function (pv, value) {
+        step:function (value,pv) {
             if (!S.isNumber(value)) {
                 return false;
             }
@@ -45,7 +45,7 @@ KISSY.add(function (S, Node,Base, PropertyRule, Rule, undefined) {
             return value % pv;
         },
         //添加1个特殊的属性
-        equalTo:function(pv, value){
+        equalTo:function(value,pv){
             //number same
             if (S.isNumber(value)) {
                 return pv === value;
@@ -73,7 +73,6 @@ KISSY.add(function (S, Node,Base, PropertyRule, Rule, undefined) {
          * @return {*}
          */
         create:function (ruleName, cfg) {
-            if(!cfg.msg) cfg.msg = {};
             return new Rule(ruleName, RuleFactory.rules[ruleName], cfg);
         }
     });
@@ -84,7 +83,12 @@ KISSY.add(function (S, Node,Base, PropertyRule, Rule, undefined) {
     requires:[
         'node',
         'base',
-        './html/propertyRule',
         './rule'
     ]
 });
+/**
+ * changelog
+ * v1.5 by 明河
+ *  - 去掉propertyRule
+ *  - 颠倒规则函数的value和pv
+ * */

@@ -16,7 +16,7 @@
     <div class="control-group">
         <label class="control-label" for="user">用户名</label>
         <div class="controls">
-            <input type="text" class="input-xlarge" id="user" required required-msg="用户名不能为空！" user="true" user-msg="该用户名已经存在！" msg-wrapper="#J_UseMsg">
+            <input type="text" class="input-xlarge" id="user" user="true" user-msg="该用户名已经存在！" required required-msg="用户名不能为空！" msg-wrapper="#J_UseMsg">
             <p class="help-block">异步校验用户名是否存在</p>
             <div id="J_UseMsg"></div>
         </div>
@@ -49,18 +49,28 @@
         });
     }
 
-    S.use('gallery/auth/1.5/,ajax', function (S, Auth,io) {
+    S.use('gallery/auth/1.5/,ajax,promise', function (S, Auth,io,Promise) {
         var auth = new Auth('#J_Auth');
-        auth.register('user', function (value,attr,defer) {
+        auth.register('user', function (value,attr,defer,field) {
+            var self = this;
             io.get("./user_success.json",'json').then(function(result){
-                defer.resolve(true);
+                var data = result[0];
+                //用户名
+                var name = data.name;
+                if(name == 'minghe'){
+                    //验证成功，传送数据
+                    defer.resolve(self);
+                }else{
+                    //验证失败，一样传送数据
+                    defer.reject(self);
+                }
             })
             return defer.promise;
         });
         auth.render();
         var user = auth.getField('user');
-        user.test().then(function(){
-            alert(2);
+        user.test().then(function(result){
+            S.log('success');
         })
     })
 </script>
