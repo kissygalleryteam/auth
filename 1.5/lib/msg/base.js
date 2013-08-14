@@ -5,7 +5,7 @@
  */
 KISSY.add(function (S, Base,Node,XTemplate) {
     var $ = Node.all;
-    var MSG_HOOK = '.J_AuthMsg';
+    var MSG_HOOK = '.auth-msg';
 
     function Msg(target, config) {
         var self = this;
@@ -26,8 +26,9 @@ KISSY.add(function (S, Base,Node,XTemplate) {
             var $target = self.get('target');
             if(!$target.length) return false;
             var $wrapper = self._getWrapper();
-            $wrapper.hide();
             self.set('wrapper',$wrapper);
+            var isExist = self.get('isExist');
+            if(!isExist) $wrapper.hide();
 
             var host = self.get('host');
             host.on('error',function(ev){
@@ -47,6 +48,9 @@ KISSY.add(function (S, Base,Node,XTemplate) {
                 }
             })
         },
+        /**
+         * 隐藏消息层
+         */
         hide:function () {
             var self = this;
             var $wrapper = self.get('wrapper');
@@ -60,16 +64,22 @@ KISSY.add(function (S, Base,Node,XTemplate) {
          */
         show:function (data) {
             var self = this;
-            var args =self.get('args');
-            var tpl = self.get('tpl');
             var $wrapper = self.get('wrapper');
             S.buffer(function () {
-                if(!$wrapper.children('.auth-msg').length || data.reCreate){
-                    var html = new XTemplate(tpl).render(data);
-                    $wrapper.html(html);
-                }
+                self._create(data);
                 $wrapper.slideDown(self.get('speed'));
             }, 50)();
+        },
+        /**
+         * 创建消息层
+         * @private
+         */
+        _create:function(data){
+            var self = this;
+            var tpl = self.get('tpl');
+            var $wrapper = self.get('wrapper');
+            var html = new XTemplate(tpl).render(data);
+            return $wrapper.html(html);
         },
         /**
          * 获取消息层容器
@@ -86,7 +96,7 @@ KISSY.add(function (S, Base,Node,XTemplate) {
 
             if(!$wrapper || !$wrapper.length){
                 var $parent = $($target.parent());
-                $wrapper = $parent.all(MSG_HOOK);
+                $wrapper = $('<div class="msg-wrapper"></div>').appendTo($parent);
             }
             return $wrapper;
         }
@@ -121,6 +131,18 @@ KISSY.add(function (S, Base,Node,XTemplate) {
                 value:'',
                 getter:function(v){
                     return $(v);
+                }
+            },
+            /**
+             * 验证层是否已经存在
+             */
+            isExist:{
+                value:false,
+                getter:function(v){
+                    var self = this;
+                    var $wrapper = self.get('wrapper');
+                    if(!$wrapper.length) return false;
+                    return $wrapper.all(MSG_HOOK).length;
                 }
             },
             speed:{value:0.3}

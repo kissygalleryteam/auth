@@ -18,7 +18,10 @@
                    min-len="5"
                    msg-wrapper="#J_UseMsg"
             >
-            <div id="J_UseMsg"></div>
+            <div id="J_UseMsg">
+                <!--这里是服务器输出的错误消息 auth-msg样式名必须存在-->
+                <p class="auth-msg auth-error">请您输入至少5个字符</p>
+            </div>
         </div>
     </div>
     <div class="control-group">
@@ -51,7 +54,7 @@
 
     S.use('gallery/auth/1.5/,gallery/auth/1.5/lib/msg/style.css', function (S, Auth) {
         var auth = new Auth('#J_Auth');
-        //注册一个异步校验器
+        //注册一个自定义规则
         auth.register('min-len', function (value,attr,defer,field) {
            var min = Number(attr);
            this.msg('error','请您输入至少'+min+'个字符');

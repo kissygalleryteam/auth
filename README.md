@@ -28,6 +28,7 @@ v1.5 测试中，请勿使用
     [+] [Filed]新增rules属性，用于获取所有的规则
     [+] [Filed]新增exclude配置，用于排除指定规则验证
     [+] [Rule]规则可以设置默认消息
+    [+] [Msg]兼容服务器返回的错误信息
     [-] 删除rule/base
     [-] 删除propertyRule
 

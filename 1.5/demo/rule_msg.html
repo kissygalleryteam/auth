@@ -50,7 +50,7 @@
 
     S.use('gallery/auth/1.5/,gallery/auth/1.5/lib/msg/style.css', function (S, Auth) {
         var auth = new Auth('#J_Auth');
-        //注册一个异步校验器
+        //注册一个自定义规则
         auth.register('min-len', function (value,attr,defer,field) {
            var min = Number(attr);
            this.msg('error','请您输入至少'+min+'个字符');
