@@ -17,6 +17,7 @@ v1.5 测试中，请勿使用
     [!] [Rule] 重构
     [!] [ruleFactory] 颠倒规则函数的value和pv
     [!] [ruleFactory] 不再区分html规则和自定义规则
+    [!] [ruleFactory] 默认规则提取成default.js
     [!] [Msg] 重构
     [!] [Msg] msg传递方式优化
     [!] 去掉多余无用的样式，使用stylus改写
@@ -27,6 +28,7 @@ v1.5 测试中，请勿使用
     [+] [Field]增加success、error、beforeTest事件
     [+] [Filed]新增rules属性，用于获取所有的规则
     [+] [Filed]新增exclude配置，用于排除指定规则验证
+    [+] [ruleFactory] 支持批量添加验证规则
     [+] [Rule]规则可以设置默认消息
     [+] [Msg]兼容服务器返回的错误信息
     [-] 删除rule/base

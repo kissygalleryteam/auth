@@ -112,8 +112,8 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
             return this._storages[name];
         },
         /**
-         * 注册一个新的验证规则，当前上下文可用
-         * @param name
+         * 注册验证规则，当name为object时，批量添加
+         * @param {String|Object} name
          * @param rule
          */
         register:function (name, rule) {
@@ -169,6 +169,15 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
                 value:"",
                 getter:function(v){
                     return $(v);
+                }
+            },
+            /**
+             * 表单支持的所有验证规则
+             */
+            rules:{
+                value:{},
+                getter:function(v){
+                    return Factory.rules;
                 }
             },
             /**

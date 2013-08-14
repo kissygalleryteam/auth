@@ -2,6 +2,7 @@
 combined files : 
 
 gallery/auth/1.5/lib/rule/rule
+gallery/auth/1.5/lib/rule/default
 gallery/auth/1.5/lib/rule/ruleFactory
 gallery/auth/1.5/lib/msg/base
 gallery/auth/1.5/lib/utils
@@ -68,6 +69,23 @@ KISSY.add('gallery/auth/1.5/lib/rule/rule',function(S, Base,Promise) {
             return validatedApply;
         },
         /**
+         * 获取/设置指定状态下的消息
+         * @param status
+         * @param msg
+         * @return msg
+         */
+        msg:function(status,msg){
+            var self = this;
+            if(!S.isString(status) && !S.isString(msg)) return self;
+            var msgs = self.get('msg');
+            if(!msg){
+                return msgs[status];
+            }else{
+                msgs[status] = msg;
+                return msg;
+            }
+        },
+        /**
          * 设置验证函数的参数值
          * @return {Array}
          * @private
@@ -114,7 +132,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/rule',function(S, Base,Promise) {
                     var target = this.get('target');
                     if(!target.length) return v;
 
-                    return target.attr(this.name);
+                    return target.attr(this.get('name'));
                 }
             },
             /**
@@ -164,72 +182,108 @@ KISSY.add('gallery/auth/1.5/lib/rule/rule',function(S, Base,Promise) {
  *  - 去掉utils引用
  * */
 /**
- * @fileoverview html 属性规则工厂
- * @author 张挺 <zhangting@taobao.com>
+ * @fileoverview 默认规则
+ * @author 明河 <minghe36@gmail.com>
  *
  */
-KISSY.add('gallery/auth/1.5/lib/rule/ruleFactory',function (S, Node,Base, Rule, undefined) {
-    var $ = Node.all;
-    var RuleFactory = function () {
-        var self = this;
-
-        RuleFactory.superclass.constructor.call(self);
-    };
-
-    RuleFactory.rules = {};
-
-    //第一个参数一定是属性的value，后面的才是真正的参数
-    S.mix(RuleFactory.rules, {
-        required:function (value,pv,field) {
+KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
+    return {
+        /**
+         * 是否存在值
+         * @param {String|Array} value 值（一般是输入框）
+         * @param {String} attr html tag中的属性值
+         * @param {Promise.Defer} defer 用于异步校验
+         * @param {Field} field Field的实例
+         * @return {boolean}
+         */
+        required:function (value,attr,defer,field) {
             if(S.isArray(value)) {
                 return value.length>0;
             }
             return !!value;
         },
-        pattern:function (value,pv) {
-            return new RegExp(pv).test(value);
+        /**
+         * 使用正则直接匹配
+         */
+        pattern:function (value,attr,defer,field) {
+            return new RegExp(attr).test(value);
         },
-        max:function (value,pv,field) {
+        /**
+         * 最大值验证
+         */
+        max:function (value,attr,defer,field) {
             if (!S.isNumber(value)) {
                 return false;
             }
-            return value <= pv;
+            return value <= attr;
         },
-        min:function (value,pv) {
+        /**
+         * 最小值验证
+         */
+        min:function (value,attr,defer,field) {
             if (!S.isNumber(value)) {
                 return false;
             }
-            return value >= pv;
+            return value >= attr;
         },
-        step:function (value,pv) {
+        /**
+         * 最大值验证
+         */
+        step:function (value,attr,defer,field) {
             if (!S.isNumber(value)) {
                 return false;
             }
-            if(value == 0 || pv == 1) return true;
+            if(value == 0 || attr == 1) return true;
 
-            return value % pv;
+            return value % attr;
         },
-        //添加1个特殊的属性
-        equalTo:function(value,pv){
+        /**
+         * 校验值是否等于属性配置的值
+         */
+        equalTo:function(value,attr,defer,field){
             //number same
             if (S.isNumber(value)) {
-                return pv === value;
+                return attr === value;
             }
 
             //selector same
-            if(S.one(pv)) {
-                return S.one(pv).val() === value;
+            if(S.one(attr)) {
+                return S.one(attr).val() === value;
             }
 
             //string same
-            return pv === value;
+            return attr === value;
         }
-    });
+    };
+
+});
+/**
+ * @fileoverview html 属性规则工厂
+ * @author 张挺 <zhangting@taobao.com>
+ *
+ */
+KISSY.add('gallery/auth/1.5/lib/rule/ruleFactory',function (S, Node,Base, Rule, defaultRules) {
+    var RuleFactory = function () {
+        var self = this;
+        RuleFactory.superclass.constructor.call(self);
+    };
+
+    RuleFactory.rules = {};
+
+    S.mix(RuleFactory.rules, defaultRules);
 
     S.mix(RuleFactory, {
-        HTML_PROPERTY:['required', 'pattern', 'max', 'min', 'step', 'equalTo'],
+        /**
+         * 注册验证规则，当name为object时，批量添加
+         * @param {String|Object} name
+         * @param rule
+         */
         register:function(name, rule) {
-            RuleFactory.rules[name] = rule;
+            if(S.isObject(name)){
+                S.mix(RuleFactory.rules,name);
+            }else{
+                RuleFactory.rules[name] = rule;
+            }
         },
         /**
          * 实例化Rule类
@@ -248,7 +302,8 @@ KISSY.add('gallery/auth/1.5/lib/rule/ruleFactory',function (S, Node,Base, Rule, 
     requires:[
         'node',
         'base',
-        './rule'
+        './rule',
+        './default'
     ]
 });
 /**
@@ -264,7 +319,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/ruleFactory',function (S, Node,Base, Rule, 
  */
 KISSY.add('gallery/auth/1.5/lib/msg/base',function (S, Base,Node,XTemplate) {
     var $ = Node.all;
-    var MSG_HOOK = '.J_AuthMsg';
+    var MSG_HOOK = '.auth-msg';
 
     function Msg(target, config) {
         var self = this;
@@ -285,13 +340,15 @@ KISSY.add('gallery/auth/1.5/lib/msg/base',function (S, Base,Node,XTemplate) {
             var $target = self.get('target');
             if(!$target.length) return false;
             var $wrapper = self._getWrapper();
-            $wrapper.hide();
             self.set('wrapper',$wrapper);
+            var isExist = self.get('isExist');
+            if(!isExist) $wrapper.hide();
 
             var host = self.get('host');
             host.on('error',function(ev){
-                var msg = ev.msg;
-                var style = ev.style || 'error';
+                var rule = ev.rule;
+                var msg = rule.msg('error');
+                var style = 'error';
                 self.show({style:style,msg:msg});
             })
             host.on('success',function(ev){
@@ -305,6 +362,9 @@ KISSY.add('gallery/auth/1.5/lib/msg/base',function (S, Base,Node,XTemplate) {
                 }
             })
         },
+        /**
+         * 隐藏消息层
+         */
         hide:function () {
             var self = this;
             var $wrapper = self.get('wrapper');
@@ -318,16 +378,22 @@ KISSY.add('gallery/auth/1.5/lib/msg/base',function (S, Base,Node,XTemplate) {
          */
         show:function (data) {
             var self = this;
-            var args =self.get('args');
-            var tpl = self.get('tpl');
             var $wrapper = self.get('wrapper');
             S.buffer(function () {
-                if(!$wrapper.children('.auth-msg').length || data.reCreate){
-                    var html = new XTemplate(tpl).render(data);
-                    $wrapper.html(html);
-                }
+                self._create(data);
                 $wrapper.slideDown(self.get('speed'));
             }, 50)();
+        },
+        /**
+         * 创建消息层
+         * @private
+         */
+        _create:function(data){
+            var self = this;
+            var tpl = self.get('tpl');
+            var $wrapper = self.get('wrapper');
+            var html = new XTemplate(tpl).render(data);
+            return $wrapper.html(html);
         },
         /**
          * 获取消息层容器
@@ -344,7 +410,7 @@ KISSY.add('gallery/auth/1.5/lib/msg/base',function (S, Base,Node,XTemplate) {
 
             if(!$wrapper || !$wrapper.length){
                 var $parent = $($target.parent());
-                $wrapper = $parent.all(MSG_HOOK);
+                $wrapper = $('<div class="msg-wrapper"></div>').appendTo($parent);
             }
             return $wrapper;
         }
@@ -379,6 +445,18 @@ KISSY.add('gallery/auth/1.5/lib/msg/base',function (S, Base,Node,XTemplate) {
                 value:'',
                 getter:function(v){
                     return $(v);
+                }
+            },
+            /**
+             * 验证层是否已经存在
+             */
+            isExist:{
+                value:false,
+                getter:function(v){
+                    var self = this;
+                    var $wrapper = self.get('wrapper');
+                    if(!$wrapper.length) return false;
+                    return $wrapper.all(MSG_HOOK).length;
                 }
             },
             speed:{value:0.3}
@@ -492,8 +570,11 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
         S.each(allRules, function (rule,ruleName) {
             if ($field.attr(ruleName)) {
                 rules[ruleName] = {
-                    error:$field.attr(ruleName + '-msg'),
-                    success:$field.attr(ruleName + '-success-msg') || '',
+                    msg:{
+                        error:$field.attr(ruleName + '-msg'),
+                        success:$field.attr(ruleName + '-success-msg') || '',
+                        warn:$field.attr(ruleName + '-warn-msg') || ''
+                    },
                     propertyValue:$field.attr(ruleName)
                 };
             }
@@ -529,7 +610,6 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
      */
     function Field(target, config) {
         var self = this;
-
         self._validateDone = {};
         //储存上一次的校验结果
         self._cache = {};
@@ -615,11 +695,9 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
         _createRule:function(name,ruleCfg){
             var self = this;
             var $target = self.get('target');
-
             S.mix(ruleCfg,{
                 value: $target.val(),
                 target:$target,
-                msg:ruleCfg,
                 field:self
             })
             //如果集合里没有，但是有配置，可以认定是自定义属性，入口为form.add
@@ -728,25 +806,15 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
             }
             //所有的规则都验证完毕
             PROMISE.then(function(rule){
-                self._fireTestEvent('success',rule);
                 //所有规则验证通过
-                _defer.resolve(self);
+                _defer.resolve(aRule);
+                self.fire('success',{rules:aRule});
             }).fail(function(rule){
-                self._fireTestEvent('error',rule);
                 //有规则存在验证失败
-                _defer.reject(self);
+                _defer.reject(rule);
+                self.fire('error',{rule:rule});
             });
-            return _defer.promise;
-        },
-        /**
-         * 派发验证后的成功或失败事件
-         * @param eventName
-         * @param oRule
-         * @private
-         */
-        _fireTestEvent:function(eventName,oRule){
-            var self = this;
-            return self.fire(eventName,{rule:oRule,msg:oRule.get(eventName),name:oRule.get('name')});
+            return PROMISE;
         }
     }, {
         ATTRS:{
@@ -930,9 +998,8 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, Node,JSON, Base,Promise, Fiel
             return this._storages[name];
         },
         /**
-         * �� *�����SM
-��(
-         * @param name
+         * 茌��Sname:object�y���
+         * @param {String|Object} name
          * @param rule
          */
         register:function (name, rule) {
@@ -988,6 +1055,15 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, Node,JSON, Base,Promise, Fiel
                 value:"",
                 getter:function(v){
                     return $(v);
+                }
+            },
+            /**
+             * hU/�@	���
+             */
+            rules:{
+                value:{},
+                getter:function(v){
+                    return Factory.rules;
                 }
             },
             /**
