@@ -19,6 +19,7 @@ v1.5 测试中，请勿使用
     [!] [ruleFactory] 不再区分html规则和自定义规则
     [!] [Msg] 重构
     [!] [Msg] msg传递方式优化
+    [!] 去掉多余无用的样式，使用stylus改写
     [+] 新增render()，不再new时马上初始化逻辑
     [+] 增加validate的同名方法test
     [+] 继承promise
