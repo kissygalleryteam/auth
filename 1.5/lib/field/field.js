@@ -265,25 +265,15 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
             }
             //所有的规则都验证完毕
             PROMISE.then(function(rule){
-                self._fireTestEvent('success',rule);
                 //所有规则验证通过
                 _defer.resolve(aRule);
+                self.fire('success',{rules:aRule});
             }).fail(function(rule){
-                self._fireTestEvent('error',rule);
                 //有规则存在验证失败
                 _defer.reject(rule);
+                self.fire('error',{rule:rule});
             });
-            return _defer.promise;
-        },
-        /**
-         * 派发验证后的成功或失败事件
-         * @param eventName
-         * @param oRule
-         * @private
-         */
-        _fireTestEvent:function(eventName,oRule){
-            var self = this;
-            return self.fire(eventName,{rule:oRule,msg:oRule.get(eventName),name:oRule.get('name')});
+            return PROMISE;
         }
     }, {
         ATTRS:{
