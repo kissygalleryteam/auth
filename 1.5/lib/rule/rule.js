@@ -55,6 +55,23 @@ KISSY.add(function(S, Base,Promise) {
             return validatedApply;
         },
         /**
+         * 获取/设置指定状态下的消息
+         * @param status
+         * @param msg
+         * @return msg
+         */
+        msg:function(status,msg){
+            var self = this;
+            if(!S.isString(status) && !S.isString(msg)) return self;
+            var msgs = self.get('msg');
+            if(!msg){
+                return msgs[status];
+            }else{
+                msgs[status] = msg;
+                return msg;
+            }
+        },
+        /**
          * 设置验证函数的参数值
          * @return {Array}
          * @private
@@ -101,7 +118,7 @@ KISSY.add(function(S, Base,Promise) {
                     var target = this.get('target');
                     if(!target.length) return v;
 
-                    return target.attr(this.name);
+                    return target.attr(this.get('name'));
                 }
             },
             /**

@@ -31,8 +31,9 @@ KISSY.add(function (S, Base,Node,XTemplate) {
 
             var host = self.get('host');
             host.on('error',function(ev){
-                var msg = ev.msg;
-                var style = ev.style || 'error';
+                var rule = ev.rule;
+                var msg = rule.msg('error');
+                var style = 'error';
                 self.show({style:style,msg:msg});
             })
             host.on('success',function(ev){

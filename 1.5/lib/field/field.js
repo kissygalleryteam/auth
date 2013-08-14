@@ -29,8 +29,11 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
         S.each(allRules, function (rule,ruleName) {
             if ($field.attr(ruleName)) {
                 rules[ruleName] = {
-                    error:$field.attr(ruleName + '-msg'),
-                    success:$field.attr(ruleName + '-success-msg') || '',
+                    msg:{
+                        error:$field.attr(ruleName + '-msg'),
+                        success:$field.attr(ruleName + '-success-msg') || '',
+                        warn:$field.attr(ruleName + '-warn-msg') || ''
+                    },
                     propertyValue:$field.attr(ruleName)
                 };
             }
@@ -66,7 +69,6 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
      */
     function Field(target, config) {
         var self = this;
-
         self._validateDone = {};
         //储存上一次的校验结果
         self._cache = {};
@@ -152,11 +154,9 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
         _createRule:function(name,ruleCfg){
             var self = this;
             var $target = self.get('target');
-
             S.mix(ruleCfg,{
                 value: $target.val(),
                 target:$target,
-                msg:ruleCfg,
                 field:self
             })
             //如果集合里没有，但是有配置，可以认定是自定义属性，入口为form.add
