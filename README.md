@@ -25,6 +25,7 @@ v1.5 测试中，请勿使用
     [+] 增加validate的同名方法test
     [+] 继承promise
     [+] 异步校验支持
+    [+] [auth]增加rules属性，用于获取所有的验证规则
     [+] [Field]增加success、error、beforeTest事件
     [+] [Filed]新增rules属性，用于获取所有的规则
     [+] [Filed]新增exclude配置，用于排除指定规则验证
