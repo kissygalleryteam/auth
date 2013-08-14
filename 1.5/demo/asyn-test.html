@@ -5,10 +5,7 @@
     <title>异步校验的demo</title>
     <script src="http://g.tbcdn.cn/kissy/k/1.3.0/kissy-min.js" charset="utf-8"></script>
     <link rel="stylesheet" href="http://a.tbcdn.cn/s/kissy/1.3.0/css/dpl/??base-min.css,forms-min.css">
-    <style type="text/css">
-        .i-text{height:30px;vertical-align:middle;}
-        .code-container{display:inline-block;height:30px;vertical-align:middle;}
-    </style>
+    <link rel="stylesheet" href="http://a.tbcdn.cn/s/kissy/1.3.0/??css/dpl/base-min.css,css/dpl/forms-min.css,button/assets/dpl-min.css">
 </head>
 <body>
 <h2>异步校验的demo</h2>
@@ -16,17 +13,17 @@
     <div class="control-group">
         <label class="control-label" for="user">用户名</label>
         <div class="controls">
-            <input type="text" class="input-xlarge" id="user" user="true" user-msg="该用户名已经存在！" required required-msg="用户名不能为空！" msg-wrapper="#J_UseMsg">
+            <input type="text" class="input-xlarge" id="user" user="true" user-msg="该用户名已经存在！"  msg-wrapper="#J_UseMsg">
             <p class="help-block">异步校验用户名是否存在</p>
             <div id="J_UseMsg"></div>
         </div>
     </div>
-<!--    <div class="control-group">
-        <label class="control-label" for="input02">用户名再确认</label>
+    <div class="control-group">
+        <label class="control-label"></label>
         <div class="controls">
-            <input type="text" class="input-xlarge" id="input02">
+            <button class="ks-button" id="J_TestUser">验证用户名</button>
         </div>
-    </div>-->
+    </div>
 </form>
 
 
@@ -54,6 +51,7 @@
         auth.register('user', function (value,attr,defer,field) {
             var self = this;
             io.get("./user_success.json",'json').then(function(result){
+                debugger;
                 var data = result[0];
                 //用户名
                 var name = data.name;
@@ -68,9 +66,17 @@
             return defer.promise;
         });
         auth.render();
-        var user = auth.getField('user');
-        user.test().then(function(result){
-            S.log('success');
+        S.one('#J_TestUser').on('click',function(ev){
+            var user = auth.getField('user');
+            user.test().then(function(result){
+                debugger;
+                alert('验证通过！');
+            }).fail(function(failRule){
+                var msg = failRule.get('error');
+                var name = failRule.get('name');
+                alert(name+'规则出错！错误消息为：'+msg);
+            });
+            ev.preventDefault();
         })
     })
 </script>

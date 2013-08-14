@@ -15,6 +15,8 @@ v1.5 测试中，请勿使用
     [!] [Field] 修改event配置
     [!] [Field] validate()方法去掉cfg参数，多个规则逗号隔开
     [!] [Rule] 重构
+    [!] [ruleFactory] 颠倒规则函数的value和pv
+    [!] [ruleFactory] 不再区分html规则和自定义规则
     [!] [Msg] 重构
     [+] 新增render()，不再new时马上初始化逻辑
     [+] 增加validate的同名方法test

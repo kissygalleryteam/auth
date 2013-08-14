@@ -267,11 +267,11 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
             PROMISE.then(function(rule){
                 self._fireTestEvent('success',rule);
                 //所有规则验证通过
-                _defer.resolve(self);
+                _defer.resolve(aRule);
             }).fail(function(rule){
                 self._fireTestEvent('error',rule);
                 //有规则存在验证失败
-                _defer.reject(self);
+                _defer.reject(rule);
             });
             return _defer.promise;
         },

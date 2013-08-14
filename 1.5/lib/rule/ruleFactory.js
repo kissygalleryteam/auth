@@ -4,7 +4,6 @@
  *
  */
 KISSY.add(function (S, Node,Base, Rule, undefined) {
-    var $ = Node.all;
     var RuleFactory = function () {
         var self = this;
 
@@ -13,7 +12,6 @@ KISSY.add(function (S, Node,Base, Rule, undefined) {
 
     RuleFactory.rules = {};
 
-    //第一个参数一定是属性的value，后面的才是真正的参数
     S.mix(RuleFactory.rules, {
         required:function (value,pv,field) {
             if(S.isArray(value)) {
@@ -62,7 +60,6 @@ KISSY.add(function (S, Node,Base, Rule, undefined) {
     });
 
     S.mix(RuleFactory, {
-        HTML_PROPERTY:['required', 'pattern', 'max', 'min', 'step', 'equalTo'],
         register:function(name, rule) {
             RuleFactory.rules[name] = rule;
         },
