@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>一个简单表单的验证</title>
+    <script src="http://g.tbcdn.cn/kissy/k/1.3.0/kissy-min.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="http://g.tbcdn.cn/kissy/k/1.3.0/css/dpl/??base-min.css,forms-min.css">
+    <link rel="stylesheet" href="http://g.tbcdn.cn/kissy/k/1.3.0/??css/dpl/base-min.css,css/dpl/forms-min.css,button/assets/dpl-min.css">
+</head>
+<body>
+<h2>给规则设置默认消息</h2>
+<form class="form-horizontal" id="J_Auth">
+    <div class="control-group">
+        <label class="control-label" for="user">用户名</label>
+        <div class="controls">
+            <input type="text" class="input-xlarge" id="user"
+                   required required-msg="用户名不可以为空！"
+                   msg-wrapper="#J_UseMsg"
+            >
+            <div id="J_UseMsg"></div>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label" for="user">邮箱</label>
+        <div class="controls">
+            <input type="text" class="input-xlarge" id="email"
+                   required required-msg="邮箱不可以为空！"
+                   msg-wrapper="#J_EmallMsg"
+                    >
+            <div id="J_EmallMsg"></div>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label"></label>
+        <div class="controls">
+            <button class="ks-button" id="J_TestForm">验证表单</button>
+        </div>
+    </div>
+</form>
+
+
+<script>
+    var S = KISSY;
+    S.config({
+        debug: true
+    });
+    if (S.Config.debug) {
+        var srcPath = "../../../";
+        S.config({
+            packages:[
+                {
+                    name: "gallery",
+                    path: srcPath,
+                    charset: "utf-8",
+                    ignorePackageNameInUri: true
+                }
+            ]
+        });
+    }
+
+    S.use('gallery/auth/1.5/,gallery/auth/1.5/lib/msg/style.css', function (S, Auth) {
+        var auth = new Auth('#J_Auth');
+        auth.render();
+
+        S.one('#J_TestForm').on('click',function(ev){
+            ev.preventDefault();
+            auth.test();
+        })
+    })
+</script>
+
+</body>
+</html>
