@@ -7,21 +7,19 @@ KISSY.add(function (S, Base,Node,XTemplate) {
     var $ = Node.all;
     var MSG_HOOK = '.auth-msg';
 
-    function Msg(target, config) {
+    function Msg(config) {
         var self = this;
         if(!config) config = {};
-        target && S.mix(config,{target:target});
         Msg.superclass.constructor.call(self,config);
-        self._init();
     };
 
 
     S.extend(Msg, Base, {
         /**
-         * init msg
-         * @private
+         * 运行
+         * @return {boolean}
          */
-        _init:function () {
+        render:function () {
             var self = this;
             var $target = self.get('target');
             if(!$target.length) return false;
