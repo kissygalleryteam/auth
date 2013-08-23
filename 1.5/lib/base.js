@@ -6,20 +6,6 @@
 KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
     var $ = Node.all;
     /**
-     * 默认配置
-     * @type {Object}
-     */
-    var defaultConfig = {
-        autoBind:true,
-        stopOnError:false
-    };
-
-    var AUTH_MODE = {
-        FORM:'form',
-        OBJECT:'object'
-    };
-
-    /**
      * @name Auth
      * @class Auth组件入口
      * @version 1.5
@@ -56,12 +42,16 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
 
             var autoBind = self.get('autoBind');
             S.each(forms, function (el) {
-                //给表单元素自动绑定事件
-                var filedConfig = {event:autoBind ? Utils.getEvent(el) : 'none'};
-                var field = new Field(el, filedConfig);
-                field.addTarget(self);
-                field.publish('validate', { bubble: 1 });
-                self.add(field);
+                //过滤不需要验证的表单元素
+                var filterTag = ['BUTTON'];
+                if(!S.inArray(el.tagName,filterTag)){
+                    //给表单元素自动绑定事件
+                    var filedConfig = {event:autoBind ? Utils.getEvent(el) : 'none'};
+                    var field = new Field(el, filedConfig);
+                    field.addTarget(self);
+                    field.publish('validate', { bubble: 1 });
+                    self.add(field);
+                }
             });
 
             //如果是form模式，需要屏蔽html5本身的校验，放在最后是为了html5的校验能生效
@@ -128,14 +118,23 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
         test:function(group){
           return this.validate(group);
         },
-        validate:function (group) {
+        /**
+         * 验证
+         * 1.5 [+] 支持指定field验证
+         * @param fields
+         * @return {Function|Promise.promise}
+         */
+        validate:function (fields) {
             var self = this;
 
-            self.fire('beforeValidate');
+            self.fire('beforeTest');
 
             var result = true, currentField;
-
-            S.each(self._storages, function (field, idx) {
+            var storages = self._storages;
+            var stopOnError = self.get('stopOnError');
+            var _defer = Auth._defer;
+/*
+            S.each(fields, function (field, idx) {
                 var r = field.validate();
                 result = result && r;
                 currentField = field;
@@ -144,20 +143,41 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
                 if (self.AuthConfig.stopOnError && !result) {
                     return false;
                 }
-            });
+            });*/
+            var fields = [];
+            S.each(storages,function(field){
+                fields.push(field);
+            })
+            var i = 0;
+            var PROMISE;
+            _testField(fields[i]);
+            function _testField(field){
+                if(i >= fields.length) return PROMISE;
+                PROMISE =  field.test();
+                i++;
+                PROMISE.then(function(){
+                    //单个field验证成功，继续验证下一个field
+                    _testField(fields[i]);
+                }).fail(function(){
+                    //field验证失败
+                    //如果配置了stopOnError，将停止下一个Field的验证
+                    if(!stopOnError){
+                        _testField(fields[i]);
+                    }
+                })
+            }
 
-            self.fire('validate', {
-                result:result,
-                lastField:currentField
+            PROMISE.then(function(){
+                //所有filed验证通过
+                _defer.resolve(fields);
+                self.fire('success',{fields:fields});
+            }).fail(function(rule){
+                //验证失败
+                _defer.reject(rule);
+                self.fire('error',{rule:rule,field:rule.get('field')});
             });
 
             self.set('result', result);
-
-            self.fire('afterValidate');
-
-            var _defer = Auth._defer;
-            _defer[result && 'resolve' || 'reject'](result);
-
             return _defer.promise;
         }
     }, {
@@ -213,4 +233,6 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
  *  - 增加validate的同名方法test
  *  - 继承promise，支持链式调用
  *  - 异步验证支持
+ *  - 增加msg配置
+ *  - 过滤不需要的标签
  * */

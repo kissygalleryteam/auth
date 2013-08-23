@@ -97,9 +97,27 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
             var _cfg = self._cfg;
             var $target = self.get('target');
             var _ruleCfg = S.merge({}, _cfg.rules);
+            self._groupTarget();
+            self._renderMsg();
+            S.each(_ruleCfg, function(ruleCfg, name){
+                if(!self._storage[name] && Factory.rules[name]) {
+                    var rule = self._createRule(name,ruleCfg);
+                    self.add(name, rule);
+                }
+            });
 
+            var target = $target.getDOMNode();
+            self._targetBind(_cfg.event || Utils.getEvent(target))
 
-            //如果为checkbox/radio则保存为数组
+        },
+        /**
+         * radio/checkedbox是一组表单元素
+         * @return {Array}
+         * @private
+         */
+        _groupTarget:function(){
+            var self = this;
+            var $target = self.get('target');
             if (S.inArray($target.attr('type'), ['checkbox','radio'])) {
                 var form = $target.getDOMNode().form, elName = $target.attr('name');
                 var els = [];
@@ -110,22 +128,7 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
                 });
                 self.set('target', els);
             }
-
-            var msgConfig = self._cfg.msg || {};
-            msgConfig.host = self;
-            self._msg = new Msg($target, msgConfig);
-            self.set('oMsg',self._msg);
-
-            S.each(_ruleCfg, function(ruleCfg, name){
-                if(!self._storage[name] && Factory.rules[name]) {
-                    var rule = self._createRule(name,ruleCfg);
-                    self.add(name, rule);
-                }
-            });
-
-            var target = self.get('target').getDOMNode();
-            self._targetBind(_cfg.event || Utils.getEvent(target))
-
+            return self.get('target');
         },
         /**
          * 给表单元素绑定验证事件
@@ -143,6 +146,27 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
                 })
             })
             return self;
+        },
+        /**
+         * 运行消息实例
+         * @return {Msg}
+         * @private
+         */
+        _renderMsg : function(){
+            var self = this;
+            var msg = self.get('msg');
+            //如果不存在自定义的消息类，初始化默认消息类
+            if(msg == ''){
+                var msgConfig = self._cfg.msg || {};
+                msg = new Msg(msgConfig);
+            }
+            var $target = self.get('target');
+            //将Field实例和Field对应的表单元素目标注入到消息配置
+            msg.set('target',$target);
+            msg.set('host',self);
+            self.set('msg',msg);
+            msg.render();
+            return msg;
         },
         /**
          * 创建规则实例
@@ -176,21 +200,9 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
             } else if(S.isFunction(rule)) {
                 _storage[name] = new Rule(name, rule, {
                     el:self._el
-                    //TODO args
                 });
             }
             self.set('rules',_storage);
-            if(_storage[name]) {
-                _storage[name].on('validate', function (ev) {
-                    S.log('[after rule validate]: name:' + ev.name + ',result:' + ev.result + ',msg:' + ev.msg);
-                    //set cache
-                    self._cache[ev.name]['result'] = ev.result;
-                    self._cache[ev.name]['msg'] = ev.msg;
-                });
-            }
-
-            this._cache[name] = {};
-
             return self;
         },
         /**
@@ -201,7 +213,6 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
         remove:function (name) {
             var _storage = this._storage;
             delete _storage[name];
-            delete this._cache[name];
             self.set('rules',_storage);
             return this;
         },
@@ -245,11 +256,15 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
                     return !S.inArray(rule.get('name'),aExclude);
                 })
             }
-
+            var _defer = Field._defer;
+            //不存在需要验证的规则，直接投递成功消息
+            if(!aRule.length){
+                _defer.resolve(aRule);
+                self.fire('success',{rules:aRule});
+                return _defer.promise;
+            }
             //校验开始
             self.fire('beforeTest',{rules:aRule});
-            var _defer = Field._defer;
-
             var i = 0;
             var PROMISE;
             _testRule(aRule[i]);
@@ -263,7 +278,6 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
                     _testRule(aRule[i]);
                 })
             }
-            //所有的规则都验证完毕
             PROMISE.then(function(rule){
                 //所有规则验证通过
                 _defer.resolve(aRule);
@@ -311,10 +325,10 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
              */
             rules:{ value:{} },
             /**
-             * 验证消息类
+             * 验证消息类实例
              * @type {Object}
              */
-            oMsg:{value:''}
+            msg:{value:''}
         }
     });
 
@@ -342,4 +356,6 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
  *  - 修改获取tag配置的方式
  *  - el配置改成target
  *  - 修改event配置
+ *  - 支持msg配置
+ *  - add _groupTarget
  * */

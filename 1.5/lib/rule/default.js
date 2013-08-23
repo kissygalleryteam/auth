@@ -7,7 +7,7 @@ KISSY.add(function (S) {
     return {
         /**
          * 是否存在值
-         * @param {String|Array} value 值（一般是输入框）
+         * @param {String|Array} value 值（可能是输入框、radio、选择框）
          * @param {String} attr html tag中的属性值
          * @param {Promise.Defer} defer 用于异步校验
          * @param {Field} field Field的实例
