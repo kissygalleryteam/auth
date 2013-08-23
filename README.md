@@ -14,6 +14,7 @@ v1.5 测试中，请勿使用
     [!] [Field] el配置改成target
     [!] [Field] 修改event配置
     [!] [Field] validate()方法去掉cfg参数，多个规则逗号隔开
+    [!] [Field] 遍历时排除button元素
     [!] [Rule] 重构
     [!] [ruleFactory] 颠倒规则函数的value和pv
     [!] [ruleFactory] 不再区分html规则和自定义规则
@@ -21,6 +22,7 @@ v1.5 测试中，请勿使用
     [!] [Msg] 重构
     [!] [Msg] msg传递方式优化
     [!] 去掉多余无用的样式，使用stylus改写
+    [!] [Field]修正不存在验证规则时报错的bug
     [+] 新增render()，不再new时马上初始化逻辑
     [+] 增加validate的同名方法test
     [+] 继承promise
@@ -32,6 +34,7 @@ v1.5 测试中，请勿使用
     [+] [ruleFactory] 支持批量添加验证规则
     [+] [Rule]规则可以设置默认消息
     [+] [Msg]兼容服务器返回的错误信息
+    [+] [Msg]可以传自定义消息类进去
     [-] 删除rule/base
     [-] 删除propertyRule
 
