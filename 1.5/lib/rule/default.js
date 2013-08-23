@@ -17,6 +17,7 @@ KISSY.add(function (S) {
             if(S.isArray(value)) {
                 return value.length>0;
             }
+            this.msg('error','不可以为空！');
             return !!value;
         },
         /**
@@ -32,6 +33,7 @@ KISSY.add(function (S) {
             if (!S.isNumber(value)) {
                 return false;
             }
+            this.msg('error','必须小于'+attr);
             return value <= attr;
         },
         /**
@@ -41,6 +43,7 @@ KISSY.add(function (S) {
             if (!S.isNumber(value)) {
                 return false;
             }
+            this.msg('error','必须大于'+attr);
             return value >= attr;
         },
         /**
