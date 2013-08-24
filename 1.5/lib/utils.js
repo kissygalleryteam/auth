@@ -17,12 +17,22 @@ KISSY.add(function (S, DOM, undefined) {
         guid:function () {
             return 'AUTH_' + S.guid();
         },
+        /**
+         * 根据元素类型来绑定默认的事件
+         * @param els
+         * @return {string}
+         */
         getEvent: function(els){
-            var event = 'blur',
-                type = DOM.attr(els, 'type');
+            var event = 'blur';
+            var  type = DOM.attr(els, 'type');
             switch (type) {
+                case "select":
+                    event = 'change';
+                    break;
                 case "select-multiple":
                 case "radio":
+                    event='click';
+                    break;
                 case "checkbox":
                     event='click';
                     break;
@@ -54,8 +64,9 @@ KISSY.add(function (S, DOM, undefined) {
     };
 
     return Utils;
-},{
-    requires:[
-        'dom'
-    ]
-});
+},{ requires:[ 'dom' ] });
+/**
+ * changelog
+ * v1.5 by 明河
+ *  - select增加type属性，默认触发事件为change
+ * */

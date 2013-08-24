@@ -14,10 +14,19 @@ KISSY.add(function (S) {
          * @return {boolean}
          */
         required:function (value,attr,defer,field) {
-            if(S.isArray(value)) {
-                return value.length>0;
-            }
             this.msg('error','不可以为空！');
+            var $target = this.get('target');
+            var groupEls = ['radio','checkbox'];
+            if(S.inArray($target.attr('type'),groupEls)){
+                var checked = false;
+                $target.each(function($el){
+                    if($el.prop('checked')){
+                        checked = true;
+                        return false;
+                    }
+                })
+                return checked;
+            }
             return !!value;
         },
         /**
@@ -77,3 +86,8 @@ KISSY.add(function (S) {
     };
 
 });
+/**
+ * changelog
+ * v1.5 by 明河
+ *  - required重构
+ * */

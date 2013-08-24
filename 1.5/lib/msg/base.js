@@ -93,6 +93,14 @@ KISSY.add(function (S, Base,Node,XTemplate) {
             if(wrapperHook) $wrapper = $(wrapperHook);
 
             if(!$wrapper || !$wrapper.length){
+                //radio和ckeckedbox的处理比较特殊
+                if($target.length > 1){
+                    $target = $target.item($target.length-1);
+                    var $parent = $($target.parent());
+                    if($parent.hasClass('radio') || $parent.hasClass('checkbox')){
+                        $target = $target.parent();
+                    }
+                }
                 var $parent = $($target.parent());
                 $wrapper = $('<div class="msg-wrapper"></div>').appendTo($parent);
             }

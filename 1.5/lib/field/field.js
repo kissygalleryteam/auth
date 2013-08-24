@@ -6,7 +6,7 @@
 KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils) {
     var $ = Node.all;
     var EMPTY = '';
-
+    var DATA_FIELD = 'data-field';
     /**
      * field默认配置
      * @type {Object}
@@ -95,40 +95,34 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
         _init:function () {
             var self = this;
             var _cfg = self._cfg;
-            var $target = self.get('target');
             var _ruleCfg = S.merge({}, _cfg.rules);
             self._groupTarget();
             self._renderMsg();
             S.each(_ruleCfg, function(ruleCfg, name){
                 if(!self._storage[name] && Factory.rules[name]) {
-                    var rule = self._createRule(name,ruleCfg);
-                    self.add(name, rule);
+                    self._createRule(name,ruleCfg);
                 }
             });
-
+            var $target = self.get('target');
+            $target.data(DATA_FIELD,self);
             var target = $target.getDOMNode();
             self._targetBind(_cfg.event || Utils.getEvent(target))
 
         },
         /**
          * radio/checkedbox是一组表单元素
-         * @return {Array}
+         * @return {NodeList}
          * @private
          */
         _groupTarget:function(){
             var self = this;
             var $target = self.get('target');
             if (S.inArray($target.attr('type'), ['checkbox','radio'])) {
-                var form = $target.getDOMNode().form, elName = $target.attr('name');
-                var els = [];
-                S.each(document.getElementsByName(elName), function(item) {
-                    if (item.form == form) {
-                        els.push(item);
-                    }
-                });
-                self.set('target', els);
+                var elName = $target.attr('name');
+                $target = $(document.getElementsByName(elName));
+                self.set('target', $target);
             }
-            return self.get('target');
+            return $target;
         },
         /**
          * 给表单元素绑定验证事件
@@ -182,9 +176,10 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
                 value: $target.val(),
                 target:$target,
                 field:self
-            })
-            //如果集合里没有，但是有配置，可以认定是自定义属性，入口为form.add
-            return Factory.create(name, ruleCfg);
+            });
+            var rule = Factory.create(name, ruleCfg);
+            self.add(name, rule);
+            return rule;
         },
         /**
          * 向Field添加一个规则实例
@@ -232,7 +227,6 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
          */
         validate:function (name) {
             var self = this;
-
             var aRule = [];
             var rules = self.get('rules');
             //只验证指定规则
@@ -316,6 +310,11 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
                 }
             },
             /**
+             * 宿主Auth的实例
+             * @type {Auth}
+             */
+            host:{ value: '' },
+            /**
              * 验证时排除的规则
              */
             exclude:{value:''},
@@ -358,4 +357,6 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
  *  - 修改event配置
  *  - 支持msg配置
  *  - add _groupTarget
+ *  - 增加host属性
+ *  - 将Field实例缓存到元素的data-field
  * */

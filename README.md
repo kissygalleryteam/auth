@@ -31,8 +31,11 @@ v1.5 测试中，请勿使用
     [+] [Field]增加success、error、beforeTest事件
     [+] [Filed]新增rules属性，用于获取所有的规则
     [+] [Filed]新增exclude配置，用于排除指定规则验证
+    [+] [Filed]新增host属性
+    [+] [Filed]将Field实例缓存到元素的data-field
     [+] [ruleFactory] 支持批量添加验证规则
     [+] [Rule]规则可以设置默认消息
+    [+] [Rule]required组的处理
     [+] [Msg]兼容服务器返回的错误信息
     [+] [Msg]可以传自定义消息类进去
     [+] [Msg]可以自动生成消息层

@@ -139,7 +139,9 @@ KISSY.add(function(S, Base,Promise) {
             /**
              * 目标元素
              */
-            target:{ value: '',getter:function(v){return S.one(v)} },
+            target:{
+                value: ''
+            },
             /**
              * 规则对应的表单域（指向会变化）
              * @type {Field}
@@ -166,4 +168,5 @@ KISSY.add(function(S, Base,Promise) {
  *  - 使用get和set来获取设置属性
  *  - 去掉基类继承
  *  - 去掉utils引用
+ *  - target去掉getter
  * */

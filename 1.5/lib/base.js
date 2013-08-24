@@ -5,6 +5,7 @@
  */
 KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
     var $ = Node.all;
+    var DATA_FIELD = 'data-field';
     /**
      * @name Auth
      * @class Auth组件入口
@@ -42,16 +43,25 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
 
             var autoBind = self.get('autoBind');
             S.each(forms, function (el) {
+                var $el = $(el);
                 //过滤不需要验证的表单元素
                 var filterTag = ['BUTTON'];
-                if(!S.inArray(el.tagName,filterTag)){
-                    //给表单元素自动绑定事件
-                    var filedConfig = {event:autoBind ? Utils.getEvent(el) : 'none'};
-                    var field = new Field(el, filedConfig);
-                    field.addTarget(self);
-                    field.publish('validate', { bubble: 1 });
-                    self.add(field);
+                var tagName = el.tagName;
+                if(S.inArray(tagName,filterTag)) return true;
+                if(tagName == 'SELECT') $el.attr('type', 'select');
+                //如果是一组表单元素像radio，不需要多次实例化Field
+                var groupEls = ['radio','checkbox'];
+                if(S.inArray($el.attr('type'),groupEls)){
+                    if($el.data(DATA_FIELD)) return true;
                 }
+                //给Filed传递默认参数
+                var filedConfig = {
+                    //绑定的验证事件
+                    event:autoBind ? Utils.getEvent(el) : '',
+                    host: self
+                };
+                var field = new Field(el, filedConfig);
+                self.add(field);
             });
 
             //如果是form模式，需要屏蔽html5本身的校验，放在最后是为了html5的校验能生效
@@ -116,7 +126,7 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
          * @return {*}
          */
         test:function(group){
-          return this.validate(group);
+            return this.validate(group);
         },
         /**
          * 验证
@@ -133,17 +143,17 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
             var storages = self._storages;
             var stopOnError = self.get('stopOnError');
             var _defer = Auth._defer;
-/*
-            S.each(fields, function (field, idx) {
-                var r = field.validate();
-                result = result && r;
-                currentField = field;
+            /*
+             S.each(fields, function (field, idx) {
+             var r = field.validate();
+             result = result && r;
+             currentField = field;
 
-                //stop on error
-                if (self.AuthConfig.stopOnError && !result) {
-                    return false;
-                }
-            });*/
+             //stop on error
+             if (self.AuthConfig.stopOnError && !result) {
+             return false;
+             }
+             });*/
             var fields = [];
             S.each(storages,function(field){
                 fields.push(field);
@@ -159,12 +169,12 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
                     //单个field验证成功，继续验证下一个field
                     _testField(fields[i]);
                 }).fail(function(){
-                    //field验证失败
-                    //如果配置了stopOnError，将停止下一个Field的验证
-                    if(!stopOnError){
-                        _testField(fields[i]);
-                    }
-                })
+                        //field验证失败
+                        //如果配置了stopOnError，将停止下一个Field的验证
+                        if(!stopOnError){
+                            _testField(fields[i]);
+                        }
+                    })
             }
 
             PROMISE.then(function(){
@@ -172,10 +182,10 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
                 _defer.resolve(fields);
                 self.fire('success',{fields:fields});
             }).fail(function(rule){
-                //验证失败
-                _defer.reject(rule);
-                self.fire('error',{rule:rule,field:rule.get('field')});
-            });
+                    //验证失败
+                    _defer.reject(rule);
+                    self.fire('error',{rule:rule,field:rule.get('field')});
+                });
 
             self.set('result', result);
             return _defer.promise;
