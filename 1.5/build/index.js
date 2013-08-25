@@ -224,25 +224,32 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
          * 最大值验证
          */
         max:function (value,attr,defer,field) {
-            if (!S.isNumber(value)) {
-                return false;
-            }
             if(!this.msg('error')) this.msg('error','必须小于'+attr);
-            return value <= attr;
+            var $target = this.get('target');
+            if($target.attr('type') == 'checkbox'){
+                value = 0;
+                $target.each(function($el){
+                    if($el.prop('checked')) value ++;
+                })
+                if(!this.msg('error')) this.msg('error','最多只能选择'+attr+'项');
+            }
+            return Number(value) <= Number(attr);
         },
         /**
          * 最小值验证
          */
         min:function (value,attr,defer,field) {
-            if (!S.isNumber(value)) {
-                return false;
-            }
             if(!this.msg('error')) this.msg('error','必须大于'+attr);
-            return value >= attr;
+            var $target = this.get('target');
+            if($target.attr('type') == 'checkbox'){
+                value = 0;
+                $target.each(function($el){
+                    if($el.prop('checked')) value ++;
+                })
+                if(!this.msg('error')) this.msg('error','最小必须选择'+attr+'项');
+            }
+            return Number(value) >= Number(attr);
         },
-        /**
-         * 最大值验证
-         */
         step:function (value,attr,defer,field) {
             if (!S.isNumber(value)) {
                 return false;
@@ -254,19 +261,56 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
         /**
          * 校验值是否等于属性配置的值
          */
-        equalTo:function(value,attr,defer,field){
-            //number same
-            if (S.isNumber(value)) {
-                return attr === value;
-            }
-
-            //selector same
-            if(S.one(attr)) {
-                return S.one(attr).val() === value;
-            }
-
-            //string same
-            return attr === value;
+        equal:function(value,attr,defer,field){
+            if(!this.msg('error')) this.msg('error','值必须等于'+attr);
+            return S.trim(attr) === S.trim(value);
+        },
+        /**
+         * 校验二个字段的值是否相同
+         * @param value
+         * @param attr
+         */
+        "equal-field":function(value,attr){
+            if(!this.msg('error')) this.msg('error','二个字段值必须相同！');
+            var field = this.get('field');
+            var auth = field.get('host');
+            if(!auth) return false;
+            var matchFiled = auth.getField(attr);
+            if(!matchFiled) return false;
+            var val = matchFiled.get('target').val();
+            return S.trim(val) === S.trim(value);
+        },
+        /**
+         * 是否是数字
+         */
+        number:function(value){
+            if(!this.msg('error')) this.msg('error','必须是数字');
+            return /^([+-]?)\\d*\\.?\\d+$/.test(S.trim(value));
+        },
+        /**
+         * 是否符合email格式
+         * @param value
+         */
+        email:function(value){
+            if(!this.msg('error')) this.msg('error','邮箱格式不合法');
+            return /^\\w+((-\\w+)|(\\.\\w+))*\\@[A-Za-z0-9]+((\\.|-)[A-Za-z0-9]+)*\\.[A-Za-z0-9]+$/.test(S.trim(value));
+        },
+        /**
+         * 是否符合手机格式
+         * @param value
+         */
+        mobile:function(value){
+            if(!this.msg('error')) this.msg('error','手机号码格式不合法');
+            return /^(13|15)[0-9]{9}$/.test(S.trim(value));
+        },
+        /**
+         * 是否符合日期格式
+         * http://blog.csdn.net/lxcnn/article/details/4362500
+         * @param value
+         */
+        date:function(value){
+            if(!this.msg('error')) this.msg('error','日期格式不合法');
+            return /^(?:(?!0000)[0-9]{4}([-/.]?)(?:(?:0?[1-9]|1[0-2])\1(?:0?[1-9]|1[0-9]|2[0-8])|(?:0?[13-9]|1[0-2])\1(?:29|30)|(?:0?[13578]|1[02])\1(?:31))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)([-/.]?)0?2\2(?:29))$/.test(S.trim(value));
         }
     };
 
@@ -275,6 +319,8 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
  * changelog
  * v1.5 by 明河
  *  - required重构
+ *  - max和min可以处理checkbox的情况
+ *  - equalTo重写
  * */
 /**
  * @fileoverview html 属性规则工厂
@@ -828,16 +874,21 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
                 })
             }
             var _defer = Field._defer;
+            var PROMISE;
             //不存在需要验证的规则，直接投递成功消息
             if(!aRule.length){
-                _defer.resolve(aRule);
-                self.fire('success',{rules:aRule});
-                return _defer.promise;
+                var _emptyDefer = new Promise.Defer();
+                var _emptyPromise = _emptyDefer.promise;
+                _emptyPromise.then(function(){
+                    _defer.resolve(aRule);
+                    self.fire('success',{rules:aRule});
+                })
+                _emptyPromise.resolve();
+                return _emptyPromise;
             }
             //校验开始
             self.fire('beforeTest',{rules:aRule});
             var i = 0;
-            var PROMISE;
             _testRule(aRule[i]);
             function _testRule(ruleData){
                 if(i >= aRule.length) return PROMISE;

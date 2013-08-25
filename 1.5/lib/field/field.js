@@ -251,16 +251,21 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
                 })
             }
             var _defer = Field._defer;
+            var PROMISE;
             //不存在需要验证的规则，直接投递成功消息
             if(!aRule.length){
-                _defer.resolve(aRule);
-                self.fire('success',{rules:aRule});
-                return _defer.promise;
+                var _emptyDefer = new Promise.Defer();
+                var _emptyPromise = _emptyDefer.promise;
+                _emptyPromise.then(function(){
+                    _defer.resolve(aRule);
+                    self.fire('success',{rules:aRule});
+                })
+                _emptyPromise.resolve();
+                return _emptyPromise;
             }
             //校验开始
             self.fire('beforeTest',{rules:aRule});
             var i = 0;
-            var PROMISE;
             _testRule(aRule[i]);
             function _testRule(ruleData){
                 if(i >= aRule.length) return PROMISE;
