@@ -305,6 +305,12 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
                 }
             },
             /**
+             * 字段名称
+             */
+            name:{
+                value:''
+            },
+            /**
              * 对应的元素绑定的事件（用于触发验证）
              */
             event:{

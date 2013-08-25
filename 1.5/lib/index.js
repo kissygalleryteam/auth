@@ -42,7 +42,6 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
             var forms = $form.getDOMNode().elements;
             if(!forms.length) return self;
 
-            var autoBind = self.get('autoBind');
             S.each(forms, function (el) {
                 var $el = $(el);
                 var type = $el.attr('type');
@@ -58,14 +57,7 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
                 if(S.inArray(type,groupEls)){
                     if($el.data(DATA_FIELD)) return true;
                 }
-                //给Filed传递默认参数
-                var filedConfig = {
-                    //绑定的验证事件
-                    event:autoBind ? Utils.getEvent(el) : '',
-                    host: self
-                };
-                var field = new Field(el, filedConfig);
-                self.add(field);
+                self.add(el);
             });
 
             //需要屏蔽html5本身的校验，放在最后是为了html5的校验能生效
@@ -109,10 +101,18 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
                 key = self.getName(el);
                 authField = self._storages[key || Utils.guid()] = field;
             } else {
-                el = S.one(field);
+                var autoBind = self.get('autoBind');
+                el = $(field);
                 if(!el.length) return false;
-
                 key = self.getName(el);
+                //给Filed传递默认参数
+                var filedConfig = {
+                    //绑定的验证事件
+                    event:autoBind ? Utils.getEvent(el) : '',
+                    host: self,
+                    name: key
+                };
+                S.mix(filedConfig,config);
                 authField = self._storages[key] = new Field(el, config);
             }
 
@@ -161,14 +161,10 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
         validate:function (fields) {
             var self = this;
             self.fire('beforeTest');
-            var result = true, currentField;
-            var storages = self._storages;
             var stopOnError = self.get('stopOnError');
             var _defer = Auth._defer;
-            var fields = [];
-            S.each(storages,function(field){
-                fields.push(field);
-            })
+            var fields = self.get('fields');
+            fields = self._filterFields(fields);
             var i = 0;
             var PROMISE;
             _testField(fields[i]);
@@ -197,9 +193,16 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
                 _defer.reject(rule);
                 self.fire('error',{rule:rule,field:rule.get('field')});
             });
-
-            self.set('result', result);
             return _defer.promise;
+        },
+        /**
+         * 过滤field数组，去掉不需要验证的数组
+         */
+        _filterFields:function(fields){
+            return S.filter(fields,function(filed){
+                var rules = filed.get('rules');
+                return !S.isEmptyObject(rules);
+            })
         }
     }, {
         ATTRS:{
@@ -219,6 +222,21 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
                 value:{},
                 getter:function(v){
                     return Factory.rules;
+                }
+            },
+            /**
+             * 所有的字段
+             */
+            fields:{
+                value:[],
+                getter:function(v){
+                    var self = this;
+                    var storages = self._storages;
+                    var fields = [];
+                    S.each(storages,function(field){
+                        fields.push(field);
+                    });
+                    return fields;
                 }
             },
             /**

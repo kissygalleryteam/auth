@@ -29,11 +29,14 @@ v1.5 测试中，请勿使用
     [+] 异步校验支持
     [+] [auth]增加rules属性，用于获取所有的验证规则
     [+] [auth]增加submitTest配置，用于拦截表单提交，先触发验证
+    [+] [auth]增加fields属性，所有的字段
+    [+] [auth]验证前过滤掉不需要验证的字段
     [+] [Field]增加success、error、beforeTest事件
     [+] [Filed]新增rules属性，用于获取所有的规则
     [+] [Filed]新增exclude配置，用于排除指定规则验证
     [+] [Filed]新增host属性
     [+] [Filed]将Field实例缓存到元素的data-field
+    [+] [Filed]增加name属性
     [+] [ruleFactory] 支持批量添加验证规则
     [+] [Rule]规则可以设置默认消息
     [+] [Rule]required组的处理
