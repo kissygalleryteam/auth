@@ -1116,13 +1116,20 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
             return authField;
         },
         /**
-         * 获取元素的id，获取不到，获取name
+         * 获取元素的name，获取不到，获取id
          * @param $el
          * @return {String}
          */
         getName:function ($el) {
-            if (!$el || !$el.length) return '';
-            return $el.attr('id') || $el.attr('name') || Utils.guid();
+            var self = this;
+            var name = Utils.guid();
+            if (!$el || !$el.length) return name;
+            //强制使用id作为name值
+            var useId = self.get('useId');
+            var id = $el.attr('id');
+            name =  $el.attr('name') || id;
+            if(useId) name = id;
+            return name;
         },
         /**
          * 根据key返回field对象
@@ -1143,11 +1150,11 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
         },
         /**
          * 触发所有表单元素的验证，validate的别名方法
-         * @param group
+         * @param fields
          * @return {*}
          */
-        test:function(group){
-            return this.validate(group);
+        test:function(fields){
+            return this.validate(fields);
         },
         /**
          * 验证
@@ -1160,7 +1167,7 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
             self.fire('beforeTest');
             var stopOnError = self.get('stopOnError');
             var _defer = Auth._defer;
-            var fields = self.get('fields');
+            //获取需要验证的字段
             fields = self._filterFields(fields);
             var i = 0;
             var PROMISE;
@@ -1196,6 +1203,19 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
          * 过滤field数组，去掉不需要验证的数组
          */
         _filterFields:function(fields){
+            var self = this;
+            var allFields = self.get('fields');
+            //用户指定了需要验证的字段
+            if(fields){
+                var names = fields.split(',');
+                if(names.length > 0){
+                    fields = S.filter(allFields,function(field){
+                        return S.inArray(field.get("name"),names);
+                    })
+                }
+            }else{
+                fields = allFields;
+            }
             return S.filter(fields,function(filed){
                 var rules = filed.get('rules');
                 return !S.isEmptyObject(rules);
@@ -1236,6 +1256,10 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
                     return fields;
                 }
             },
+            /**
+             * 强制使用元素的id作为字段标识
+             */
+            useId:{ value: false },
             /**
              * 是否自动给表单元素绑定事件
              */

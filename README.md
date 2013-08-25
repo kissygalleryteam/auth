@@ -11,6 +11,7 @@ v1.5 测试中，请勿使用
     [!] 重构消息类
     [!] 改用get和set来获取/设置属性
     [!] tag config方式更改
+    [!] [Auth] 优先获取name，而不是id
     [!] [Field] el配置改成target
     [!] [Field] 修改event配置
     [!] [Field] validate()方法去掉cfg参数，多个规则逗号隔开
@@ -28,9 +29,11 @@ v1.5 测试中，请勿使用
     [+] 继承promise
     [+] 异步校验支持
     [+] [auth]增加rules属性，用于获取所有的验证规则
+    [+] [auth]增加useId属性，可以强制使用id作为字段标识
     [+] [auth]增加submitTest配置，用于拦截表单提交，先触发验证
     [+] [auth]增加fields属性，所有的字段
     [+] [auth]验证前过滤掉不需要验证的字段
+    [+] [auth]test()支持指定需要验证的字段，比如test("user,email")
     [+] [Field]增加success、error、beforeTest事件
     [+] [Filed]新增rules属性，用于获取所有的规则
     [+] [Filed]新增exclude配置，用于排除指定规则验证
