@@ -43,6 +43,7 @@ v1.5 测试中，请勿使用
     [+] 增加对uploader的支持
     [-] 删除rule/base
     [-] 删除propertyRule
+    [-] 删除lib/base
 
 ### V1.4
 

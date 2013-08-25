@@ -7,7 +7,6 @@ gallery/auth/1.5/lib/rule/ruleFactory
 gallery/auth/1.5/lib/msg/base
 gallery/auth/1.5/lib/utils
 gallery/auth/1.5/lib/field/field
-gallery/auth/1.5/lib/base
 gallery/auth/1.5/lib/index
 gallery/auth/1.5/index
 
@@ -153,7 +152,9 @@ KISSY.add('gallery/auth/1.5/lib/rule/rule',function(S, Base,Promise) {
             /**
              * 目标元素
              */
-            target:{ value: '',getter:function(v){return S.one(v)} },
+            target:{
+                value: ''
+            },
             /**
              * 规则对应的表单域（指向会变化）
              * @type {Field}
@@ -180,6 +181,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/rule',function(S, Base,Promise) {
  *  - 使用get和set来获取设置属性
  *  - 去掉基类继承
  *  - 去掉utils引用
+ *  - target去掉getter
  * */
 /**
  * @fileoverview 默认规则
@@ -190,15 +192,25 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
     return {
         /**
          * 是否存在值
-         * @param {String|Array} value 值（一般是输入框）
+         * @param {String|Array} value 值（可能是输入框、radio、选择框）
          * @param {String} attr html tag中的属性值
          * @param {Promise.Defer} defer 用于异步校验
          * @param {Field} field Field的实例
          * @return {boolean}
          */
         required:function (value,attr,defer,field) {
-            if(S.isArray(value)) {
-                return value.length>0;
+            if(!this.msg('error')) this.msg('error','不可以为空！');
+            var $target = this.get('target');
+            var groupEls = ['radio','checkbox'];
+            if(S.inArray($target.attr('type'),groupEls)){
+                var checked = false;
+                $target.each(function($el){
+                    if($el.prop('checked')){
+                        checked = true;
+                        return false;
+                    }
+                })
+                return checked;
             }
             return !!value;
         },
@@ -215,6 +227,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
             if (!S.isNumber(value)) {
                 return false;
             }
+            if(!this.msg('error')) this.msg('error','必须小于'+attr);
             return value <= attr;
         },
         /**
@@ -224,6 +237,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
             if (!S.isNumber(value)) {
                 return false;
             }
+            if(!this.msg('error')) this.msg('error','必须大于'+attr);
             return value >= attr;
         },
         /**
@@ -257,6 +271,11 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
     };
 
 });
+/**
+ * changelog
+ * v1.5 by 明河
+ *  - required重构
+ * */
 /**
  * @fileoverview html 属性规则工厂
  * @author 张挺 <zhangting@taobao.com>
@@ -321,21 +340,19 @@ KISSY.add('gallery/auth/1.5/lib/msg/base',function (S, Base,Node,XTemplate) {
     var $ = Node.all;
     var MSG_HOOK = '.auth-msg';
 
-    function Msg(target, config) {
+    function Msg(config) {
         var self = this;
         if(!config) config = {};
-        target && S.mix(config,{target:target});
         Msg.superclass.constructor.call(self,config);
-        self._init();
     };
 
 
     S.extend(Msg, Base, {
         /**
-         * init msg
-         * @private
+         * 运行
+         * @return {boolean}
          */
-        _init:function () {
+        render:function () {
             var self = this;
             var $target = self.get('target');
             if(!$target.length) return false;
@@ -409,6 +426,14 @@ KISSY.add('gallery/auth/1.5/lib/msg/base',function (S, Base,Node,XTemplate) {
             if(wrapperHook) $wrapper = $(wrapperHook);
 
             if(!$wrapper || !$wrapper.length){
+                //radio和ckeckedbox的处理比较特殊
+                if($target.length > 1){
+                    $target = $target.item($target.length-1);
+                    var $parent = $($target.parent());
+                    if($parent.hasClass('radio') || $parent.hasClass('checkbox')){
+                        $target = $target.parent();
+                    }
+                }
                 var $parent = $($target.parent());
                 $wrapper = $('<div class="msg-wrapper"></div>').appendTo($parent);
             }
@@ -497,12 +522,22 @@ KISSY.add('gallery/auth/1.5/lib/utils',function (S, DOM, undefined) {
         guid:function () {
             return 'AUTH_' + S.guid();
         },
+        /**
+         * 9nC {�eњؤ���
+         * @param els
+         * @return {string}
+         */
         getEvent: function(els){
-            var event = 'blur',
-                type = DOM.attr(els, 'type');
+            var event = 'blur';
+            var  type = DOM.attr(els, 'type');
             switch (type) {
+                case "select":
+                    event = 'change';
+                    break;
                 case "select-multiple":
                 case "radio":
+                    event='click';
+                    break;
                 case "checkbox":
                     event='click';
                     break;
@@ -534,11 +569,12 @@ KISSY.add('gallery/auth/1.5/lib/utils',function (S, DOM, undefined) {
     };
 
     return Utils;
-},{
-    requires:[
-        'dom'
-    ]
-});
+},{ requires:[ 'dom' ] });
+/**
+ * changelog
+ * v1.5 by �
+ *  - select��type^'ؤ�ы�:change
+ * */
 /**
  * @fileoverview
  * @author czy88840616 <czy88840616@gmail.com>
@@ -547,7 +583,7 @@ KISSY.add('gallery/auth/1.5/lib/utils',function (S, DOM, undefined) {
 KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils) {
     var $ = Node.all;
     var EMPTY = '';
-
+    var DATA_FIELD = 'data-field';
     /**
      * field默认配置
      * @type {Object}
@@ -636,37 +672,34 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
         _init:function () {
             var self = this;
             var _cfg = self._cfg;
-            var $target = self.get('target');
             var _ruleCfg = S.merge({}, _cfg.rules);
-
-
-            //如果为checkbox/radio则保存为数组
-            if (S.inArray($target.attr('type'), ['checkbox','radio'])) {
-                var form = $target.getDOMNode().form, elName = $target.attr('name');
-                var els = [];
-                S.each(document.getElementsByName(elName), function(item) {
-                    if (item.form == form) {
-                        els.push(item);
-                    }
-                });
-                self.set('target', els);
-            }
-
-            var msgConfig = self._cfg.msg || {};
-            msgConfig.host = self;
-            self._msg = new Msg($target, msgConfig);
-            self.set('oMsg',self._msg);
-
+            self._groupTarget();
+            self._renderMsg();
             S.each(_ruleCfg, function(ruleCfg, name){
                 if(!self._storage[name] && Factory.rules[name]) {
-                    var rule = self._createRule(name,ruleCfg);
-                    self.add(name, rule);
+                    self._createRule(name,ruleCfg);
                 }
             });
-
-            var target = self.get('target').getDOMNode();
+            var $target = self.get('target');
+            $target.data(DATA_FIELD,self);
+            var target = $target.getDOMNode();
             self._targetBind(_cfg.event || Utils.getEvent(target))
 
+        },
+        /**
+         * radio/checkedbox是一组表单元素
+         * @return {NodeList}
+         * @private
+         */
+        _groupTarget:function(){
+            var self = this;
+            var $target = self.get('target');
+            if (S.inArray($target.attr('type'), ['checkbox','radio'])) {
+                var elName = $target.attr('name');
+                $target = $(document.getElementsByName(elName));
+                self.set('target', $target);
+            }
+            return $target;
         },
         /**
          * 给表单元素绑定验证事件
@@ -686,6 +719,27 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
             return self;
         },
         /**
+         * 运行消息实例
+         * @return {Msg}
+         * @private
+         */
+        _renderMsg : function(){
+            var self = this;
+            var msg = self.get('msg');
+            //如果不存在自定义的消息类，初始化默认消息类
+            if(msg == ''){
+                var msgConfig = self._cfg.msg || {};
+                msg = new Msg(msgConfig);
+            }
+            var $target = self.get('target');
+            //将Field实例和Field对应的表单元素目标注入到消息配置
+            msg.set('target',$target);
+            msg.set('host',self);
+            self.set('msg',msg);
+            msg.render();
+            return msg;
+        },
+        /**
          * 创建规则实例
          * @param name
          * @param ruleCfg
@@ -699,9 +753,10 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
                 value: $target.val(),
                 target:$target,
                 field:self
-            })
-            //如果集合里没有，但是有配置，可以认定是自定义属性，入口为form.add
-            return Factory.create(name, ruleCfg);
+            });
+            var rule = Factory.create(name, ruleCfg);
+            self.add(name, rule);
+            return rule;
         },
         /**
          * 向Field添加一个规则实例
@@ -717,21 +772,9 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
             } else if(S.isFunction(rule)) {
                 _storage[name] = new Rule(name, rule, {
                     el:self._el
-                    //TODO args
                 });
             }
             self.set('rules',_storage);
-            if(_storage[name]) {
-                _storage[name].on('validate', function (ev) {
-                    S.log('[after rule validate]: name:' + ev.name + ',result:' + ev.result + ',msg:' + ev.msg);
-                    //set cache
-                    self._cache[ev.name]['result'] = ev.result;
-                    self._cache[ev.name]['msg'] = ev.msg;
-                });
-            }
-
-            this._cache[name] = {};
-
             return self;
         },
         /**
@@ -742,7 +785,6 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
         remove:function (name) {
             var _storage = this._storage;
             delete _storage[name];
-            delete this._cache[name];
             self.set('rules',_storage);
             return this;
         },
@@ -762,7 +804,6 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
          */
         validate:function (name) {
             var self = this;
-
             var aRule = [];
             var rules = self.get('rules');
             //只验证指定规则
@@ -786,11 +827,15 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
                     return !S.inArray(rule.get('name'),aExclude);
                 })
             }
-
+            var _defer = Field._defer;
+            //不存在需要验证的规则，直接投递成功消息
+            if(!aRule.length){
+                _defer.resolve(aRule);
+                self.fire('success',{rules:aRule});
+                return _defer.promise;
+            }
             //校验开始
             self.fire('beforeTest',{rules:aRule});
-            var _defer = Field._defer;
-
             var i = 0;
             var PROMISE;
             _testRule(aRule[i]);
@@ -804,7 +849,6 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
                     _testRule(aRule[i]);
                 })
             }
-            //所有的规则都验证完毕
             PROMISE.then(function(rule){
                 //所有规则验证通过
                 _defer.resolve(aRule);
@@ -843,6 +887,11 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
                 }
             },
             /**
+             * 宿主Auth的实例
+             * @type {Auth}
+             */
+            host:{ value: '' },
+            /**
              * 验证时排除的规则
              */
             exclude:{value:''},
@@ -852,10 +901,10 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
              */
             rules:{ value:{} },
             /**
-             * 验证消息类
+             * 验证消息类实例
              * @type {Object}
              */
-            oMsg:{value:''}
+            msg:{value:''}
         }
     });
 
@@ -883,33 +932,24 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
  *  - 修改获取tag配置的方式
  *  - el配置改成target
  *  - 修改event配置
+ *  - 支持msg配置
+ *  - add _groupTarget
+ *  - 增加host属性
+ *  - 将Field实例缓存到元素的data-field
  * */
 /**
- * @fileoverview hU��{
+ * @fileoverview 表单验证类
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('gallery/auth/1.5/lib/base',function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
+KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
     var $ = Node.all;
-    /**
-     * ؤMn
-     * @type {Object}
-     */
-    var defaultConfig = {
-        autoBind:true,
-        stopOnError:false
-    };
-
-    var AUTH_MODE = {
-        FORM:'form',
-        OBJECT:'object'
-    };
-
+    var DATA_FIELD = 'data-field';
     /**
      * @name Auth
-     * @class Auth��e�
+     * @class Auth组件入口
      * @version 1.5
-     * @param target {selector|htmlElement} formC 
+     * @param target {selector|htmlElement} form元素
      * @param config {object}
      * @return Auth
      * @constructor
@@ -932,7 +972,7 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, Node,JSON, Base,Promise, Fiel
 
     S.extend(Auth,Base, /** @lends Auth.prototype*/ {
         /**
-         * �auth
+         * 初始化auth
          */
         render:function () {
             var self = this;
@@ -942,30 +982,43 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, Node,JSON, Base,Promise, Fiel
 
             var autoBind = self.get('autoBind');
             S.each(forms, function (el) {
-                //�hUC ��њ��
-                var filedConfig = {event:autoBind ? Utils.getEvent(el) : 'none'};
+                var $el = $(el);
+                //过滤不需要验证的表单元素
+                var filterTag = ['BUTTON'];
+                var tagName = el.tagName;
+                if(S.inArray(tagName,filterTag)) return true;
+                if(tagName == 'SELECT') $el.attr('type', 'select');
+                //如果是一组表单元素像radio，不需要多次实例化Field
+                var groupEls = ['radio','checkbox'];
+                if(S.inArray($el.attr('type'),groupEls)){
+                    if($el.data(DATA_FIELD)) return true;
+                }
+                //给Filed传递默认参数
+                var filedConfig = {
+                    //绑定的验证事件
+                    event:autoBind ? Utils.getEvent(el) : '',
+                    host: self
+                };
                 var field = new Field(el, filedConfig);
-                field.addTarget(self);
-                field.publish('validate', { bubble: 1 });
                 self.add(field);
             });
 
-            //��/form! �O=html5,��!�>( /:�html5�!��H
+            //如果是form模式，需要屏蔽html5本身的校验，放在最后是为了html5的校验能生效
             $form.attr('novalidate', 'novalidate');
 
             return self;
         },
         /**
-         * �� * �!��hU�
+         * 添加一个需要校验的表单域
          *
-         * @param field {Field|string|htmlElement} hU��ahtmlhUC 
-         * @param config {object} �	�Mn�� �/field�a1� dMn
+         * @param field {Field|string|htmlElement} 表单域对象或html表单元素
+         * @param config {object} 可选的配置，如果传的是field对象，就无需此配置
          * @return {*}
          */
         add:function (field, config) {
             var el, key, self = this;
             var authField = '';
-            // e�/Field���
+            //传入的是Field的实例
             if (field instanceof Field) {
                 el = field.get('target');
                 key = self.getName(el);
@@ -981,7 +1034,7 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, Node,JSON, Base,Promise, Fiel
             return authField;
         },
         /**
-         * ��C �id��0��name
+         * 获取元素的id，获取不到，获取name
          * @param $el
          * @return {String}
          */
@@ -990,7 +1043,7 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, Node,JSON, Base,Promise, Fiel
             return $el.attr('id') || $el.attr('name') || Utils.guid();
         },
         /**
-         * 9nkey��field�a
+         * 根据key返回field对象
          * @param name
          * @return {Field}
          */
@@ -998,7 +1051,7 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, Node,JSON, Base,Promise, Fiel
             return this._storages[name];
         },
         /**
-         * 茌��Sname:object�y���
+         * 注册验证规则，当name为object时，批量添加
          * @param {String|Object} name
          * @param rule
          */
@@ -1007,49 +1060,79 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, Node,JSON, Base,Promise, Fiel
             return this;
         },
         /**
-         * ��@	hUC ���validate�+��
+         * 触发所有表单元素的验证，validate的别名方法
          * @param group
          * @return {*}
          */
         test:function(group){
-          return this.validate(group);
+            return this.validate(group);
         },
-        validate:function (group) {
+        /**
+         * 验证
+         * 1.5 [+] 支持指定field验证
+         * @param fields
+         * @return {Function|Promise.promise}
+         */
+        validate:function (fields) {
             var self = this;
 
-            self.fire('beforeValidate');
+            self.fire('beforeTest');
 
             var result = true, currentField;
+            var storages = self._storages;
+            var stopOnError = self.get('stopOnError');
+            var _defer = Auth._defer;
+            /*
+             S.each(fields, function (field, idx) {
+             var r = field.validate();
+             result = result && r;
+             currentField = field;
 
-            S.each(self._storages, function (field, idx) {
-                var r = field.validate();
-                result = result && r;
-                currentField = field;
+             //stop on error
+             if (self.AuthConfig.stopOnError && !result) {
+             return false;
+             }
+             });*/
+            var fields = [];
+            S.each(storages,function(field){
+                fields.push(field);
+            })
+            var i = 0;
+            var PROMISE;
+            _testField(fields[i]);
+            function _testField(field){
+                if(i >= fields.length) return PROMISE;
+                PROMISE =  field.test();
+                i++;
+                PROMISE.then(function(){
+                    //单个field验证成功，继续验证下一个field
+                    _testField(fields[i]);
+                }).fail(function(){
+                        //field验证失败
+                        //如果配置了stopOnError，将停止下一个Field的验证
+                        if(!stopOnError){
+                            _testField(fields[i]);
+                        }
+                    })
+            }
 
-                //stop on error
-                if (self.AuthConfig.stopOnError && !result) {
-                    return false;
-                }
-            });
-
-            self.fire('validate', {
-                result:result,
-                lastField:currentField
-            });
+            PROMISE.then(function(){
+                //所有filed验证通过
+                _defer.resolve(fields);
+                self.fire('success',{fields:fields});
+            }).fail(function(rule){
+                    //验证失败
+                    _defer.reject(rule);
+                    self.fire('error',{rule:rule,field:rule.get('field')});
+                });
 
             self.set('result', result);
-
-            self.fire('afterValidate');
-
-            var _defer = Auth._defer;
-            _defer[result && 'resolve' || 'reject'](result);
-
             return _defer.promise;
         }
     }, {
         ATTRS:{
             /**
-             * hUC 
+             * 表单元素
              */
             target:{
                 value:"",
@@ -1058,7 +1141,7 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, Node,JSON, Base,Promise, Fiel
                 }
             },
             /**
-             * hU/�@	���
+             * 表单支持的所有验证规则
              */
             rules:{
                 value:{},
@@ -1067,11 +1150,11 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, Node,JSON, Base,Promise, Fiel
                 }
             },
             /**
-             * /&���hUC њ��
+             * 是否自动给表单元素绑定事件
              */
             autoBind:{value:true},
             /**
-             * S���/&\bb���
+             * 当发生错误时，是否停止下面的验证
              */
             stopOnError:{value:false}
         }
@@ -1095,23 +1178,13 @@ KISSY.add('gallery/auth/1.5/lib/base',function (S, Node,JSON, Base,Promise, Fiel
 });
 /**
  * changelog
- * v1.5 by �
- *  - ��validate���test
- *  - �promise/�(
- *  - e��/
+ * v1.5 by 明河
+ *  - 增加validate的同名方法test
+ *  - 继承promise，支持链式调用
+ *  - 异步验证支持
+ *  - 增加msg配置
+ *  - 过滤不需要的标签
  * */
-/**
- * @fileoverview auth入口
- * @author czy88840616 <czy88840616@gmail.com>
- *
- */
-KISSY.add('gallery/auth/1.5/lib/index',function(S, Auth){
-    return Auth;
-}, {
-    requires:[
-        './base'
-    ]
-});
 /**
  * @fileoverview Form Auth For Kissy
  * @author zhangting@taobao.com<zhangting@taobao.com>
