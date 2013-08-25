@@ -22,11 +22,15 @@ v1.5还在测试和编写文档中，请先看旧版[v1.4](http://gallery.kissyu
 
 ##快速使用
 
+### 引用
+    <script src="http://g.tbcdn.cn/kissy/k/1.3.0/kissy-min.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="http://g.tbcdn.cn/kissy/k/1.3.0/??css/dpl/base-min.css,css/dpl/forms-min.css,button/assets/dpl-min.css">
+
+使用[kissy dpl的form](http://docs.kissyui.com/1.3/dpl/simpleui/forms.html)结构和样式
+
 ### HTML
 
 表单的结构如下：
-
-建议使用[kissy dpl的form](http://docs.kissyui.com/1.3/dpl/simpleui/forms.html)结构和样式
 
     <form class="form-horizontal" id="J_Auth">
         <div class="control-group">
@@ -50,6 +54,7 @@ v1.5还在测试和编写文档中，请先看旧版[v1.4](http://gallery.kissyu
 
     <input type="text" name="user" required required-msg="用户名不可以为空！">
 
+
 ### 初始化组件
 
     S.use('gallery/auth/1.5/,gallery/auth/1.5/lib/msg/style.css', function (S, Auth) {
@@ -61,7 +66,11 @@ Auth的第一个参数为form目标元素。
 
 *render()*：必须调用！
 
-*gallery/auth/1.5/lib/msg/style.css* ：为消息层样式，这里使用异步加载，推荐静态引用，地址为：http://gallery.kissyui.com/auth/1.5/lib/msg/style.css、
+*gallery/auth/1.5/lib/msg/style.css* ：为消息层样式，这里使用异步加载，推荐静态引用，地址为：http://gallery.kissyui.com/auth/1.5/lib/msg/style.css
+
+当提交表单前默认会触发验证，验证成功提交表单，想要去掉这个作用，请配置*submitTest:false* 。
+
+
 
 
 
