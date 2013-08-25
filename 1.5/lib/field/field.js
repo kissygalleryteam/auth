@@ -133,6 +133,7 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
             var self = this;
             var $target = self.get('target');
             if(!$target.length) return false;
+            if($target.attr('type') == 'select') v = v + ' change';
             $target.on(v,function(){
                 //增加个延迟，确保原生表单改变完成
                 S.later(function(){
