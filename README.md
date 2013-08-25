@@ -28,6 +28,7 @@ v1.5 测试中，请勿使用
     [+] 继承promise
     [+] 异步校验支持
     [+] [auth]增加rules属性，用于获取所有的验证规则
+    [+] [auth]增加submitTest配置，用于拦截表单提交，先触发验证
     [+] [Field]增加success、error、beforeTest事件
     [+] [Filed]新增rules属性，用于获取所有的规则
     [+] [Filed]新增exclude配置，用于排除指定规则验证
@@ -36,6 +37,7 @@ v1.5 测试中，请勿使用
     [+] [ruleFactory] 支持批量添加验证规则
     [+] [Rule]规则可以设置默认消息
     [+] [Rule]required组的处理
+    [+] [Rule]required清理掉空格
     [+] [Msg]兼容服务器返回的错误信息
     [+] [Msg]可以传自定义消息类进去
     [+] [Msg]可以自动生成消息层

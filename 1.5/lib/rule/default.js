@@ -27,7 +27,7 @@ KISSY.add(function (S) {
                 })
                 return checked;
             }
-            return !!value;
+            return !!S.trim(value);
         },
         /**
          * 使用正则直接匹配

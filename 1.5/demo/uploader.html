@@ -33,7 +33,7 @@
         </div>
     </div>
     <div class="form-actions">
-        <div class="ks-button ks-button-primary ks-button-shown" id="J_TestForm" role="button" aria-disabled="false" tabindex="0" hidefocus="true" aria-pressed="false">提交</div>
+        <input class="ks-button ks-button-primary ks-button-shown" type="submit" value="提交">
     </div>
 </form>
 
@@ -90,10 +90,6 @@
                     urlHidden.test();
                 })
 
-                S.one('#J_TestForm').on('click',function(ev){
-                    ev.preventDefault();
-                    auth.test();
-                })
             });
         })
     })
