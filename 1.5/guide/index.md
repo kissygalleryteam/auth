@@ -70,6 +70,39 @@ Auth的第一个参数为form目标元素。
 
 当提交表单前默认会触发验证，验证成功提交表单，想要去掉这个作用，请配置*submitTest:false* 。
 
+##默认规则
+
+Auth默认集成了最初级的验证规则：
+
+规则名 | 用途|用法举例
+------------ | -------------| -------------
+required | 值必须存在（兼容radio/checkbox/select的处理）| required required-msg="用户名必须存在！"
+pattern | 配置一个正则对值进行验证| pattern="s$" pattern-msg="email错误！"
+max | 最大值校验（兼容checkbox的处理）| max="3" max-msg="最多选择3项！"
+min | 最小值校验（兼容checkbox的处理）| min="3" min-msg="最小选择3项！"
+equalTo | value是否等于配置的值 | equalTo="明河" equalTo-msg="请填写明河！"
+mobile | 是否符合手机号码格式 | mobile mobile-msg="手机号码不合法！"
+email | 是否符合email格式  |
+date | 是否符合日期格式 |
+number | 是否是数字  |
+
+
+
+##规则消息配置
+
+##注册自定义规则
+
+##验证事件绑定控制
+
+##自由控制Field的配置
+
+##异步验证的处理
+
+##与uploader配合使用
+
+##与butterfly配合使用
+
+
 
 
 

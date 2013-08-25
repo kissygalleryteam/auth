@@ -38,6 +38,8 @@ v1.5 测试中，请勿使用
     [+] [Rule]规则可以设置默认消息
     [+] [Rule]required组的处理
     [+] [Rule]required清理掉空格
+    [+] [Rule]max和min可以处理checkbox的情况
+    [+] [Rule]增加mobile、email、date、number支持
     [+] [Msg]兼容服务器返回的错误信息
     [+] [Msg]可以传自定义消息类进去
     [+] [Msg]可以自动生成消息层
