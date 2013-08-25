@@ -261,7 +261,7 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
                     _defer.resolve(aRule);
                     self.fire('success',{rules:aRule});
                 })
-                _emptyPromise.resolve();
+                _emptyDefer.resolve();
                 return _emptyPromise;
             }
             //校验开始

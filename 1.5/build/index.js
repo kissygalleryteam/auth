@@ -884,7 +884,7 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
                     _defer.resolve(aRule);
                     self.fire('success',{rules:aRule});
                 })
-                _emptyPromise.resolve();
+                _emptyDefer.resolve();
                 return _emptyPromise;
             }
             //校验开始
