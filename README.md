@@ -40,6 +40,7 @@ v1.5 测试中，请勿使用
     [+] [Msg]可以传自定义消息类进去
     [+] [Msg]可以自动生成消息层
     [+] [Msg]默认规则增加msg
+    [+] 增加对uploader的支持
     [-] 删除rule/base
     [-] 删除propertyRule
 

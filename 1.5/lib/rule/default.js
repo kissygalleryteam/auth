@@ -14,7 +14,7 @@ KISSY.add(function (S) {
          * @return {boolean}
          */
         required:function (value,attr,defer,field) {
-            this.msg('error','不可以为空！');
+            if(!this.msg('error')) this.msg('error','不可以为空！');
             var $target = this.get('target');
             var groupEls = ['radio','checkbox'];
             if(S.inArray($target.attr('type'),groupEls)){
@@ -42,7 +42,7 @@ KISSY.add(function (S) {
             if (!S.isNumber(value)) {
                 return false;
             }
-            this.msg('error','必须小于'+attr);
+            if(!this.msg('error')) this.msg('error','必须小于'+attr);
             return value <= attr;
         },
         /**
@@ -52,7 +52,7 @@ KISSY.add(function (S) {
             if (!S.isNumber(value)) {
                 return false;
             }
-            this.msg('error','必须大于'+attr);
+            if(!this.msg('error')) this.msg('error','必须大于'+attr);
             return value >= attr;
         },
         /**
