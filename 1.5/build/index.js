@@ -212,7 +212,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
                 })
                 return checked;
             }
-            return !!value;
+            return !!S.trim(value);
         },
         /**
          * 使用正则直接匹配
@@ -977,20 +977,24 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
         render:function () {
             var self = this;
             var $form = self.get('target');
+            if(!$form.length) return self;
             var forms = $form.getDOMNode().elements;
             if(!forms.length) return self;
 
             var autoBind = self.get('autoBind');
             S.each(forms, function (el) {
                 var $el = $(el);
+                var type = $el.attr('type');
                 //过滤不需要验证的表单元素
                 var filterTag = ['BUTTON'];
                 var tagName = el.tagName;
                 if(S.inArray(tagName,filterTag)) return true;
+                //排除掉提交按钮
+                if(type == 'submit') return true;
                 if(tagName == 'SELECT') $el.attr('type', 'select');
                 //如果是一组表单元素像radio，不需要多次实例化Field
                 var groupEls = ['radio','checkbox'];
-                if(S.inArray($el.attr('type'),groupEls)){
+                if(S.inArray(type,groupEls)){
                     if($el.data(DATA_FIELD)) return true;
                 }
                 //给Filed传递默认参数
@@ -1003,9 +1007,29 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
                 self.add(field);
             });
 
-            //如果是form模式，需要屏蔽html5本身的校验，放在最后是为了html5的校验能生效
+            //需要屏蔽html5本身的校验，放在最后是为了html5的校验能生效
             $form.attr('novalidate', 'novalidate');
 
+            self._submit();
+            return self;
+        },
+        /**
+         * 提交表单时触发验证
+         * @private
+         */
+        _submit:function(){
+            var self = this;
+            var submitTest = self.get('submitTest');
+            if(!submitTest) return self;
+            var $form = self.get('target');
+            $form.on('submit',function(ev){
+                ev.preventDefault();
+                self.test();
+            })
+            self.on('success',function(){
+                //提交表单
+                $form.getDOMNode().submit();
+            })
             return self;
         },
         /**
@@ -1075,24 +1099,11 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
          */
         validate:function (fields) {
             var self = this;
-
             self.fire('beforeTest');
-
             var result = true, currentField;
             var storages = self._storages;
             var stopOnError = self.get('stopOnError');
             var _defer = Auth._defer;
-            /*
-             S.each(fields, function (field, idx) {
-             var r = field.validate();
-             result = result && r;
-             currentField = field;
-
-             //stop on error
-             if (self.AuthConfig.stopOnError && !result) {
-             return false;
-             }
-             });*/
             var fields = [];
             S.each(storages,function(field){
                 fields.push(field);
@@ -1108,12 +1119,12 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
                     //单个field验证成功，继续验证下一个field
                     _testField(fields[i]);
                 }).fail(function(){
-                        //field验证失败
-                        //如果配置了stopOnError，将停止下一个Field的验证
-                        if(!stopOnError){
-                            _testField(fields[i]);
-                        }
-                    })
+                    //field验证失败
+                    //如果配置了stopOnError，将停止下一个Field的验证
+                    if(!stopOnError){
+                        _testField(fields[i]);
+                    }
+                })
             }
 
             PROMISE.then(function(){
@@ -1121,10 +1132,10 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
                 _defer.resolve(fields);
                 self.fire('success',{fields:fields});
             }).fail(function(rule){
-                    //验证失败
-                    _defer.reject(rule);
-                    self.fire('error',{rule:rule,field:rule.get('field')});
-                });
+                //验证失败
+                _defer.reject(rule);
+                self.fire('error',{rule:rule,field:rule.get('field')});
+            });
 
             self.set('result', result);
             return _defer.promise;
@@ -1156,7 +1167,11 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
             /**
              * 当发生错误时，是否停止下面的验证
              */
-            stopOnError:{value:false}
+            stopOnError:{value:false},
+            /**
+             * 提交表单前先触发验证
+             */
+            submitTest:{value:true}
         }
     });
 
@@ -1184,6 +1199,7 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
  *  - 异步验证支持
  *  - 增加msg配置
  *  - 过滤不需要的标签
+ *  - 增加submitTest配置
  * */
 /**
  * @fileoverview Form Auth For Kissy
