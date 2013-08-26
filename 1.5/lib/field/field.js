@@ -212,6 +212,14 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
             return this;
         },
         /**
+         * 获取指定规则
+         */
+        rule:function(name){
+            var self = this;
+            var rules = self.get('rules');
+            return rules[name];
+        },
+        /**
          * validate同名方法，触发字段验证
          * @param name
          * @return {Promise}
@@ -369,4 +377,5 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
  *  - add _groupTarget
  *  - 增加host属性
  *  - 将Field实例缓存到元素的data-field
+ *  - 增加rule方法
  * */

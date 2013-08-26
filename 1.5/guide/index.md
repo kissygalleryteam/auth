@@ -72,7 +72,7 @@ Auth的第一个参数为form目标元素。
 
 ##默认规则
 
-Auth默认集成了最初级的验证规则：
+Auth默认集成了常用的验证规则，直接配置在表单元素的属性上：
 
 规则名 | 用途|用法举例
 ------------ | -------------| -------------
@@ -80,15 +80,79 @@ required | 值必须存在（兼容radio/checkbox/select的处理）| required r
 pattern | 配置一个正则对值进行验证| pattern="s$" pattern-msg="email错误！"
 max | 最大值校验（兼容checkbox的处理）| max="3" max-msg="最多选择3项！"
 min | 最小值校验（兼容checkbox的处理）| min="3" min-msg="最小选择3项！"
-equalTo | value是否等于配置的值 | equalTo="明河" equalTo-msg="请填写明河！"
+equal | value是否等于配置的值 | equalTo="明河" equalTo-msg="请填写明河！"
+equal-field | 校验二个字段的值是否相同 | equal-field="password" equal-field-msg="密码输入不一致！"
+number | 是否是数字  | number number-msg="必须是数字"
 mobile | 是否符合手机号码格式 | mobile mobile-msg="手机号码不合法！"
 email | 是否符合email格式  |
 date | 是否符合日期格式 |
-number | 是否是数字  |
+
+##验证消息控制
+
+每个Field对应一个Msg。
+
+请看demo：<a href="http://gallery.kissyui.com/auth/1.5/demo/msg.html" target="_blank">字段上消息的控制</a>。
+
+###指定消息层容器
+
+组件默认会在表单元素后面插入个消息容器：
+
+    <div class="msg-wrapper"></div>
+
+想要自己指定消息层容器，通过配置msg-wrapper属性：
+
+    <input type="text" class="input-xlarge" id="user" msg-wrapper="#J_UseMsg">
+    <div id="J_UseMsg"></div>
+
+msg-wrapper的值为容器钩子。
+
+###服务器默认输出了错误消息时的处理
+
+请看demo：<a href="http://gallery.kissyui.com/auth/1.5/demo/server_msg.html" target="_blank">字段上消息的控制</a>。
+
+    <input type="text" class="input-xlarge" id="user" msg-wrapper="#J_UseMsg" >
+    <div id="J_UseMsg">
+        <!--这里是服务器输出的错误消息 auth-msg样式名必须存在-->
+        <p class="auth-msg auth-error">用户名不可以为空！</p>
+    </div>
+
+组件会自动处理这种场景，不会出现怪异的二个提示层。
+
+###获取消息实例
+
+    //auth为Auth实例
+    //获取name为user的字段
+    var userField = auth.field('user');
+    //获取消息实例
+    var msg = userField.get('msg');
 
 
+###显示消息
 
-##规则消息配置
+    msg.show('warn','用户名不可以为空！');
+
+生成的层结构：
+
+    <p class="auth-msg auth-warn">用户名不可以为空！</p>
+
+warn变成样式名auth-warn，根据场景可以随意配置。
+
+##修改消息内容
+
+可以手动修改规则对应的消息内容：
+
+    var userField = auth.field('user');
+    var requiredRule = userField.rule('required');
+    requiredRule.set('error','用户名必须是明河');
+    requiredRule.set('success','校验通过');
+
+###隐藏消息
+
+    msg.hide();
+
+###控制动画速度
+
+    msg.set('speed',0.8);
 
 ##注册自定义规则
 

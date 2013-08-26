@@ -33,14 +33,14 @@ KISSY.add(function (S, Base,Node,XTemplate) {
                 var rule = ev.rule;
                 var msg = rule.msg('error');
                 var style = 'error';
-                self.show({style:style,msg:msg});
+                self.show(style,msg);
             })
             host.on('success',function(ev){
                 var msg = ev.msg;
                 var style = ev.style;
                 if(msg || style){
                     style = ev.style || 'success';
-                    self.show({style:style,msg:msg});
+                    self.show(style,msg);
                 }else{
                     self.hide();
                 }
@@ -58,12 +58,16 @@ KISSY.add(function (S, Base,Node,XTemplate) {
         },
         /**
          * 显示消息层
-         * @param data
+         * @param status 比如error
+         * @param msg 比如用户名不可以为空
+         * @return {*}
          */
-        show:function (data) {
+        show:function (status,msg) {
             var self = this;
+            if(!S.isString(status) || !S.isString(msg)) return self;
             var $wrapper = self.get('wrapper');
             S.buffer(function () {
+                var data = {style:status,msg:msg};
                 self._create(data);
                 $wrapper.slideDown(self.get('speed'));
             }, 50)();

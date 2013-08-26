@@ -412,14 +412,14 @@ KISSY.add('gallery/auth/1.5/lib/msg/base',function (S, Base,Node,XTemplate) {
                 var rule = ev.rule;
                 var msg = rule.msg('error');
                 var style = 'error';
-                self.show({style:style,msg:msg});
+                self.show(style,msg);
             })
             host.on('success',function(ev){
                 var msg = ev.msg;
                 var style = ev.style;
                 if(msg || style){
                     style = ev.style || 'success';
-                    self.show({style:style,msg:msg});
+                    self.show(style,msg);
                 }else{
                     self.hide();
                 }
@@ -437,12 +437,16 @@ KISSY.add('gallery/auth/1.5/lib/msg/base',function (S, Base,Node,XTemplate) {
         },
         /**
          * 显示消息层
-         * @param data
+         * @param status 比如error
+         * @param msg 比如用户名不可以为空
+         * @return {*}
          */
-        show:function (data) {
+        show:function (status,msg) {
             var self = this;
+            if(!S.isString(status) || !S.isString(msg)) return self;
             var $wrapper = self.get('wrapper');
             S.buffer(function () {
+                var data = {style:status,msg:msg};
                 self._create(data);
                 $wrapper.slideDown(self.get('speed'));
             }, 50)();
@@ -835,6 +839,14 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
             return this;
         },
         /**
+         * 获取指定规则
+         */
+        rule:function(name){
+            var self = this;
+            var rules = self.get('rules');
+            return rules[name];
+        },
+        /**
          * validate同名方法，触发字段验证
          * @param name
          * @return {Promise}
@@ -992,6 +1004,7 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
  *  - add _groupTarget
  *  - 增加host属性
  *  - 将Field实例缓存到元素的data-field
+ *  - 增加rule方法
  * */
 /**
  * @fileoverview 表单验证类

@@ -17,11 +17,13 @@ v1.5 测试中，请勿使用
     [!] [Field] validate()方法去掉cfg参数，多个规则逗号隔开
     [!] [Field] 遍历时排除button元素
     [!] [Rule] 重构
+    [!] [Rule]equalTo改成equal
     [!] [ruleFactory] 颠倒规则函数的value和pv
     [!] [ruleFactory] 不再区分html规则和自定义规则
     [!] [ruleFactory] 默认规则提取成default.js
     [!] [Msg] 重构
     [!] [Msg] msg传递方式优化
+    [!] [Msg] show()方法改变
     [!] 去掉多余无用的样式，使用stylus改写
     [!] [Field]修正不存在验证规则时报错的bug
 
@@ -48,6 +50,7 @@ v1.5 测试中，请勿使用
     [+] [Filed]新增host属性
     [+] [Filed]将Field实例缓存到元素的data-field
     [+] [Filed]增加name属性
+    [+] [Filed]增加rule方法
 
     [+] [ruleFactory] 支持批量添加验证规则
     [+] [Rule]规则可以设置默认消息
@@ -55,6 +58,7 @@ v1.5 测试中，请勿使用
     [+] [Rule]required清理掉空格
     [+] [Rule]max和min可以处理checkbox的情况
     [+] [Rule]增加mobile、email、date、number支持
+    [+] [Rule]新增equal-field规则
 
     [+] [Msg]兼容服务器返回的错误信息
     [+] [Msg]可以传自定义消息类进去
