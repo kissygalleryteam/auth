@@ -113,7 +113,7 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
                     name: key
                 };
                 S.mix(filedConfig,config);
-                authField = self._storages[key] = new Field(el, config);
+                authField = self._storages[key] = new Field(el, filedConfig);
             }
 
             return authField;

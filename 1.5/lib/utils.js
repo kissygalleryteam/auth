@@ -31,10 +31,10 @@ KISSY.add(function (S, DOM, undefined) {
                     break;
                 case "select-multiple":
                 case "radio":
-                    event='click';
+                    event='click change';
                     break;
                 case "checkbox":
-                    event='click';
+                    event='click change';
                     break;
                 default:
                     event = 'blur';
