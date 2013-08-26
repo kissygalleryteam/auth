@@ -582,10 +582,10 @@ KISSY.add('gallery/auth/1.5/lib/utils',function (S, DOM, undefined) {
                     break;
                 case "select-multiple":
                 case "radio":
-                    event='click';
+                    event='click change';
                     break;
                 case "checkbox":
-                    event='click';
+                    event='click change';
                     break;
                 default:
                     event = 'blur';
@@ -756,7 +756,6 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
             var self = this;
             var $target = self.get('target');
             if(!$target.length) return false;
-            if($target.attr('type') == 'select') v = v + ' change';
             $target.on(v,function(){
                 //增加个延迟，确保原生表单改变完成
                 S.later(function(){
@@ -865,12 +864,11 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
                     aRule.push(oRule)
                 })
             }
-
             //排除指定的规则
             var exclude = self.get('exclude');
             if(exclude != ''){
                 var aExclude = exclude.split(',');
-                S.filter(aRule,function(rule){
+                aRule = S.filter(aRule,function(rule){
                     return !S.inArray(rule.get('name'),aExclude);
                 })
             }
@@ -1110,7 +1108,7 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
                     name: key
                 };
                 S.mix(filedConfig,config);
-                authField = self._storages[key] = new Field(el, config);
+                authField = self._storages[key] = new Field(el, filedConfig);
             }
 
             return authField;
