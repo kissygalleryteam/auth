@@ -135,6 +135,26 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
             return name;
         },
         /**
+         * 获取Field的目标元素
+         * @param fieldName 字段名称
+         * @return {*}
+         */
+        fieldTarget:function(fieldName){
+            if(!fieldName) return false;
+            var self = this;
+            var field = self.field(fieldName);
+            if(!field) return false;
+            return field.get('target');
+        },
+        /**
+         * getField的别名方法
+         * @param name
+         * @return {}
+         */
+        field:function(name){
+            return this.getField(name);
+        },
+        /**
          * 根据key返回field对象
          * @param name
          * @return {Field}
@@ -303,4 +323,6 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
  *  - 增加msg配置
  *  - 过滤不需要的标签
  *  - 增加submitTest配置
+ *  - 增加fieldTarget方法
+ *  - 增加field方法
  * */
