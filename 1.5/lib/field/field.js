@@ -247,7 +247,7 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
             var exclude = self.get('exclude');
             if(exclude != ''){
                 var aExclude = exclude.split(',');
-                S.filter(aRule,function(rule){
+                aRule = S.filter(aRule,function(rule){
                     return !S.inArray(rule.get('name'),aExclude);
                 })
             }
