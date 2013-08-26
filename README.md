@@ -39,6 +39,8 @@ v1.5 测试中，请勿使用
     [+] [auth]test()支持指定需要验证的字段，比如test("user,email")
     [+] [auth]增加fieldTarget方法
     [+] [auth]增加field方法
+    [+] [auth]增加success、error事件
+    [+] [auth]error事件广播出出错的fields
 
     [+] [Field]增加success、error、beforeTest事件
     [+] [Filed]新增rules属性，用于获取所有的规则

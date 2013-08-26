@@ -1130,6 +1130,26 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
             return name;
         },
         /**
+         * 获取Field的目标元素
+         * @param fieldName 字段名称
+         * @return {*}
+         */
+        fieldTarget:function(fieldName){
+            if(!fieldName) return false;
+            var self = this;
+            var field = self.field(fieldName);
+            if(!field) return false;
+            return field.get('target');
+        },
+        /**
+         * getField的别名方法
+         * @param name
+         * @return {}
+         */
+        field:function(name){
+            return this.getField(name);
+        },
+        /**
          * 根据key返回field对象
          * @param name
          * @return {Field}
@@ -1169,6 +1189,7 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
             fields = self._filterFields(fields);
             var i = 0;
             var PROMISE;
+            var errorFields = [];
             _testField(fields[i]);
             function _testField(field){
                 if(i >= fields.length) return PROMISE;
@@ -1177,23 +1198,27 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
                 PROMISE.then(function(){
                     //单个field验证成功，继续验证下一个field
                     _testField(fields[i]);
-                }).fail(function(){
+                }).fail(function(rule){
                     //field验证失败
                     //如果配置了stopOnError，将停止下一个Field的验证
                     if(!stopOnError){
                         _testField(fields[i]);
                     }
+                    errorFields.push(rule.get('field'));
                 })
             }
-
+            //最后一个Field的PROMISE（说明所有的Field都验证了一遍）
             PROMISE.then(function(){
-                //所有filed验证通过
-                _defer.resolve(fields);
-                self.fire('success',{fields:fields});
-            }).fail(function(rule){
-                //验证失败
-                _defer.reject(rule);
-                self.fire('error',{rule:rule,field:rule.get('field')});
+                if(!errorFields.length){
+                    debugger;
+                    //所有filed验证通过
+                    //_defer.resolve(fields);
+                    //self.fire('success',{fields:fields});
+                }
+            }).fail(function(){
+                //有一个Field验证失败，就可以派发auth的失败事件
+                _defer.reject(errorFields);
+                self.fire('error',{field:errorFields});
             });
             return _defer.promise;
         },
@@ -1298,6 +1323,8 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
  *  - 增加msg配置
  *  - 过滤不需要的标签
  *  - 增加submitTest配置
+ *  - 增加fieldTarget方法
+ *  - 增加field方法
  * */
 /**
  * @fileoverview Form Auth For Kissy

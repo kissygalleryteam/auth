@@ -194,6 +194,7 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
             fields = self._filterFields(fields);
             var i = 0;
             var PROMISE;
+            var errorFields = [];
             _testField(fields[i]);
             function _testField(field){
                 if(i >= fields.length) return PROMISE;
@@ -202,23 +203,27 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
                 PROMISE.then(function(){
                     //单个field验证成功，继续验证下一个field
                     _testField(fields[i]);
-                }).fail(function(){
+                }).fail(function(rule){
                     //field验证失败
                     //如果配置了stopOnError，将停止下一个Field的验证
                     if(!stopOnError){
                         _testField(fields[i]);
                     }
+                    errorFields.push(rule.get('field'));
                 })
             }
-
+            //最后一个Field的PROMISE（说明所有的Field都验证了一遍）
             PROMISE.then(function(){
-                //所有filed验证通过
-                _defer.resolve(fields);
-                self.fire('success',{fields:fields});
-            }).fail(function(rule){
-                //验证失败
-                _defer.reject(rule);
-                self.fire('error',{rule:rule,field:rule.get('field')});
+                if(!errorFields.length){
+                    debugger;
+                    //所有filed验证通过
+                    //_defer.resolve(fields);
+                    //self.fire('success',{fields:fields});
+                }
+            }).fail(function(){
+                //有一个Field验证失败，就可以派发auth的失败事件
+                _defer.reject(errorFields);
+                self.fire('error',{field:errorFields});
             });
             return _defer.promise;
         },
