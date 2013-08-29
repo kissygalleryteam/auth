@@ -27,7 +27,7 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
         var allRules = Factory.rules;
         var rules = {};
         S.each(allRules, function (rule,ruleName) {
-            if ($field.attr(ruleName)) {
+            if ($field.attr(ruleName) !== undefined) {
                 rules[ruleName] = {
                     msg:{
                         error:$field.attr(ruleName + '-msg'),

@@ -654,7 +654,7 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
         var allRules = Factory.rules;
         var rules = {};
         S.each(allRules, function (rule,ruleName) {
-            if ($field.attr(ruleName)) {
+            if ($field.attr(ruleName) !== undefined) {
                 rules[ruleName] = {
                     msg:{
                         error:$field.attr(ruleName + '-msg'),
@@ -1195,14 +1195,25 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
          */
         validate:function (fields) {
             var self = this;
-            self.fire('beforeTest');
             var stopOnError = self.get('stopOnError');
             var _defer = Auth._defer;
             //获取需要验证的字段
             fields = self._filterFields(fields);
+            //不存在需要验证的规则，直接投递成功消息
+            if(!fields.length){
+                var _emptyDefer = new Promise.Defer();
+                var _emptyPromise = _emptyDefer.promise;
+                _emptyPromise.then(function(){
+                    _defer.resolve(fields);
+                    self.fire('success',{fields:fields});
+                })
+                _emptyDefer.resolve();
+                return _emptyPromise;
+            }
             var i = 0;
             var PROMISE;
             var errorFields = [];
+            self.fire('beforeTest',{fields:fields});
             _testField(fields[i]);
             function _testField(field){
                 if(i >= fields.length) return PROMISE;
