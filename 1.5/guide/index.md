@@ -216,12 +216,18 @@ Auth的独特之处在于使用promise模式，保证验证的规则能够排序
 * 返回值必须是*defer.promise*
 * 异步加载成功后，如果校验成功调用下*defer.resolve(self)*，校验失败调用下*defer.reject(self)*。
 
-##验证事件绑定控制
+##验证事件
+
 
 ##自由控制Field的配置
 
 
 ##与uploader配合使用
+
+如果你的表单包含有[uploader]()异步上传组件，[demo传送门](http://gallery.kissyui.com/auth/1.5/demo/rule_msg.html)。
+
+由于uploader的初始化代码比较多，就全部贴出来了。
+
 
 ##与butterfly配合使用
 
