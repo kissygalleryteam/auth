@@ -215,10 +215,9 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
             //最后一个Field的PROMISE（说明所有的Field都验证了一遍）
             PROMISE.then(function(){
                 if(!errorFields.length){
-                    debugger;
                     //所有filed验证通过
-                    //_defer.resolve(fields);
-                    //self.fire('success',{fields:fields});
+                    _defer.resolve(fields);
+                    self.fire('success',{fields:fields});
                 }
             }).fail(function(){
                 //有一个Field验证失败，就可以派发auth的失败事件

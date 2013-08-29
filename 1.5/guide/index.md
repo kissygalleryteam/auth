@@ -108,7 +108,7 @@ msg-wrapper的值为容器钩子。
 
 ###服务器默认输出了错误消息时的处理
 
-请看demo：<a href="http://gallery.kissyui.com/auth/1.5/demo/server_msg.html" target="_blank">字段上消息的控制</a>。
+请看demo：<a href="http://gallery.kissyui.com/auth/1.5/demo/server_msg.html" target="_blank">配合服务器输出的消息</a>。
 
     <input type="text" class="input-xlarge" id="user" msg-wrapper="#J_UseMsg" >
     <div id="J_UseMsg">
@@ -137,7 +137,7 @@ msg-wrapper的值为容器钩子。
 
 warn变成样式名auth-warn，根据场景可以随意配置。
 
-##修改消息内容
+###修改消息内容
 
 可以手动修改规则对应的消息内容：
 
