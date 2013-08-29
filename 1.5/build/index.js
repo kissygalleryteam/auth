@@ -301,7 +301,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
          */
         mobile:function(value){
             if(!this.msg('error')) this.msg('error','手机号码格式不合法');
-            return /^(13|15)[0-9]{9}$/.test(S.trim(value));
+            return /^0?\d{11}$/.test(S.trim(value));
         },
         /**
          * 是否符合日期格式
