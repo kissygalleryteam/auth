@@ -156,11 +156,70 @@ warn变成样式名auth-warn，根据场景可以随意配置。
 
 ##注册自定义规则
 
+[demo传送门](http://gallery.kissyui.com/auth/1.5/demo/add_custom_rule.html)
+
+使用*auth.register(ruleName,function)* 注册一个自定义规则。
+
+*ruleName*: 规则名称
+*ruleFunction*: 规则函数，有有二个核心参数，*value*为被验证元素的值，*attr*为html tag中配置的属性值。
+
+    auth.register('min-len', function (value,attr) {
+       var min = Number(attr);
+       this.msg('error','请您输入至少'+min+'个字符');
+       return value.length >= Number(attr);
+    });
+
+ruleFunction的this上下文指向对应的Rule实例，比如你要设置rule的错误消息：
+
+    this.msg('error','挺爷，vmarket报错了~');
+
+ruleFunction必须有个返回值，同步校验（区别于异步校验）返回的是Boolean值。
+
+有时你还希望获取到Field实例，调用其*test()*方法：
+
+    var field = this.get('field');
+
+### html tag中的配置
+
+    <input type="text" class="input-xlarge" min-len="5">
+
+您也可以在tag上配置错误消息：*min-len-msg="出错了"*，html上配置的消息会覆盖ruleFunction上配置的error消息。
+
+##异步验证的处理
+
+[demo传送门](http://gallery.kissyui.com/auth/1.5/demo/asyn_test.html)
+
+这是Auth的亮点，与市面上任何一款表单验证组件都不同。
+
+    auth.register('user', function (value,attr,defer,field) {
+        var self = this;
+        io.get("./user_success.json",'json').then(function(result){
+            var data = result[0];
+            //用户名
+            var name = data.name;
+            if(name == 'minghe'){
+                //验证成功，传送数据
+                defer.resolve(self);
+            }else{
+                //验证失败，一样传送数据
+                defer.reject(self);
+            }
+        });
+        //特别注意：不同于同步校验，这里返回promise
+        return defer.promise;
+    });
+
+Auth的独特之处在于使用promise模式，保证验证的规则能够排序执行。
+
+*ruleFunction*有第三个参数：*defer* （[Promise.Defer]()的实例），在ruleFunction中，你可以自由的写异步处理逻辑，需要注意的知识二点：
+
+* 返回值必须是*defer.promise*
+* 异步加载成功后，如果校验成功调用下*defer.resolve(self)*，校验失败调用下*defer.reject(self)*。
+
 ##验证事件绑定控制
 
 ##自由控制Field的配置
 
-##异步验证的处理
 
 ##与uploader配合使用
 
