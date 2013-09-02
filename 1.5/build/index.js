@@ -709,8 +709,7 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
 
         Field.superclass.constructor.call(self,config);
 
-        self._init();
-        return self;
+        return self._init();
     }
 
 
@@ -722,6 +721,11 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
         _init:function () {
             var self = this;
             var _cfg = self._cfg;
+            var $target = self.get('target');
+            //已经存在Field实例，直接返回该实例
+            if($target.data(DATA_FIELD)){
+                return $target.data(DATA_FIELD);
+            }
             var _ruleCfg = S.merge({}, _cfg.rules);
             self._groupTarget();
             self._renderMsg();
@@ -730,11 +734,10 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
                     self._createRule(name,ruleCfg);
                 }
             });
-            var $target = self.get('target');
             $target.data(DATA_FIELD,self);
             var target = $target.getDOMNode();
-            self._targetBind(_cfg.event || Utils.getEvent(target))
-
+            self._targetBind(_cfg.event || Utils.getEvent(target));
+            return self;
         },
         /**
          * radio/checkedbox是一组表单元素
@@ -745,8 +748,14 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
             var self = this;
             var $target = self.get('target');
             if (S.inArray($target.attr('type'), ['checkbox','radio'])) {
-                var elName = $target.attr('name');
-                $target = $(document.getElementsByName(elName));
+                var form = $target.getDOMNode().form, elName = $target.attr('name');
+                var els = [];
+                S.each(document.getElementsByName(elName), function(item) {
+                    if (item.form == form) {
+                        els.push(item);
+                    }
+                });
+                $target = $(els);
                 self.set('target', $target);
             }
             return $target;
@@ -1241,7 +1250,7 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
             }).fail(function(){
                 //有一个Field验证失败，就可以派发auth的失败事件
                 _defer.reject(errorFields);
-                self.fire('error',{field:errorFields});
+                self.fire('error',{fields:errorFields});
             });
             return _defer.promise;
         },

@@ -4,7 +4,7 @@ Auth是灵活且强大的表单验证组件，支持异步校验，支持与异�
 
 作者：张挺（V1.4）| 明河（V1.5+）
 
-v1.5还在测试和编写文档中，请先看旧版[v1.4](http://gallery.kissyui.com/auth/1.4/guide/index.html) 。
+v1.5beta发布，欢迎试用反馈bug~~~
 
 ##demo汇总
 
@@ -218,6 +218,10 @@ Auth的独特之处在于使用promise模式，保证验证的规则能够排序
 
 ##验证事件
 
+Auth实例的事件
+
+auth.on('success')
+
 
 ##自由控制Field的配置
 
@@ -226,7 +230,37 @@ Auth的独特之处在于使用promise模式，保证验证的规则能够排序
 
 如果你的表单包含有[uploader]()异步上传组件，[demo传送门](http://gallery.kissyui.com/auth/1.5/demo/rule_msg.html)。
 
-由于uploader的初始化代码比较多，就全部贴出来了。
+由于uploader的初始化代码比较多，就不全部贴出来了。
+
+Uploader（异步上传组件），需要个hidden来存储服务器返回的url，Auth进行校验时只要对这个hidden进行校验即可。
+
+Uploader自带了格式、数量等验证，一般只需验证required，有特殊验证需求可以注册个自定义规则。
+
+    <input type="file" class="g-u" id="J_UploaderBtn" value="上传文件" name="Filedata" >
+    <input type="hidden" id="J_Urls" name="urls" value="http://test.jpg" required required-msg="必须上传一个文件！"/>
+
+来看个场景：必须上传二个文件
+
+    auth.register('uploader-limit',function(value,attr){
+        var limit = Number(attr);
+        var queue = uploader.get('queue');
+        var count = queue.get('files').length;
+        return count == limit;
+    })
+
+（ps：uploader为Uploader实例）
+
+验证配置如下：
+
+    <input type="hidden" id="J_Urls" name="urls" value="http://test.jpg" uploader-limit="2" uploader-limit-msg="必须只能上传二个文件！" />
+
+还必须监听Uploader的事件，触发验证。
+
+    uploader.on("success add",function(){
+        //触发hidden的验证
+        var urlHidden = auth.getField('J_Urls');
+        urlHidden.test();
+    })
 
 
 ##与butterfly配合使用
