@@ -323,9 +323,11 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
                     var target = $(v);
                     var self = this;
                     var rules = self.get('rules');
-                    S.each(rules,function(rule){
-                        rule.set('target',target);
-                    });
+                    if(!S.isEmptyObject(rules)){
+                        S.each(rules,function(rule){
+                            if(rule.set) rule.set('target',target);
+                        });
+                    }
                     return target;
                 }
             },

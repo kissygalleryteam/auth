@@ -950,9 +950,11 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
                     var target = $(v);
                     var self = this;
                     var rules = self.get('rules');
-                    S.each(rules,function(rule){
-                        rule.set('target',target);
-                    });
+                    if(!S.isEmptyObject(rules)){
+                        S.each(rules,function(rule){
+                            if(rule.set) rule.set('target',target);
+                        });
+                    }
                     return target;
                 }
             },
