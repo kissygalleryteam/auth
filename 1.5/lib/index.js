@@ -312,11 +312,7 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
             /**
              * 提交表单前先触发验证
              */
-            submitTest:{value:true},
-            /**
-             * 如果表单元素的display:none，不需要验证
-             */
-            hiddenTest:{value:false}
+            submitTest:{value:true}
         }
     });
 

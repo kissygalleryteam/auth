@@ -269,7 +269,7 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
             //隐藏的元素不需要触发校验
             if(!self.get('hiddenTest')){
                 var target = self.get('target');
-                if(target.css('display') == 'none') aRule = [];
+                if(target.attr('disabled')) aRule = [];
             }
             var _defer = Field._defer;
             var PROMISE;
@@ -373,9 +373,9 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
              */
             msg:{value:''},
             /**
-             * 如果表单元素的display:none，不需要验证
+             * 如果表单元素的disabled时，不需要验证
              */
-            hiddenTest:{value:false}
+            disabledTest:{value:false}
         }
     });
 
