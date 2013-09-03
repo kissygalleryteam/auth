@@ -944,6 +944,16 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
                 value:'',
                 getter:function(v){
                     return $(v);
+                },
+                setter:function(v){
+                    //重新设置target，需要设置rule的target
+                    var target = $(v);
+                    var self = this;
+                    var rules = self.get('rules');
+                    S.each(rules,function(rule){
+                        rule.set('target',target);
+                    });
+                    return target;
                 }
             },
             /**
