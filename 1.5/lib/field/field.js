@@ -266,6 +266,11 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
                     return !S.inArray(rule.get('name'),aExclude);
                 })
             }
+            //隐藏的元素不需要触发校验
+            if(!self.get('hiddenTest')){
+                var target = self.get('target');
+                if(target.css('display') == 'none') aRule = [];
+            }
             var _defer = Field._defer;
             var PROMISE;
             //不存在需要验证的规则，直接投递成功消息
@@ -366,7 +371,11 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
              * 验证消息类实例
              * @type {Object}
              */
-            msg:{value:''}
+            msg:{value:''},
+            /**
+             * 如果表单元素的display:none，不需要验证
+             */
+            hiddenTest:{value:false}
         }
     });
 

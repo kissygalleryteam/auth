@@ -893,6 +893,11 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
                     return !S.inArray(rule.get('name'),aExclude);
                 })
             }
+            //隐藏的元素不需要触发校验
+            if(!self.get('hiddenTest')){
+                var target = self.get('target');
+                if(target.css('display') == 'none') aRule = [];
+            }
             var _defer = Field._defer;
             var PROMISE;
             //不存在需要验证的规则，直接投递成功消息
@@ -993,7 +998,11 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
              * 验证消息类实例
              * @type {Object}
              */
-            msg:{value:''}
+            msg:{value:''},
+            /**
+             * 如果表单元素的display:none，不需要验证
+             */
+            hiddenTest:{value:false}
         }
     });
 
@@ -1153,14 +1162,17 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
          * @return {String}
          */
         getName:function ($el) {
+            if (!$el || !$el.length) return '';
             var self = this;
-            var name = Utils.guid();
-            if (!$el || !$el.length) return name;
+            var guid = Utils.guid();
             //强制使用id作为name值
             var useId = self.get('useId');
-            var id = $el.attr('id');
-            name =  $el.attr('name') || id;
-            if(useId) name = id;
+            var name;
+            if(useId){
+                name = $el.attr('id') || $el.attr('name') || guid;
+            }else{
+                name = $el.attr('name') || $el.attr('id') || guid;
+            }
             return name;
         },
         /**
@@ -1338,7 +1350,11 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
             /**
              * 提交表单前先触发验证
              */
-            submitTest:{value:true}
+            submitTest:{value:true},
+            /**
+             * 如果表单元素的display:none，不需要验证
+             */
+            hiddenTest:{value:false}
         }
     });
 

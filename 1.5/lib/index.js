@@ -124,14 +124,17 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
          * @return {String}
          */
         getName:function ($el) {
+            if (!$el || !$el.length) return '';
             var self = this;
-            var name = Utils.guid();
-            if (!$el || !$el.length) return name;
+            var guid = Utils.guid();
             //强制使用id作为name值
             var useId = self.get('useId');
-            var id = $el.attr('id');
-            name =  $el.attr('name') || id;
-            if(useId) name = id;
+            var name;
+            if(useId){
+                name = $el.attr('id') || $el.attr('name') || guid;
+            }else{
+                name = $el.attr('name') || $el.attr('id') || guid;
+            }
             return name;
         },
         /**
@@ -309,7 +312,11 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
             /**
              * 提交表单前先触发验证
              */
-            submitTest:{value:true}
+            submitTest:{value:true},
+            /**
+             * 如果表单元素的display:none，不需要验证
+             */
+            hiddenTest:{value:false}
         }
     });
 
