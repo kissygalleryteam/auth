@@ -16,6 +16,9 @@
             <input type="text" class="input-xlarge" id="user" required>
         </div>
     </div>
+    <div class="form-actions">
+        <input class="ks-button ks-button-primary ks-button-shown" type="submit" value="提交">
+    </div>
 </form>
 
 
@@ -58,9 +61,18 @@
         var user = auth.getField('user');
         user.on('beforeTest',function(ev){
             var rules = ev.rules;
+            S.log('user字段验证的规则：');
+            S.log(rules);
         })
         user.on('success',function(ev){
-
+            var rules = ev.rules;
+            S.log('user字段验证成功：');
+            S.log(rules);
+        })
+        user.on('error',function(ev){
+            var rule = ev.rule;
+            S.log('出错的规则是：');
+            S.log(rule);
         })
     })
 </script>

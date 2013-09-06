@@ -211,17 +211,73 @@ ruleFunction必须有个返回值，同步校验（区别于异步校验）返�
 
 Auth的独特之处在于使用promise模式，保证验证的规则能够排序执行。
 
-*ruleFunction*有第三个参数：*defer* （[Promise.Defer]()的实例），在ruleFunction中，你可以自由的写异步处理逻辑，需要注意的知识二点：
+*ruleFunction*有第三个参数：*defer* （[Promise.Defer](http://docs.kissyui.com/docs/html/api/component/promise/defer.html)的实例），在ruleFunction中，你可以自由的写异步处理逻辑，需要注意的知识二点：
 
 * 返回值必须是*defer.promise*
 * 异步加载成功后，如果校验成功调用下*defer.resolve(self)*，校验失败调用下*defer.reject(self)*。
 
-##验证事件
+## 验证事件
 
-Auth实例的事件
+[demo传送门](http://gallery.kissyui.com/auth/1.5/demo/event.html)
 
-auth.on('success')
+Auth和Field的验证事件相同，都有：beforeTest（校验前）、success（校验通过）、error（校验失败）事件，但事件的参数有所差异。
 
+先初始化了auth：
+
+    var auth = new Auth('#J_Auth');
+    auth.render();
+
+### Auth的*beforeTest*演示
+
+    auth.on('beforeTest',function(ev){
+        var fields = ev.fields;
+        S.log('验证的字段有：');
+        S.log(fields);
+    })
+
+*fields*：保存着需要校验的字段数组
+
+### Auth的*success*演示
+
+    auth.on("success",function(){
+        S.log('全部验证通过');
+    })
+
+参数*fields*：保存着所有触发校验的字段数组
+
+### Auth的*error*演示
+
+    auth.on('error',function(ev){
+        var fields = ev.fields;
+        S.log('出错的字段是：');
+        S.log(fields);
+    })
+
+参数*fields*：保存着所有出错的字段数组
+
+### 来看下Field的三个事件
+
+先获取个Field
+
+    var user = auth.getField('user');
+
+留意事件参数值的差异：Field的值为Rule规则实例。
+
+    user.on('beforeTest',function(ev){
+        var rules = ev.rules;
+        S.log('user字段验证的规则：');
+        S.log(rules);
+    })
+    user.on('success',function(ev){
+        var rules = ev.rules;
+        S.log('user字段验证成功：');
+        S.log(rules);
+    })
+    user.on('error',function(ev){
+        var rule = ev.rule;
+        S.log('出错的规则是：');
+        S.log(rule);
+    })
 
 ##自由控制Field的配置
 
