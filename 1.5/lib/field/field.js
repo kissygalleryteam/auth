@@ -202,9 +202,7 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
             if (rule instanceof Rule) {
                 _storage[name] = rule;
             } else if(S.isFunction(rule)) {
-                _storage[name] = new Rule(name, rule, {
-                    el:self._el
-                });
+                _storage[name] = new Rule(name, rule);
             }
             self.set('rules',_storage);
             return self;
@@ -311,10 +309,6 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
         }
     }, {
         ATTRS:{
-            message:{
-                value:EMPTY
-            },
-            result:{},
             /**
              * 目标元素
              */

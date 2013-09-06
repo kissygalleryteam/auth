@@ -2,6 +2,10 @@
 
 Auth是灵活且强大的表单验证组件，支持异步校验，支持与异步上传组件配合使用。
 
+表单的业务场景往往非常复杂，只有灵活的表单校验组件才能满足，而Auth在灵活性上无与伦比，超越其他任何校验组件。
+
+（明河：Auth是最好的表单校验组件，使用它，您不会后悔。）
+
 作者：张挺（V1.4）| 明河（V1.5+）
 
 v1.5beta发布，欢迎试用反馈bug~~~
@@ -279,7 +283,74 @@ Auth和Field的验证事件相同，都有：beforeTest（校验前）、success
         S.log(rule);
     })
 
-##自由控制Field的配置
+##Field字段API详解
+
+### Field所有的属性说明
+
+属性名 | 类型|只读|默认值|说明
+------------ | -------------| -------------| -------------| -------------
+name | String|Y|""| 字段名称
+rules | Object|Y|{}| 字段上绑定的所有规则
+rules | Object|Y|{}| 字段上绑定的所有规则
+host | Auth|Y|""| Auth的实例
+msg | Msg|N|""| 消息实例，可以覆写自定义的消息类实例
+exclude | String|N|""| 验证时排除的规则，后面有详细演示
+disabledTest | Boolean|N|false|  如果表单元素的disabled时，跳过验证，设置为true时，disabled的元素字段也会触发校验
+event | String|N|""|  给元素绑定指定的事件用于触发校验，比如*user.set('event','blur')*
+target | NodeList|N|""| target指向Field对应的表单元素，target是可以被改写的
+
+
+### 通过元素获取Filed实例
+
+    <input type="text" name="user" id="J_User" required>
+
+    var field = KISSY.one('#J_User').data('data-field');
+
+*data-field*：当Field实例化时会把实例缓存到表单元素上。
+
+### 如何不触发字段校验
+
+业务场景：有个input隐藏了，我们不希望触发这个input的校验。
+
+最简单方法：
+
+    <input type="text" name="user" required disabled>
+
+设置input的disabled属性，Auth校验时会自动跳过这个字段。
+
+高端方法：使用exclude属性排除该字段方法
+
+### exclude属性的妙用
+
+    var user = auth.field('user');
+    user.set('exclude','required');
+
+校验时，排除required规则，如果要排除多个规则：*user.set('exclude','required,max')*。
+
+不希望排除规则：*user.set('exclude','')*。
+
+### then()与fail()
+
+
+    user.test().then(function(){
+        //校验成功后执行
+    }).fail(function(){
+        //校验失败后执行
+    })
+
+
+### rule():获取指定规则
+
+    user.rule('max');
+
+### remove():删除指定规则
+
+    user.remove('max');
+
+### add(name, rule):添加一个规则实例
+
+add方法有必要着重讲解下。
+
 
 
 ##与uploader配合使用
