@@ -283,6 +283,65 @@ Auth和Field的验证事件相同，都有：beforeTest（校验前）、success
         S.log(rule);
     })
 
+##Auth API详解
+
+### 属性/配置参数
+
+属性名 | 类型|只读|默认值|说明
+------------ | -------------| -------------| -------------| -------------
+stopOnError | Boolean|N|false| 设置为true时，当field校验失败时会停止后面field的校验
+submitTest | Boolean|N|true| 设置为true时，提交表单前会先触发校验
+autoBind | Boolean|Y|true| 设置为true时，生成field时，会自动给表单元素绑定校验事件
+useId | Boolean|Y|false| 设置为true时，会优先使用元素的id作为field的那么，默认优先使用name
+fields | Array|Y|[]| auth下所有的field
+rules | Object|Y|{}| auth支持的所有规则
+target | Nodelist|Y|""| auth对应的form元素
+
+### test()：触发校验
+
+    auth.test().then(function(){
+        //校验成功后执行
+    }).fail(function(){
+        //校验失败后执行
+    })
+
+跟field一样，支持链式调用then()和fail()方法。
+
+test()支持只校验指定的field。
+
+    auth.test('user,sex');
+
+### register(name, rule)：注册验证规则
+
+    auth.register('max',function(value,attr){
+        return true;
+    });
+
+当name为object时，批量添加。
+
+    auth.register({
+        'max':function(value,attr){
+            return true;
+        }
+    });
+
+### field(name)：根据key返回field对象
+
+    var user = auth.field('user');
+
+### fieldTarget(name):获取Field的目标元素
+
+    var $user = auth.fieldTarget('user');
+
+如果你需要对表单元素进行特殊操作，不需要给元素加个钩子，直接使用这个方法即可。
+
+### add(field, config)：添加一个field
+
+    auth.add("#new_user");
+
+有些表单元素是异步加载的，在auth初始化时并没有添加进去，这时候就需要*add()*手动将field添加到auth中。
+
+
 ##Field字段API详解
 
 ### Field所有的属性说明
@@ -362,63 +421,58 @@ target | NodeList|N|""| target指向Field对应的表单元素，target是可以
 
     user.test('max,min');
 
-##Auth API详解
+##Rule API详解
 
-### 属性/配置参数
+业界大部分的规则都是做成了Object配置形式，比如：
 
-属性名 | 类型|只读|默认值|说明
------------- | -------------| -------------| -------------| -------------
-stopOnError | Boolean|N|false| 设置为true时，当field校验失败时会停止后面field的校验
-submitTest | Boolean|N|true| 设置为true时，提交表单前会先触发校验
-autoBind | Boolean|Y|true| 设置为true时，生成field时，会自动给表单元素绑定校验事件
-useId | Boolean|Y|false| 设置为true时，会优先使用元素的id作为field的那么，默认优先使用name
-fields | Array|Y|[]| auth下所有的field
-rules | Object|Y|{}| auth支持的所有规则
-target | Nodelist|Y|""| auth对应的form元素
+    demo.addRule([{
+        ele:".inputxt:eq(0)",
+        datatype:"zh2-4"
+    },
+    {
+        ele:".inputxt:eq(1)",
+        datatype:"*6-20"
+    }]);
 
-### test()：触发校验
+这种结构化的方式配置起来很简单，但遗憾的是只能满足70%的普通需求，表单的业务场景是非常复杂的，ajax异步校验，加个"callback"字段，如果要适用异步上传的校验呢？如果需要延迟3秒校验呢？再加个字段？
 
-    auth.test().then(function(){
-        //校验成功后执行
-    }).fail(function(){
-        //校验失败后执行
+结构化的设计在表单校验中是错误的，低估了表单业务复杂性。
+
+所以Auth使用Function的方式，用户可以在规则函数中写任何校验逻辑，甚至异步校验逻辑，只要保证函数的返回值符合auth要求即可。
+
+比如下面的代码：
+
+    auth.register('later-max',function(value,attr,defer){
+        var self = this;
+        S.later(function(){
+            if(value < attr){
+                defer.resolve(self);
+            }else{
+                defer.reject(self);
+            }
+        },3000);
+        return defer.promise;
     })
 
-跟field一样，支持链式调用then()和fail()方法。
+比如随意设置错误消息：
 
-test()支持只校验指定的field。
+    auth.register('min',function(value,attr,defer){
+        if(!this.msg('error')) this.msg('error','消息随便设置');
+        return Number(value) > 0;
+    })
 
-    auth.test('user,sex');
+更强大的是，你可以通过rule回溯到Field和Auth。
+比如当你校验这个规则时，希望校验另外一个规则：
 
-### register(name, rule)：注册验证规则
+    auth.register('min',function(value,attr,defer){
+        return Number(value) > 0;
+    })
 
-    auth.register('max',function(value,attr){
-        return true;
-    });
-
-当name为object时，批量添加。
-
-    auth.register({
-        'max':function(value,attr){
-            return true;
-        }
-    });
-
-### field(name)：根据key返回field对象
-
-    var user = auth.field('user');
-
-### fieldTarget(name):获取Field的目标元素
-
-    var $user = auth.fieldTarget('user');
-
-如果你需要对表单元素进行特殊操作，不需要给元素加个钩子，直接使用这个方法即可。
-
-### add(field, config)：添加一个field
-
-    auth.add("#new_user");
-
-有些表单元素是异步加载的，在auth初始化时并没有添加进去，这时候就需要*add()*手动将field添加到auth中。
+    auth.register('len',function(value,attr,defer){
+        var field = this.get('field');
+        field.test('min');
+        return Number(value) > 3;
+    })
 
 
 ##与uploader配合使用
