@@ -329,6 +329,15 @@ target | NodeList|N|""| target指向Field对应的表单元素，target是可以
 
 不希望排除规则：*user.set('exclude','')*。
 
+### 重写target属性的用法
+
+有时表单元素会移除，或重新渲染，这时候*target*已经不存在了，就需要重写下target属性，不然校验会失败。
+
+    KISSY.one('#user').remove();
+    var user = auth.field('user');
+    user.set('target',"#new_user");
+    S.log(KISSY.one('#new_user').data('data-field'));
+
 ### then()与fail()
 
 
@@ -347,10 +356,69 @@ target | NodeList|N|""| target指向Field对应的表单元素，target是可以
 
     user.remove('max');
 
-### add(name, rule):添加一个规则实例
+### test():校验字段上绑定的规则
 
-add方法有必要着重讲解下。
+可以指定校验规则：
 
+    user.test('max,min');
+
+##Auth API详解
+
+### 属性/配置参数
+
+属性名 | 类型|只读|默认值|说明
+------------ | -------------| -------------| -------------| -------------
+stopOnError | Boolean|N|false| 设置为true时，当field校验失败时会停止后面field的校验
+submitTest | Boolean|N|true| 设置为true时，提交表单前会先触发校验
+autoBind | Boolean|Y|true| 设置为true时，生成field时，会自动给表单元素绑定校验事件
+useId | Boolean|Y|false| 设置为true时，会优先使用元素的id作为field的那么，默认优先使用name
+fields | Array|Y|[]| auth下所有的field
+rules | Object|Y|{}| auth支持的所有规则
+target | Nodelist|Y|""| auth对应的form元素
+
+### test()：触发校验
+
+    auth.test().then(function(){
+        //校验成功后执行
+    }).fail(function(){
+        //校验失败后执行
+    })
+
+跟field一样，支持链式调用then()和fail()方法。
+
+test()支持只校验指定的field。
+
+    auth.test('user,sex');
+
+### register(name, rule)：注册验证规则
+
+    auth.register('max',function(value,attr){
+        return true;
+    });
+
+当name为object时，批量添加。
+
+    auth.register({
+        'max':function(value,attr){
+            return true;
+        }
+    });
+
+### field(name)：根据key返回field对象
+
+    var user = auth.field('user');
+
+### fieldTarget(name):获取Field的目标元素
+
+    var $user = auth.fieldTarget('user');
+
+如果你需要对表单元素进行特殊操作，不需要给元素加个钩子，直接使用这个方法即可。
+
+### add(field, config)：添加一个field
+
+    auth.add("#new_user");
+
+有些表单元素是异步加载的，在auth初始化时并没有添加进去，这时候就需要*add()*手动将field添加到auth中。
 
 
 ##与uploader配合使用

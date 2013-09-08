@@ -95,10 +95,6 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
             var self = this;
             var _cfg = self._cfg;
             var $target = self.get('target');
-            //已经存在Field实例，直接返回该实例
-            if($target.data(DATA_FIELD)){
-                return $target.data(DATA_FIELD);
-            }
             var _ruleCfg = S.merge({}, _cfg.rules);
             self._groupTarget();
             self._renderMsg();
@@ -326,6 +322,7 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
                         S.each(rules,function(rule){
                             if(rule.set) rule.set('target',target);
                         });
+                        target.data(DATA_FIELD,self);
                     }
                     return target;
                 }
