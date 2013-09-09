@@ -1,7 +1,7 @@
 {
     "name": "auth",
     "version": "1.5",
-    "desc": "最强大的表单验证组件",
+    "desc": "最强大的表单校验组件",
     "cover": "",
     "tag":"表单,表单验证",
     "author": {

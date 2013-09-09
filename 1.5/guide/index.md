@@ -1,10 +1,8 @@
 ##综述
 
-Auth是灵活且强大的表单验证组件，支持异步校验，支持与异步上传组件配合使用。
+Auth是非常强大的表单校验组件，Auth在灵活性上是无与伦比，足以满足大部分的表单场景。
 
-表单的业务场景往往非常复杂，只有灵活的表单校验组件才能满足，而Auth在灵活性上无与伦比，超越其他任何校验组件。
-
-（明河：Auth是最好的表单校验组件，使用它，您不会后悔。）
+Auth支持异步校验，支持与异步上传组件配合使用。
 
 作者：张挺（V1.4）| 明河（V1.5+）
 
@@ -15,12 +13,15 @@ v1.5beta发布，欢迎试用反馈bug~~~
 <ul>
     <li><a href="http://gallery.kissyui.com/auth/1.5/demo/simple_form.html">一个简单表单的验证</a></li>
     <li><a href="http://gallery.kissyui.com/auth/1.5/demo/add_custom_rule.html">添加自定义验证规则</a></li>
+    <li><a href="http://gallery.kissyui.com/auth/1.5/demo/event.html">事件举例</a>(1.5+)</li>
+    <li><a href="http://gallery.kissyui.com/auth/1.5/demo/exclude.html">exclude（可以排除验证规则）用法举例</a>(1.5+)</li>
     <li><a href="http://gallery.kissyui.com/auth/1.5/demo/asyn_test.html">支持异步校验！</a>(1.5+)</li>
     <li><a href="http://gallery.kissyui.com/auth/1.5/demo/uploader.html">与异步文件上传组件配合校验！</a>(1.5+)</li>
     <li><a href="http://gallery.kissyui.com/auth/1.5/demo/rule_msg.html">规则可以设置默认消息</a>(1.5+)</li>
     <li><a href="http://gallery.kissyui.com/auth/1.5/demo/server_msg.html">配合服务器输出的消息</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/1.5/demo/rule_msg.html">获取到焦点显示警告信息</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/1.5/demo/rule_msg.html">配合uploader使用</a>(1.5+)</li>
+    <li><a href="http://gallery.kissyui.com/auth/1.5/demo/msg.html">字段上消息的控制</a></li>
+    <li><a href="http://gallery.kissyui.com/auth/1.5/demo/rule_msg.html">给规则设置默认消息</a>(1.5+)</li>
+    <li><a href="http://gallery.kissyui.com/auth/1.5/demo/noSubmitTest.html">表单提交不默认触发验证</a>(1.5+)</li>
     <li><a href="http://gallery.kissyui.com/auth/1.5/demo/rule_msg.html">配合butterfly使用</a>(1.5+)</li>
 </ul>
 
