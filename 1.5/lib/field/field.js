@@ -26,13 +26,21 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
     function getFieldAttrRules($field){
         var allRules = Factory.rules;
         var rules = {};
+        var sort = $field.attr('test-rules');
+        if(sort){
+            var sortRules = {};
+            S.each(sort.split(','),function(ruleNames){
+                if(allRules[ruleNames]) sortRules[ruleNames] = allRules[ruleNames];
+            });
+            allRules = sortRules;
+        }
         S.each(allRules, function (rule,ruleName) {
             if ($field.attr(ruleName) !== undefined) {
                 rules[ruleName] = {
                     msg:{
                         error:$field.attr(ruleName + '-msg'),
-                        success:$field.attr(ruleName + '-success-msg') || '',
-                        warn:$field.attr(ruleName + '-warn-msg') || ''
+                        success:$field.attr(ruleName + '-success-msg') || EMPTY,
+                        warn:$field.attr(ruleName + '-warn-msg') || EMPTY
                     },
                     propertyValue:$field.attr(ruleName)
                 };
