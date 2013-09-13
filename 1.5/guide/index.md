@@ -216,7 +216,7 @@ ruleFunction必须有个返回值，同步校验（区别于异步校验）返�
 
 Auth的独特之处在于使用promise模式，保证验证的规则能够排序执行。
 
-*ruleFunction*有第三个参数：*defer* （[Promise.Defer](http://docs.kissyui.com/docs/html/api/component/promise/defer.html)的实例），在ruleFunction中，你可以自由的写异步处理逻辑，需要注意的知识二点：
+*ruleFunction*有第三个参数：*defer* （[Promise.Defer](http://docs.kissyui.com/docs/html/api/component/promise/defer.html)的实例），在ruleFunction中，你可以自由的写异步处理逻辑，需要注意二点：
 
 * 返回值必须是*defer.promise*
 * 异步加载成功后，如果校验成功调用下*defer.resolve(self)*，校验失败调用下*defer.reject(self)*。

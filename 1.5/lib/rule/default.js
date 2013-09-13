@@ -100,7 +100,7 @@ KISSY.add(function (S) {
          */
         number:function(value){
             if(!this.msg('error')) this.msg('error','必须是数字');
-            return /^([+-]?)\\d*\\.?\\d+$/.test(S.trim(value));
+            return /^([+-]?)\d*\.?\d+$/.test(S.trim(value));
         },
         /**
          * 是否符合email格式
@@ -108,7 +108,7 @@ KISSY.add(function (S) {
          */
         email:function(value){
             if(!this.msg('error')) this.msg('error','邮箱格式不合法');
-            return /^\\w+((-\\w+)|(\\.\\w+))*\\@[A-Za-z0-9]+((\\.|-)[A-Za-z0-9]+)*\\.[A-Za-z0-9]+$/.test(S.trim(value));
+            return /^(?:\w+\.?)*\w+@(?:\w+\.)+\w+$/.test(S.trim(value));
         },
         /**
          * 是否符合手机格式

@@ -285,7 +285,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
          */
         number:function(value){
             if(!this.msg('error')) this.msg('error','必须是数字');
-            return /^([+-]?)\\d*\\.?\\d+$/.test(S.trim(value));
+            return /^([+-]?)\d*\.?\d+$/.test(S.trim(value));
         },
         /**
          * 是否符合email格式
@@ -293,7 +293,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
          */
         email:function(value){
             if(!this.msg('error')) this.msg('error','邮箱格式不合法');
-            return /^\\w+((-\\w+)|(\\.\\w+))*\\@[A-Za-z0-9]+((\\.|-)[A-Za-z0-9]+)*\\.[A-Za-z0-9]+$/.test(S.trim(value));
+            return /^(?:\w+\.?)*\w+@(?:\w+\.)+\w+$/.test(S.trim(value));
         },
         /**
          * 是否符合手机格式
@@ -722,10 +722,6 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
             var self = this;
             var _cfg = self._cfg;
             var $target = self.get('target');
-            //已经存在Field实例，直接返回该实例
-            if($target.data(DATA_FIELD)){
-                return $target.data(DATA_FIELD);
-            }
             var _ruleCfg = S.merge({}, _cfg.rules);
             self._groupTarget();
             self._renderMsg();
@@ -829,9 +825,7 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
             if (rule instanceof Rule) {
                 _storage[name] = rule;
             } else if(S.isFunction(rule)) {
-                _storage[name] = new Rule(name, rule, {
-                    el:self._el
-                });
+                _storage[name] = new Rule(name, rule);
             }
             self.set('rules',_storage);
             return self;
@@ -938,10 +932,6 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
         }
     }, {
         ATTRS:{
-            message:{
-                value:EMPTY
-            },
-            result:{},
             /**
              * 目标元素
              */
@@ -959,6 +949,7 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
                         S.each(rules,function(rule){
                             if(rule.set) rule.set('target',target);
                         });
+                        target.data(DATA_FIELD,self);
                     }
                     return target;
                 }
