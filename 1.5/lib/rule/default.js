@@ -36,6 +36,13 @@ KISSY.add(function (S) {
             return new RegExp(attr).test(value);
         },
         /**
+         * 是否是数字
+         */
+        number:function(value){
+            if(!this.msg('error')) this.msg('error','必须是数字');
+            return /^([+-]?)\d*\.?\d+$/.test(S.trim(value));
+        },
+        /**
          * 最大值验证
          */
         max:function (value,attr,defer,field) {
@@ -94,13 +101,6 @@ KISSY.add(function (S) {
             if(!matchFiled) return false;
             var val = matchFiled.get('target').val();
             return S.trim(val) === S.trim(value);
-        },
-        /**
-         * 是否是数字
-         */
-        number:function(value){
-            if(!this.msg('error')) this.msg('error','必须是数字');
-            return /^([+-]?)\d*\.?\d+$/.test(S.trim(value));
         },
         /**
          * 是否符合email格式
