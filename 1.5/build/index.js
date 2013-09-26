@@ -662,7 +662,7 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
             allRules = sortRules;
         }
         S.each(allRules, function (rule,ruleName) {
-            if ($field.attr(ruleName) !== undefined) {
+            if ($field.hasAttr(ruleName)) {
                 rules[ruleName] = {
                     msg:{
                         error:$field.attr(ruleName + '-msg'),

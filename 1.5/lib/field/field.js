@@ -35,7 +35,7 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
             allRules = sortRules;
         }
         S.each(allRules, function (rule,ruleName) {
-            if ($field.attr(ruleName) !== undefined) {
+            if ($field.hasAttr(ruleName)) {
                 rules[ruleName] = {
                     msg:{
                         error:$field.attr(ruleName + '-msg'),
