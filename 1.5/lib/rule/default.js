@@ -70,7 +70,7 @@ KISSY.add(function (S) {
                 })
                 if(!this.msg('error')) this.msg('error','最小必须选择'+attr+'项');
             }
-            return Number(value) >= Number(attr);
+            return Number(value) > Number(attr);
         },
         step:function (value,attr,defer,field) {
             if (!S.isNumber(value)) {

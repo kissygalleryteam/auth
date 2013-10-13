@@ -370,11 +370,7 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
              * 验证消息类实例
              * @type {Object}
              */
-            msg:{value:''},
-            /**
-             * 如果表单元素的disabled时，不需要验证
-             */
-            disabledTest:{value:false}
+            msg:{value:''}
         }
     });
 

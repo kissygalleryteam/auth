@@ -255,7 +255,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
                 })
                 if(!this.msg('error')) this.msg('error','最小必须选择'+attr+'项');
             }
-            return Number(value) >= Number(attr);
+            return Number(value) > Number(attr);
         },
         step:function (value,attr,defer,field) {
             if (!S.isNumber(value)) {
@@ -997,11 +997,7 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
              * 验证消息类实例
              * @type {Object}
              */
-            msg:{value:''},
-            /**
-             * 如果表单元素的disabled时，不需要验证
-             */
-            disabledTest:{value:false}
+            msg:{value:''}
         }
     });
 
