@@ -51,7 +51,7 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
                 if(S.inArray(tagName,filterTag)) return true;
                 //排除掉提交按钮
                 if(type == 'submit') return true;
-                if(tagName == 'SELECT') $el.attr('type', 'select');
+                if(tagName == 'SELECT') $el.attr('data-type', 'select');
                 //如果是一组表单元素像radio，不需要多次实例化Field
                 var groupEls = ['radio','checkbox'];
                 if(S.inArray(type,groupEls)){

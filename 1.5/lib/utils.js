@@ -24,7 +24,7 @@ KISSY.add(function (S, DOM, undefined) {
          */
         getEvent: function(els){
             var event = 'blur';
-            var  type = DOM.attr(els, 'type');
+            var  type = DOM.attr(els, 'type') || DOM.attr(els, 'data-type');
             switch (type) {
                 case "select":
                     event = 'change';
