@@ -13,10 +13,7 @@
     <div class="control-group">
         <label class="control-label" for="user">用户名</label>
         <div class="controls">
-            <input type="text" class="input-xlarge" id="user"
-                   min-len="5"
-                   msg-wrapper="#J_UseMsg"
-            >
+            <input type="text" name="user" min-len="5" msg-wrapper="#J_UseMsg">
             <div id="J_UseMsg"></div>
         </div>
     </div>
@@ -55,15 +52,6 @@
            var min = Number(attr);
            this.msg('error','请您输入至少'+min+'个字符');
            return value.length >= Number(attr);
-        });
-        //可以批量添加
-        auth.register({
-            'max-len':function(value,attr,defer,field){
-                return true;
-            },
-            'demo-rule':function(value,attr,defer,field){
-                return false;
-            }
         });
         S.log(auth.get('rules'));
         auth.render();

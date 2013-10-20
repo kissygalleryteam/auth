@@ -1152,6 +1152,20 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
             return authField;
         },
         /**
+         * 删除field字段
+         * @param key
+         * @return {*}
+         */
+        remove:function(key){
+            var self = this;
+            if(!key) return self;
+            if(self._storages[key]){
+                delete self._storages[key];
+                S.log('删除'+key+' field');
+                return self;
+            }
+        },
+        /**
          * 获取元素的name，获取不到，获取id
          * @param $el
          * @return {String}
