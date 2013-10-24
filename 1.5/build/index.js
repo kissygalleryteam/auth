@@ -189,6 +189,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/rule',function(S, Base,Promise) {
  *
  */
 KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
+    var EMPTY = "";
     return {
         /**
          * 是否存在值
@@ -217,7 +218,9 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
         /**
          * 使用正则直接匹配
          */
-        pattern:function (value,attr,defer,field) {
+        pattern:function (value,attr) {
+            if(!this.msg('error')) this.msg('error','不符合要求');
+            if(value == "") return true;
             return new RegExp(attr).test(value);
         },
         /**
@@ -225,6 +228,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
          */
         number:function(value){
             if(!this.msg('error')) this.msg('error','必须是数字');
+            if(value == "") return true;
             return /^([+-]?)\d*\.?\d+$/.test(S.trim(value));
         },
         /**
@@ -232,6 +236,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
          */
         max:function (value,attr,defer,field) {
             if(!this.msg('error')) this.msg('error','必须小于'+attr);
+            if(value == "") return true;
             var $target = this.get('target');
             if($target.attr('type') == 'checkbox'){
                 value = 0;
@@ -247,6 +252,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
          */
         min:function (value,attr,defer,field) {
             if(!this.msg('error')) this.msg('error','必须大于'+attr);
+            if(value == "") return true;
             var $target = this.get('target');
             if($target.attr('type') == 'checkbox'){
                 value = 0;
@@ -257,19 +263,12 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
             }
             return Number(value) > Number(attr);
         },
-        step:function (value,attr,defer,field) {
-            if (!S.isNumber(value)) {
-                return false;
-            }
-            if(value == 0 || attr == 1) return true;
-
-            return value % attr;
-        },
         /**
          * 校验值是否等于属性配置的值
          */
         equal:function(value,attr,defer,field){
             if(!this.msg('error')) this.msg('error','值必须等于'+attr);
+            if(value == "") return true;
             return S.trim(attr) === S.trim(value);
         },
         /**
@@ -279,11 +278,12 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
          */
         "equal-field":function(value,attr){
             if(!this.msg('error')) this.msg('error','二个字段值必须相同！');
+            if(value == "") return true;
             var field = this.get('field');
             var auth = field.get('host');
-            if(!auth) return false;
+            if(!auth) return true;
             var matchFiled = auth.getField(attr);
-            if(!matchFiled) return false;
+            if(!matchFiled) return true;
             var val = matchFiled.get('target').val();
             return S.trim(val) === S.trim(value);
         },
@@ -293,6 +293,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
          */
         email:function(value){
             if(!this.msg('error')) this.msg('error','邮箱格式不合法');
+            if(value == "") return true;
             return /^(?:\w+\.?)*\w+@(?:\w+\.)+\w+$/.test(S.trim(value));
         },
         /**
@@ -301,6 +302,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
          */
         mobile:function(value){
             if(!this.msg('error')) this.msg('error','手机号码格式不合法');
+            if(value == "") return true;
             return /^0?\d{11}$/.test(S.trim(value));
         },
         /**
@@ -310,6 +312,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
          */
         date:function(value){
             if(!this.msg('error')) this.msg('error','日期格式不合法');
+            if(value == "") return true;
             return /^(?:(?!0000)[0-9]{4}([-/.]?)(?:(?:0?[1-9]|1[0-2])\1(?:0?[1-9]|1[0-9]|2[0-8])|(?:0?[13-9]|1[0-2])\1(?:29|30)|(?:0?[13578]|1[02])\1(?:31))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)([-/.]?)0?2\2(?:29))$/.test(S.trim(value));
         }
     };
