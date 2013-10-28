@@ -118,7 +118,7 @@ KISSY.add(function (S) {
         mobile:function(value){
             if(!this.msg('error')) this.msg('error','手机号码格式不合法');
             if(value == "") return true;
-            return /^0?\d{11}$/.test(S.trim(value));
+            return /^0?\d{9,11}$/.test(S.trim(value));
         },
         /**
          * 是否符合日期格式
@@ -135,8 +135,10 @@ KISSY.add(function (S) {
 });
 /**
  * changelog
+ *
  * v1.5 by 明河
  *  - required重构
  *  - max和min可以处理checkbox的情况
  *  - equalTo重写
+ *  - #5
  * */
