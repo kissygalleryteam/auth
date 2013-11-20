@@ -74,7 +74,7 @@ KISSY.add(function (S) {
                 $target.each(function($el){
                     if($el.prop('checked')) value ++;
                 })
-                if(!this.msg('error')) this.msg('error','最小必须选择'+attr+'项');
+                if(!this.msg('error')) this.msg('error','至少选择'+attr+'项');
             }
             return Number(value) > Number(attr);
         },

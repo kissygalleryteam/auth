@@ -307,6 +307,7 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Msg, Utils)
             }).fail(function(rule){
                 //有规则存在验证失败
                 _defer.reject(rule);
+                S.log(self.get('name')+'字段出错的规则是：'+rule.get('name'));
                 self.fire('error',{rule:rule});
             });
             return PROMISE;
