@@ -29,6 +29,10 @@ module.exports = function(grunt) {
                     {
                         src: "<%= pkg.version %>/index.js",
                         dest: "<%= pkg.version %>/build/index.js"
+                    },
+                    {
+                        src: "<%= pkg.version %>/plugin/msgs/index.js",
+                        dest: "<%= pkg.version %>/build/plugin/msgs/index.js"
                     }
                 ]
             }
@@ -42,23 +46,29 @@ module.exports = function(grunt) {
                     ascii_only: true
                 }
             },
-            base: {
-                files: {
-                    '<%= pkg.version %>/build/index-min.js': ['<%= pkg.version %>/build/index.js']
-                }
+            page: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= pkg.version %>/build',
+                        src: ['**/*.js', '!**/*-min.js'],
+                        dest: '<%= pkg.version %>/build',
+                        ext: '-min.js'
+                    }
+                ]
             }
         },
         copy: {
             main: {
                 files: [
-                    {src: ['<%= pkg.version %>/lib/msg/style.css'], dest: '<%= pkg.version %>/build/lib/msg/style.css'}
+                    {src: ['<%= pkg.version %>/plugin/msgs/style.css'], dest: '<%= pkg.version %>/build/plugin/msgs/style.css'}
                 ]
             }
         },
         cssmin: {
             combine: {
                 files: {
-                    '<%= pkg.version %>/build/lib/msg/style-min.css': ['<%= pkg.version %>/build/lib/msg/style.css']
+                    '<%= pkg.version %>/build/plugin/msgs/style-min.css': ['<%= pkg.version %>/build/plugin/msgs/style.css']
                 }
             }
         }

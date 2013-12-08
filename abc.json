@@ -1,8 +1,7 @@
 {
     "name": "auth",
-    "version": "1.5",
+    "version": "1.6",
     "desc": "最强大的表单校验组件",
-    "cover": "",
     "tag":"表单,表单验证",
     "author": {
         "name": "张挺/明河",
