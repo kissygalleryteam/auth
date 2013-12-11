@@ -244,7 +244,6 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
                     }).fail(function(){
                         //有一个Field验证失败，就可以派发auth的失败事件
                         _defer.reject(errorFields);
-                        debugger;
                         self.fire('error',{fields:errorFields});
                     });
                     return PROMISE;
