@@ -19,6 +19,7 @@ v1.6beta发布，欢迎试用反馈bug~~~
     [!]增加fnWrapper配置
     [!]Auth新增fnFilter配置
     [!]Auth新增fnConfig配置
+    [!]优化异步链
 
 ### V1.5 by 明河
 

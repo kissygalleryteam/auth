@@ -213,16 +213,16 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
         validate:function (fields) {
             var self = this;
             var stopOnError = self.get('stopOnError');
-            var _defer = Auth._defer;
+            var _defer = new Promise.Defer();
             //获取需要验证的字段
-            fields = self._filterFields(fields);
+            var newFields = self._filterFields(fields);
             //不存在需要验证的规则，直接投递成功消息
-            if(!fields.length){
+            if(!newFields.length){
                 var _emptyDefer = new Promise.Defer();
                 var _emptyPromise = _emptyDefer.promise;
                 _emptyPromise.then(function(){
-                    _defer.resolve(fields);
-                    self.fire('success',{fields:fields});
+                    _defer.resolve(newFields);
+                    self.fire('success',{fields:newFields});
                 })
                 _emptyDefer.resolve();
                 return _emptyPromise;
@@ -230,36 +230,39 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
             var i = 0;
             var PROMISE;
             var errorFields = [];
-            self.fire('beforeTest',{fields:fields});
-            _testField(fields[i]);
+            self.fire('beforeTest',{fields:newFields});
+            _testField(newFields[i]);
             function _testField(field){
-                if(i >= fields.length) return PROMISE;
+                if(i >= newFields.length){
+                    //最后一个Field的PROMISE（说明所有的Field都验证了一遍）
+                    PROMISE.then(function(){
+                        if(!errorFields.length){
+                            //所有filed验证通过
+                            _defer.resolve(newFields);
+                            self.fire('success',{fields:newFields});
+                        }
+                    }).fail(function(){
+                        //有一个Field验证失败，就可以派发auth的失败事件
+                        _defer.reject(errorFields);
+                        debugger;
+                        self.fire('error',{fields:errorFields});
+                    });
+                    return PROMISE;
+                }
                 PROMISE =  field.test();
                 i++;
                 PROMISE.then(function(){
                     //单个field验证成功，继续验证下一个field
-                    _testField(fields[i]);
+                    _testField(newFields[i]);
                 }).fail(function(rule){
-                        //field验证失败
-                        //如果配置了stopOnError，将停止下一个Field的验证
-                        if(!stopOnError){
-                            _testField(fields[i]);
-                        }
-                        errorFields.push(rule.get('field'));
-                    })
+                    //field验证失败
+                    //如果配置了stopOnError，将停止下一个Field的验证
+                    if(!stopOnError){
+                        _testField(newFields[i]);
+                    }
+                    errorFields.push(rule.get('field'));
+                })
             }
-            //最后一个Field的PROMISE（说明所有的Field都验证了一遍）
-            PROMISE.then(function(){
-                if(!errorFields.length){
-                    //所有filed验证通过
-                    _defer.resolve(fields);
-                    self.fire('success',{fields:fields});
-                }
-            }).fail(function(){
-                    //有一个Field验证失败，就可以派发auth的失败事件
-                    _defer.reject(errorFields);
-                    self.fire('error',{fields:errorFields});
-                });
             return _defer.promise;
         },
         /**
@@ -279,10 +282,11 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
             }else{
                 fields = allFields;
             }
-            return S.filter(fields,function(filed){
+            fields = S.filter(fields,function(filed){
                 var rules = filed.get('rules');
                 return !S.isEmptyObject(rules);
-            })
+            });
+            return fields;
         }
     }, {
         ATTRS:{

@@ -252,8 +252,7 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Utils) {
                 var target = self.get('target');
                 if(target.attr('disabled')) aRule = [];
             }
-            var _defer = Field._defer;
-            var PROMISE;
+            var _defer = new Promise.Defer();
             //不存在需要验证的规则，直接投递成功消息
             if(!aRule.length){
                 var _emptyDefer = new Promise.Defer();
@@ -267,19 +266,15 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Utils) {
             }
             //校验开始
             self.fire('beforeTest',{rules:aRule});
-            var i = 0;
-            _testRule(aRule[i]);
-            function _testRule(ruleData){
-                if(i >= aRule.length) return PROMISE;
-                var oRule = ruleData;
-                PROMISE =  oRule.validate();
-                i++;
-                PROMISE.then(function(){
-                    //单个规则验证成功，继续验证下一个规则
-                    _testRule(aRule[i]);
+            var d = new Promise.Defer();
+            d.resolve(true);
+            var p = d.promise;
+            S.each(aRule,function(oRule){
+                p = p.then(function(e){
+                    return oRule.validate();
                 })
-            }
-            PROMISE.then(function(rule){
+            })
+            p.then(function(){
                 //所有规则验证通过
                 _defer.resolve(aRule);
                 self.fire('success',{rules:aRule});
@@ -289,7 +284,7 @@ KISSY.add(function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Utils) {
                 S.log(self.get('name')+'字段出错的规则是：'+rule.get('name'));
                 self.fire('error',{rule:rule});
             });
-            return PROMISE;
+            return _defer.promise;
         }
     }, {
         ATTRS:{
