@@ -31,9 +31,10 @@ KISSY.add(function (S, Base,Node,XTemplate) {
                 self.show(style,msg);
             })
             host.on('success',function(ev){
-                var msg = ev.msg;
-                var style = ev.style;
-                if(msg || style){
+                var field = ev.target;
+                var $field = field.get('target');
+                var msg = $field.attr('success-msg');
+                if(msg){
                     style = ev.style || 'success';
                     self.show(style,msg);
                 }else{

@@ -382,7 +382,7 @@ KISSY.add('gallery/auth/1.6/lib/rule/ruleFactory',function (S, Node,Base, Rule, 
  * */
 /**
  * @fileoverview
- * @author  : <zhangting@taobao.com>
+ * @author 张挺 <zhangting@taobao.com>
  *
  */
 KISSY.add('gallery/auth/1.6/lib/utils',function (S, DOM, undefined) {
@@ -400,7 +400,7 @@ KISSY.add('gallery/auth/1.6/lib/utils',function (S, DOM, undefined) {
             return 'AUTH_' + S.guid();
         },
         /**
-         * 9nC {�eњؤ���
+         * 根据元素类型来绑定默认的事件
          * @param els
          * @return {string}
          */
@@ -449,8 +449,8 @@ KISSY.add('gallery/auth/1.6/lib/utils',function (S, DOM, undefined) {
 },{ requires:[ 'dom' ] });
 /**
  * changelog
- * v1.5 by �
- *  - select��type^'ؤ�ы�:change
+ * v1.5 by 明河
+ *  - select增加type属性，默认触发事件为change
  * */
 /**
  * @fileoverview
@@ -1078,7 +1078,6 @@ KISSY.add('gallery/auth/1.6/index',function (S, Node,JSON, Base,Promise, Field, 
                     }).fail(function(){
                         //有一个Field验证失败，就可以派发auth的失败事件
                         _defer.reject(errorFields);
-                        debugger;
                         self.fire('error',{fields:errorFields});
                     });
                     return PROMISE;
