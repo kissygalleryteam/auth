@@ -47,6 +47,10 @@
                 tpl: '<div class="msg {prefixCls}"><p class="{style}">{msg}</p></div>',
                 args: {
                     prefixCls: 'under'
+                },
+                style: {
+                    success: '',
+                    error: ''
                 }
             }
         });
@@ -56,6 +60,7 @@
 
             auth.validate(function(result){
                 if(result) {
+                    //提交表单
                     ev.target.submit();
                 }
             });
