@@ -63,7 +63,8 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
 
         config = S.merge(defaultConfig, config);
 
-        self._cfg = config || {};
+        self.set(cfg, config || {});
+
         //保存rule的集合
         self._storage = {};
 
@@ -77,7 +78,7 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
     S.extend(Field, Base, {
         _init: function (el) {
             var self = this,
-                _cfg = self._cfg,
+                _cfg = self.get('cfg'),
                 _el = S.one(el),
                 _ruleCfg = S.merge({}, _cfg.rules);
 
@@ -97,8 +98,8 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
             }
 
             //msg init
-            if (self._cfg.msg) {
-                self._msg = new Msg(_el, self._cfg.msg);
+            if (_cfg.msg) {
+                self._msg = new Msg(_el, _cfg.msg);
             }
 
             //add html property
@@ -225,30 +226,32 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
 
                 next();
             })(_storage, function () {
-                // 保证有规则才触发
-                if (curRule) {
-                    var msg = self._cache[curRule._name].msg || EMPTY;
+                var msg = (curRule && self._cache[curRule._name].msg) || EMPTY;
 
-                    self.set('result', result);
-                    self.set('message', msg);
+                self.set('result', result);
+                self.set('message', msg);
 
-                    if (self._msg) {
-                        self._msg.show({
-                            style: result ? self._cfg.style[RULE_SUCCESS] : self._cfg.style[RULE_ERROR],
-                            msg: msg
-                        });
-                    } else {
-                        self._msg.hide();
-                    }
-
-                    self.fire('validate authValidate', {
-                        result: result,
-                        msg: msg,
-                        errRule: result ? '' : curRule
+                if (msg) {
+                    self._msg && self._msg.show({
+                        style: result ? self._cfg.style[RULE_SUCCESS] : self._cfg.style[RULE_ERROR],
+                        msg: msg
                     });
-                    //校验结束
+                } else {
+                    self._msg && self._msg.hide();
                 }
+
+                self.fire('validate authValidate', {
+                    result: result,
+                    msg: msg,
+                    errRule: result ? '' : curRule
+                });
+                //校验结束
             });
+        },
+        addConfig: function(cfg) {
+            var self = this;
+            var config = self.get('cfg');
+            self.set('cfg', S.merge(config, cfg));
         }
     }, {
         ATTRS: {
@@ -256,7 +259,8 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
                 value: EMPTY
             },
             result: {},
-            el: {}
+            el: {},
+            cfg: {}
         }
     });
 

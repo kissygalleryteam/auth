@@ -63,36 +63,27 @@ KISSY.add(function (S, JSON, Base, Field, Factory, Utils, undefined) {
             }
 
             //save config
-            self.AuthConfig = config;
+            self.set('config', config);
 
             //需要屏蔽html5本身的校验，放在最后是为了html5的校验能生效
             S.one(el).attr('novalidate', 'novalidate');
-
         },
         /**
          * 添加一个需要校验的表单域
          *
-         * @param field {Field|string|htmlElement} 表单域对象或html表单元素
-         * @param config {object} 可选的配置，如果传的是field对象，就无需此配置
+         * @param field {Field} 表单域对象
+         * @param cfg
          * @return {*}
          */
-        add: function (field, config) {
-            var el, key, self = this;
+        add: function (field, cfg) {
+            var self = this,
+                el = field.get('el'),
+                key = el.attr('id') || el.attr('name'),
+                authCfg = self.get('config');
 
-            if (field instanceof Field) {
-                //add field
-                el = field.get('el');
-                key = S.one(el).attr('id') || S.one(el).attr('name');
-                self._storages[key || Utils.guid()] = field;
-            } else {
-                //add html element
-                el = S.one(field);
-                if (el) {
-                    key = S.one(el).attr('id') || S.one(el).attr('name');
-                    var filedConfig = S.merge(self.AuthConfig, {event: self.AuthConfig.autoBind ? Utils.getEvent(el) : 'none'}, config);
-                    self._storages[key || Utils.guid()] = new Field(el, filedConfig);
-                }
-            }
+            //TODO
+            field.addConfig(S.merge({event: authCfg.autoBind ? Utils.getEvent(el) : 'none'}, cfg));
+            self._storages[key || Utils.guid()] = field;
 
             return self;
         },
@@ -131,7 +122,7 @@ KISSY.add(function (S, JSON, Base, Field, Factory, Utils, undefined) {
                                 next();
                             } else {
                                 result = false;
-                                self.AuthConfig.stopOnError ? complete() : next();
+                                self.get('config').stopOnError ? complete() : next();
                             }
                         });
                         currentField.validate();
@@ -154,7 +145,8 @@ KISSY.add(function (S, JSON, Base, Field, Factory, Utils, undefined) {
         }
     }, {
         ATTRS: {
-            result: {}
+            result: {},
+            config: {}
         }
     });
 

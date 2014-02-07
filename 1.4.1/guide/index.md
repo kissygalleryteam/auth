@@ -21,3 +21,4 @@ Auth1.4.1是1.4的扩充，增加了异步校验势必会使得原有的API发�
 - rule的规则函数添加最后一个异步参数，但是保留同步返回的方式
 - 现在hidden、submit、button、reset等表单将不会触发校验
 - 去除了auth、field和rule的“beforeValidate”和“afterValidate”事件
+- 去除auth.add时自动创建field的接口，改为直接add new Auth.Field()，保持Field创建入口统一
