@@ -10,6 +10,15 @@ Auth1.4.1是1.4的扩充，增加了异步校验势必会使得原有的API发�
 
 ##demo汇总
 
+<ul>
+    <li><a href="http://gallery.kissyui.com/auth/1.4.1/demo/first.html">一个简单表单的验证</a></li>
+    <li><a href="http://gallery.kissyui.com/auth/1.4.1/demo/msg.html">带message的校验</a></li>
+    <li><a href="http://gallery.kissyui.com/auth/1.4.1/demo/modifyField.html">修改一个已经存在的field</a></li>
+    <li><a href="http://gallery.kissyui.com/auth/1.4.1/demo/async.html">支持异步校验！</a></li>
+    <li><a href="http://gallery.kissyui.com/auth/1.4.1/demo/checkbox.html">checkbox+添加自定义校验！</a></li>
+    <li><a href="http://gallery.kissyui.com/auth/1.4.1/demo/all.html">复杂而全面的校验场景</a></li>
+</ul>
+
 ##API汇总
 
 ##代码变化汇总
