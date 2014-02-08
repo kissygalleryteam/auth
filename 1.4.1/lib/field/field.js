@@ -14,21 +14,25 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
      */
     var defaultConfig = {
         event: 'blur',
-        style: {
-            'success': 'ok',
-            'error': 'error'
-        }
+        msg: {
+            style: {
+                'success': 'ok',
+                'error': 'error'
+            }
+        },
+        rules:{}
     };
 
     var RULE_SUCCESS = 'success',
         RULE_ERROR = 'error';
 
     function processMsg(rule, validated) {
-        var msg;
-        if (rule._msg) {
-            msg = validated ? rule._msg[RULE_SUCCESS] : rule._msg[RULE_ERROR];
+        var _msg = rule.get('msg'),
+            msg;
+        if (_msg) {
+            msg = validated ? _msg[RULE_SUCCESS] : _msg[RULE_ERROR];
         } else {
-            msg = validated ? rule._msg[RULE_SUCCESS] : '';
+            msg = validated ? _msg[RULE_SUCCESS] : '';
         }
 
         rule.fire('validate', {
@@ -58,12 +62,12 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
                 rules: cfg
             };
 
-            config = S.merge(propertyConfig, config);
+            S.mix(config, propertyConfig, false, undefined, true);
         }
 
-        config = S.merge(defaultConfig, config);
+        S.mix(config, defaultConfig, false, undefined, true);
 
-        self.set(cfg, config || {});
+        self.set('cfg', config || {});
 
         //保存rule的集合
         self._storage = {};
@@ -81,7 +85,6 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
                 _cfg = self.get('cfg'),
                 _el = S.one(el),
                 _ruleCfg = S.merge({}, _cfg.rules);
-
 
             //如果为checkbox/radio则保存为数组
             if (S.inArray(_el.attr('type'), ['checkbox', 'radio'])) {
@@ -229,11 +232,12 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
                 var msg = (curRule && self._cache[curRule._name].msg) || EMPTY;
 
                 self.set('result', result);
-                self.set('message', msg);
+                self.set('msg', msg);
 
                 if (msg) {
+                    var _cfg = self.get('cfg');
                     self._msg && self._msg.show({
-                        style: result ? self._cfg.style[RULE_SUCCESS] : self._cfg.style[RULE_ERROR],
+                        style: result ? _cfg.msg.style[RULE_SUCCESS] : _cfg.msg.style[RULE_ERROR],
                         msg: msg
                     });
                 } else {
@@ -248,17 +252,34 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
                 //校验结束
             });
         },
-        addConfig: function(cfg) {
-            var self = this;
-            var config = self.get('cfg');
-            self.set('cfg', S.merge(config, cfg));
+        config: function(cfg) {
+            var self = this,
+                _cfg = self.get('cfg');
+            if(cfg) {
+                S.mix(_cfg, cfg, true, undefined, true);
+                self.set('cfg', _cfg);
+
+                if(_cfg.rules) {
+                    S.each(_cfg.rules, function (ruleCfg, name) {
+                        if (self._storage[name]) {
+                            self._storage[name].set('msg', ruleCfg);
+                        } else {
+                            self.add(name, ruleCfg);
+                        }
+                    });
+                }
+            } else {
+                return _cfg;
+            }
         }
     }, {
         ATTRS: {
-            message: {
+            msg: {
                 value: EMPTY
             },
-            result: {},
+            result: {
+                value: true
+            },
             el: {},
             cfg: {}
         }

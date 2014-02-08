@@ -1,7 +1,7 @@
 ﻿/**
  * @fileoverview 表单验证类
  * @author czy88840616 <czy88840616@gmail.com>
- *
+ * config => https://gist.github.com/czy88840616/8857539
  */
 KISSY.add(function (S, JSON, Base, Field, Factory, Utils, undefined) {
 
@@ -11,7 +11,8 @@ KISSY.add(function (S, JSON, Base, Field, Factory, Utils, undefined) {
      */
     var defaultConfig = {
         autoBind: true,
-        stopOnError: false
+        stopOnError: false,
+        exclude:[]
     };
 
 
@@ -52,38 +53,72 @@ KISSY.add(function (S, JSON, Base, Field, Factory, Utils, undefined) {
             var forms = el.elements,
                 self = this;
 
+            //save config
+            self.set('cfg', config);
+
             if (forms && forms.length) {
+                var lastKey;
                 S.each(forms, function (el) {
-                    if (!/(hidden|submit|button|reset)/.test(S.one(el).attr('type'))) {
-                        var filedConfig = S.merge(config, {event: config.autoBind ? Utils.getEvent(el) : 'none'});
-                        var f = new Field(el, filedConfig);
-                        self.add(f);
+                    var _el = S.one(el),
+                        elName = _el.attr('name'),
+                        elKey =  elName || _el.attr('id'); //防止没有name导致初始化不添加
+
+                    if (!/(hidden|submit|button|reset)/.test(_el.attr('type')) && lastKey != elKey) {
+                        //不能在黑名单中
+                        if(!S.inArray(elName, config.exclude)) {
+                            //checkbox和radio只加最后一个
+                            if (S.inArray(_el.attr('type'), ['checkbox', 'radio'])) {
+                                var form = _el.getDOMNode().form,
+                                    els = [];
+
+                                S.each(document.getElementsByName(elName), function (item) {
+                                    if (item.form == form) {
+                                        els.push(item);
+                                    }
+                                });
+
+                                self.field(els.pop());
+                                lastName = elName;
+                            } else {
+                                self.field(_el);
+                            }
+                        }
                     }
                 });
             }
-
-            //save config
-            self.set('config', config);
 
             //需要屏蔽html5本身的校验，放在最后是为了html5的校验能生效
             S.one(el).attr('novalidate', 'novalidate');
         },
         /**
-         * 添加一个需要校验的表单域
+         * 添加或者返回一个需要校验的表单域
          *
-         * @param field {Field} 表单域对象
-         * @param cfg
          * @return {*}
          */
-        add: function (field, cfg) {
-            var self = this,
-                el = field.get('el'),
-                key = el.attr('id') || el.attr('name'),
-                authCfg = self.get('config');
+        field: function () {
+            if(arguments.length == 1 && S.isString(arguments[0]) && !S.all(arguments[0]).length) {
+                return this._storages[arguments[0]];
+            } else {
+                var els = S.all(arguments[0]),
+                    cfg = arguments[1] || {},
+                    self = this,
+                    authCfg = self.get('cfg'),
+                    defaultCfg = {
+                        msg: authCfg.msg,
+                        rules: authCfg.rules
+                    };
 
-            //TODO
-            field.addConfig(S.merge({event: authCfg.autoBind ? Utils.getEvent(el) : 'none'}, cfg));
-            self._storages[key || Utils.guid()] = field;
+                S.each(els, function(el) {
+                    el = S.one(el);
+                    var key = el.attr('id') || el.attr('name');
+                    if(self._storages[key]) {
+                        self._storages[key].config(cfg);
+                    } else {
+                        S.mix(cfg, defaultCfg, false, undefined, true);
+                        self._storages[key || Utils.guid()] = new Field(el, S.merge(cfg, {event: authCfg.autoBind ? Utils.getEvent(el) : 'none'}));
+                    }
+                });
+            }
 
             return self;
         },
@@ -91,6 +126,7 @@ KISSY.add(function (S, JSON, Base, Field, Factory, Utils, undefined) {
          * 根据key返回field对象
          * @param name
          * @return {*}
+         * @deprecated
          */
         getField: function (name) {
             return this._storages[name];
@@ -122,7 +158,7 @@ KISSY.add(function (S, JSON, Base, Field, Factory, Utils, undefined) {
                                 next();
                             } else {
                                 result = false;
-                                self.get('config').stopOnError ? complete() : next();
+                                self.get('cfg').stopOnError ? complete() : next();
                             }
                         });
                         currentField.validate();
@@ -145,13 +181,11 @@ KISSY.add(function (S, JSON, Base, Field, Factory, Utils, undefined) {
         }
     }, {
         ATTRS: {
-            result: {},
-            config: {}
+            result: {
+                value: true
+            },
+            cfg: {}
         }
-    });
-
-    S.mix(Auth, {
-        Field: Field
     });
 
     return Auth;

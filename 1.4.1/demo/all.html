@@ -114,13 +114,10 @@
     S.use('gallery/auth/1.4.1/, event, gallery/auth/1.4.1/style.css', function (S, Auth, E) {
         var auth = new Auth('#J_Auth', {
             msg: {
-                tpl: '<div class="msg {prefixCls}"><p class="{style}">{msg}</p></div>',
-                args: {
-                    prefixCls: 'under'
-                },
+                tpl: '<div class="msg under"><p class="{style}">{msg}</p></div>',
                 style: {
-                    success: '',
-                    error: ''
+                    success: 'ok',
+                    error: 'error'
                 }
             }
         });
@@ -134,7 +131,7 @@
             return values.length > 1;
         });
 
-        auth.add(new Auth.Field('#card', {
+        auth.field('#card', {
             rules:{
                 card: {
                     success:'输入卡号正确',
@@ -145,20 +142,19 @@
                 success:'attention',
                 error:'error'
             }
-        }));
+        });
 
-        auth.add('#interest', {
+        auth.field('#interest', {
             rules:{
-                moreselect: {
-                    error:'必须选择超过1个'
-                }
+                moreselect: '必须选择超过1个'
             },
             style:{
                 error:'error'
             }
         });
 
-        auth.getField('card').validate();
+        //提前校验
+        auth.field('card').validate();
 
         E.on('#J_Auth', 'submit', function(ev){
             ev.preventDefault();
