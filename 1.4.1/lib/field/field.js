@@ -151,13 +151,13 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
             } else if (S.isFunction(rule)) {
                 _storage[name] = new Rule(name, rule, {
                     el: self._el,
-                    msg: cfg.msg
+                    msg: cfg
                 });
-            } else if (S.isPlainObject(rule)) {
+            } else {
                 cfg = rule;
                 rule = Factory.create(name, {
                     el: self.get('el'),
-                    msg: cfg.msg
+                    msg: cfg
                 });
                 _storage[name] = rule;
             }

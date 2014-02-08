@@ -68,9 +68,11 @@
             return values.length > 1;
         });
 
-        auth.field('interest').add("moreselect", {
-            msg: '必须选择超过1个'
-        });
+        auth.field('interest').add("moreselect", '必须选择超过1个');
+
+//        auth.field('interest').add("moreselect", {
+//            error: '必须选择超过1个'
+//        });
 
         E.on('#J_Auth', 'submit', function(ev){
             ev.preventDefault();
