@@ -22,7 +22,7 @@ Auth1.4.1是1.4的扩充，增加了异步校验势必会使得原有的API发�
 
 ##API汇总
 
-auth初始化参数
+*auth初始化参数*
 
 - el {el|htmlElement|String} 表单参数
 - config {Object}
@@ -50,16 +50,16 @@ var auth = new Auth('#J_Auth', {
     },
     "exclude": [],
     "rules": {
-        "required":"此项必填"，
+        "required":"此项必填",
         "max": {
-            "success": "范围可用"，
+            "success": "范围可用",
             "error": "超出最大范围"
         }
     }
 });
 ```
 
-auth的方法
+*auth的方法*
 
 - register(ruleName, ruleFn) 注册一个全局规则，每个field都可以用，如果仅仅是一个field需要某规则，直接使用field.add即可
     - ruleName {String} 规则名
@@ -103,7 +103,7 @@ auth.validate(function(result){
 });
 ```
 
-auth的事件
+*auth的事件*
 
 - validate 校验事件
     - ev.result {Boolean}
@@ -115,7 +115,7 @@ auth.on('validate', function(ev) {
 });
 ```
 
-auth的属性
+*auth的属性*
 
 - result {Boolean} 最近一次的校验结果
 - cfg {Object} 当前的配置信息
