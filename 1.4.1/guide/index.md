@@ -16,11 +16,114 @@ Auth1.4.1是1.4的扩充，增加了异步校验势必会使得原有的API发�
     <li><a href="http://gallery.kissyui.com/auth/1.4.1/demo/modifyField.html">修改一个已经存在的field</a></li>
     <li><a href="http://gallery.kissyui.com/auth/1.4.1/demo/async.html">支持异步校验！</a></li>
     <li><a href="http://gallery.kissyui.com/auth/1.4.1/demo/checkbox.html">checkbox+添加自定义校验！</a></li>
-    <li><a href="http://gallery.kissyui.com/auth/1.4.1/demo/addField.html">动态添加一个field</a></li>
+    <li><a href="http://gallery.kissyui.com/auth/1.4.1/demo/addfield.html">动态添加一个field</a></li>
     <li><a href="http://gallery.kissyui.com/auth/1.4.1/demo/all.html">复杂而全面的校验场景</a></li>
 </ul>
 
 ##API汇总
+
+auth初始化参数
+
+- el {el|htmlElement|String} 表单参数
+- config {Object}
+    - autoBind {Boolean} 是否自动绑定事件
+    - stopOnError {Boolean} 是否当校验碰到错误时停止
+    - exclude {Array} 需要排除的表单name数组，用于暂时不进行校验的表单域，一般情况下无需使用，因为即使创建了表单域，如果没有规则，默认的校验结果都是true
+    - msg {Object} 消息配置
+        - tpl {String} 消息模板，包含style和msg两个默认变量
+        - style {Object} 成功和失败的class
+            - success {String} 成功的class
+            - error {String} 失败的class
+    - rules {Object} 规则默认的默认消息配置
+        - 规则名 {String|Object} 如果只有失败的消息，可以直接使用字符串，如果有成功和失败两个消息，就写成对象
+
+```js
+var auth = new Auth('#J_Auth', {
+    "autoBind": true,
+    "stopOnError": false,
+    "msg": {
+        "tpl": '<div class="msg {prefixCls}"><p class="{style}">{msg}</p></div>',
+        "style":{
+            "success":'attention',
+            "error":'error'
+        }
+    },
+    "exclude": [],
+    "rules": {
+        "required":"此项必填"，
+        "max": {
+            "success": "范围可用"，
+            "error": "超出最大范围"
+        }
+    }
+});
+```
+
+auth的方法
+
+- register(ruleName, ruleFn) 注册一个全局规则，每个field都可以用，如果仅仅是一个field需要某规则，直接使用field.add即可
+    - ruleName {String} 规则名
+    - ruleFn {Function} 规则内容
+
+```js
+//注册同步规则
+auth.register('card', function (value) {
+    return value.length > 3;
+});
+
+//注册异步规则
+auth.register('name', function(values, done) {
+    KISSY.use('ajax, dom',function(S, IO){
+        //我随便找了个异步地址
+        IO.jsonp('http://suggest.taobao.com/sug', {q:'a'}, function(data){
+            //假装失败了
+            done(false);
+        });
+    });
+});
+```
+
+- field(name) {String} 返回一个已经存在的field，name为field的id或者name
+- field(el, config) 添加或者修改一个field
+    - el {el|htmlElement|String}
+    - config {Object}
+        - rules 见auth初始化的rules
+
+
+- validate(callback) 校验auth里所有的field
+    - callback {Function} 有一个result参数，用于取到返回的结果
+
+```js
+auth.validate(function(result){
+    if(result) {
+        //TODO
+    } else {
+        alert('校验不通过');
+    }
+});
+```
+
+auth的事件
+
+- validate 校验事件
+    - ev.result {Boolean}
+    - lastField {FieldObject} field对象，最后一个校验的field
+
+```js
+auth.on('validate', function(ev) {
+    console.log(ev.result);
+});
+```
+
+auth的属性
+
+- result {Boolean} 最近一次的校验结果
+- cfg {Object} 当前的配置信息
+
+```js
+auth.get('result')
+auth.get('cfg')
+```
 
 ##代码变化汇总
 

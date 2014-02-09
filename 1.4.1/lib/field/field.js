@@ -268,6 +268,7 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
                         }
                     });
                 }
+                return self;
             } else {
                 return _cfg;
             }
