@@ -3,13 +3,11 @@ combined files :
 
 gallery/auth/1.4.1/lib/rule/base
 gallery/auth/1.4.1/lib/utils
-gallery/auth/1.4.1/lib/rule/html/propertyRule
 gallery/auth/1.4.1/lib/rule/rule
 gallery/auth/1.4.1/lib/rule/ruleFactory
 gallery/auth/1.4.1/lib/msg/base
 gallery/auth/1.4.1/lib/field/field
 gallery/auth/1.4.1/lib/base
-gallery/auth/1.4.1/lib/index
 gallery/auth/1.4.1/index
 
 */
@@ -20,76 +18,42 @@ gallery/auth/1.4.1/index
  */
 KISSY.add('gallery/auth/1.4.1/lib/rule/base', function(S, Base, undefined) {
 
-    var RULE_SUCCESS = 'success',
-        RULE_ERROR = 'error',
-        DEFAULT_MSG = {
+    var DEFAULT_MSG = {
             success:'',
             error:''
         };
 
-    var BaseRule = function() {
-        var args = [].slice.call(arguments),
-            self = this;
+    var BaseRule = function(fn, msg) {
+        var self = this;
 
-        self.validation = args[0] ? args[0]:function() {return true};
-
-        var cfg = S.merge({}, args[1]);
-
-        //save args
-        if(args[1]) {
-            self._args = S.isArray(cfg['args']) ? cfg['args'] : [cfg['args']];
-        }
-
-        //default is error message
-        if(!S.isPlainObject(cfg['msg'])) {
-            cfg['msg'] = {
-                error:cfg['msg']
-            };
-        }
-
-        //merge msg
-        self._msg = S.merge(DEFAULT_MSG, cfg['msg']);
+        self.validation = fn ? fn:function() {return true};
 
         BaseRule.superclass.constructor.call(self);
+        //merge msg
+        self.set('msg', msg);
     };
 
     S.extend(BaseRule, Base, /** @lends Base.prototype*/{
         validate: function() {
             var self = this;
-
-            var args = [].slice.call(arguments);
-            var validated = self.validation.apply(self, args.length ? args: self._args);
-
-            var msg;
-            if(self._msg) {
-                msg = validated ? self._msg[RULE_SUCCESS] : self._msg[RULE_ERROR];
-            } else {
-                msg = validated ? self._msg[RULE_SUCCESS] : '';
-            }
-
-            self.fire('beforeValidate');
-
-            //Deprecated
-            self.fire(validated ? RULE_SUCCESS:RULE_ERROR, {
-                msg:msg
-            });
-
-            self.fire('validate', {
-                result: validated,
-                msg: msg,
-                name: self._name
-            });
-
-            self.fire('afterValidate');
-
-            return validated;
+            return self.validation.apply(self, arguments);
         }
     }, {
         ATTRS: {
             msg:{
                 value:'',
                 setter:function(msg) {
-                    this._msg = S.merge(this._msg, msg);
+                    if(S.isString(msg)) {
+                        msg = {
+                            error: msg
+                        };
+                    }
+                    var _msg = this.get('msg');
+                    if(!_msg) {
+                        return S.merge(DEFAULT_MSG, msg);
+                    } else {
+                        return S.merge(this.get('msg'), msg);
+                    }
                 }
             }
         }
@@ -103,10 +67,11 @@ KISSY.add('gallery/auth/1.4.1/lib/rule/base', function(S, Base, undefined) {
 });
 /**
  * @fileoverview
- * @author  : <zhangting@taobao.com>
+ * @author 张挺 <zhangting@taobao.com>
  *
  */
 KISSY.add('gallery/auth/1.4.1/lib/utils', function (S, DOM, undefined) {
+
     var Utils = {
         toJSON:function (cfg) {
             cfg = cfg.replace(/'/g, '"');
@@ -153,6 +118,13 @@ KISSY.add('gallery/auth/1.4.1/lib/utils', function (S, DOM, undefined) {
                     val = DOM.val(els);
             }
             return val;
+        },
+        getKeys: function(arr) {
+            var keys = [];
+            for (var key in arr) {
+                keys.push(key);
+            }
+            return keys;
         }
     };
 
@@ -167,7 +139,7 @@ KISSY.add('gallery/auth/1.4.1/lib/utils', function (S, DOM, undefined) {
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('gallery/auth/1.4.1/lib/rule/html/propertyRule', function(S, BaseRule, Utils, undefined) {
+KISSY.add('gallery/auth/1.4.1/lib/rule/rule',function(S, BaseRule, Utils, undefined) {
 
     /**
      * 属性规则
@@ -177,90 +149,28 @@ KISSY.add('gallery/auth/1.4.1/lib/rule/html/propertyRule', function(S, BaseRule,
      * @param {Object} rule params and msg
      * @constructor
      */
-    var ProPertyRule = function() {
+    var Rule = function(name, fn, cfg) {
         var self = this;
-        var args = [].slice.call(arguments);
-        if(!args.length) {
-            S.log('please use a name to define property');
-            return;
-        }
-        self._name = args[0];
-        var cfg = args[2]||{args:[]};
 
-        self._initArgs = cfg.args;
+        self._name = name;
+        cfg = cfg||{};
+
         //_propertyValue和_el如果要修改必须通过属性的修改
         self._propertyValue = cfg.propertyValue;
         self._el = cfg.el;
-        ProPertyRule.superclass.constructor.apply(self, args.slice(1));
-    };
-
-    S.extend(ProPertyRule, BaseRule, /** @lends BaseRule.prototype*/{
-        validate:function () {
-            var self = this;
-            if(S.isUndefined(arguments[0])) {
-                return ProPertyRule.superclass.validate.apply(this, [self._propertyValue, Utils.getValue(self._el)].concat(self._initArgs));
-            } else {
-                //bugfix for no args input
-                var args = [].slice.call(arguments);
-                //一旦传入过值之后，表示复写初始化的参数
-                self._initArgs = args;
-                //将属性的value作为第一个参数传进去，将当前元素的值当成第二个参数传入
-                return ProPertyRule.superclass.validate.apply(this, [self._propertyValue, Utils.getValue(self._el)].concat(args));
-            }
-        }
-    });
-
-    return ProPertyRule;
-}, {
-    requires:[
-        '../base',
-        '../../utils'
-    ]
-});
-/**
- * @fileoverview 规则抽象类
- * @author czy88840616 <czy88840616@gmail.com>
- *
- */
-KISSY.add('gallery/auth/1.4.1/lib/rule/rule', function(S, BaseRule, Utils, undefined) {
-
-    /**
-     * 属性规则
-     *
-     * @param {String} ruleName
-     * @param {Function} ruleBody
-     * @param {Object} rule params and msg
-     * @constructor
-     */
-    var Rule = function() {
-        var self = this;
-        var args = [].slice.call(arguments);
-        if(!args.length) {
-            S.log('please use a name to define rule');
-            return;
-        }
-        self._name = args[0];
-        var cfg = args[2]||{args:[]};
-
-        self._initArgs = cfg.args;
-        self._el = cfg.el;
-        //_propertyValue和_el如果要修改必须通过属性的修改
-        Rule.superclass.constructor.apply(self, args.slice(1));
+        Rule.superclass.constructor.call(self, fn, cfg.msg);
     };
 
     S.extend(Rule, BaseRule, /** @lends BaseRule.prototype*/{
-        validate:function () {
+        validate:function (done) {
             var self = this;
-            if(S.isUndefined(arguments[0])) {
-                return Rule.superclass.validate.apply(this, [Utils.getValue(self._el)].concat(self._initArgs));
+
+            if(self._propertyValue) {
+                return Rule.superclass.validate.call(this, self._propertyValue, Utils.getValue(self._el), done);
             } else {
-                //bugfix for no args input
-                var args = [].slice.call(arguments);
-                //一旦传入过值之后，表示复写初始化的参数
-                self._initArgs = args;
-                //将当前元素的值当成第一个参数传入
-                return Rule.superclass.validate.apply(this, [Utils.getValue(self._el)].concat(args));
+                return Rule.superclass.validate.call(this, Utils.getValue(self._el), done);
             }
+
         }
     });
 
@@ -276,10 +186,9 @@ KISSY.add('gallery/auth/1.4.1/lib/rule/rule', function(S, BaseRule, Utils, undef
  * @author 张挺 <zhangting@taobao.com>
  *
  */
-KISSY.add('gallery/auth/1.4.1/lib/rule/ruleFactory', function (S, Base, PropertyRule, Rule, undefined) {
+KISSY.add('gallery/auth/1.4.1/lib/rule/ruleFactory',function (S, Base, Rule, undefined) {
     var RuleFactory = function () {
         var self = this;
-
         RuleFactory.superclass.constructor.call(self);
     };
 
@@ -340,11 +249,10 @@ KISSY.add('gallery/auth/1.4.1/lib/rule/ruleFactory', function (S, Base, Property
             RuleFactory.rules[name] = rule;
         },
         create:function (ruleName, cfg) {
-            if(S.inArray(ruleName, RuleFactory.HTML_PROPERTY)) {
-                return new PropertyRule(ruleName, RuleFactory.rules[ruleName], cfg);
-            } else if(RuleFactory.rules[ruleName]) {
+            if(S.inArray(ruleName, RuleFactory.HTML_PROPERTY) || RuleFactory.rules[ruleName] ) {
                 return new Rule(ruleName, RuleFactory.rules[ruleName], cfg);
             }
+
             return undefined;
         }
     });
@@ -354,7 +262,6 @@ KISSY.add('gallery/auth/1.4.1/lib/rule/ruleFactory', function (S, Base, Property
 }, {
     requires:[
         'base',
-        './html/propertyRule',
         './rule'
     ]
 });
@@ -387,7 +294,7 @@ KISSY.add('gallery/auth/1.4.1/lib/msg/base', function (S, Base) {
          * @param cfg {Object}
          * @private
          */
-        _init:function (srcNode, cfg) {
+        _init: function (srcNode, cfg) {
             var self = this;
             self._el = S.one(srcNode);
             self.set('tpl', cfg.tpl);
@@ -395,16 +302,16 @@ KISSY.add('gallery/auth/1.4.1/lib/msg/base', function (S, Base) {
 
             self._msgContainer = S.one('.' + AUTH_MSG_CLS, self._el.parent());
 
-            if(!self._msgContainer) {
-                self._msgContainer = S.one('<div class="' + AUTH_MSG_CLS +'" style="display: none"></div>');
+            if (!self._msgContainer) {
+                self._msgContainer = S.one('<div class="' + AUTH_MSG_CLS + '" style="display: none"></div>');
                 self._el.parent().append(self._msgContainer);
             }
 
         },
-        hide:function () {
+        hide: function () {
             this._msgContainer.hide();
         },
-        show:function (o) {
+        show: function (o) {
             var self = this;
             o = S.merge(self.get('args'), o);
 
@@ -414,12 +321,12 @@ KISSY.add('gallery/auth/1.4.1/lib/msg/base', function (S, Base) {
             }, 50)();
         }
     }, {
-        ATTRS:{
-            tpl:{
-                value:''
+        ATTRS: {
+            tpl: {
+                value: ''
             },
-            args:{
-                value:{}
+            args: {
+                value: {}
             }
         }
     });
@@ -427,7 +334,7 @@ KISSY.add('gallery/auth/1.4.1/lib/msg/base', function (S, Base) {
     return Msg;
 
 }, {
-    requires:[
+    requires: [
         'base'
     ]
 });
@@ -436,8 +343,7 @@ KISSY.add('gallery/auth/1.4.1/lib/msg/base', function (S, Base) {
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, DOM, Factory,
-                                                         Rule, PropertyRule, Msg, Utils, undefined) {
+KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, DOM, Factory, Rule, Msg, Utils, undefined) {
 
     var EMPTY = '',
         CONFIG_NAME = 'data-valid';
@@ -447,18 +353,40 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
      * @type {Object}
      */
     var defaultConfig = {
-        event:'blur',
-        style:{
-            'success':'ok',
-            'error':'error'
-        }
+        event: 'blur',
+        msg: {
+            style: {
+                'success': 'ok',
+                'error': 'error'
+            }
+        },
+        rules:{}
     };
+
+    var RULE_SUCCESS = 'success',
+        RULE_ERROR = 'error';
+
+    function processMsg(rule, validated) {
+        var _msg = rule.get('msg'),
+            msg;
+        if (_msg) {
+            msg = validated ? _msg[RULE_SUCCESS] : _msg[RULE_ERROR];
+        } else {
+            msg = validated ? _msg[RULE_SUCCESS] : '';
+        }
+
+        rule.fire('validate', {
+            result: validated,
+            msg: msg,
+            name: rule._name
+        });
+    }
 
     var Field = function (el, config) {
         var self = this;
 
         self._validateDone = {};
-        //储存上一次的校验结果
+        //储存上一次的规则校验结果
         self._cache = {};
 
         /**
@@ -471,15 +399,16 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
             cfg = Utils.toJSON(cfg);
             //把所有伪属性都当作rule处理
             var propertyConfig = {
-                rules:cfg
+                rules: cfg
             };
 
-            config = S.merge(propertyConfig, config);
+            S.mix(config, propertyConfig, false, undefined, true);
         }
 
-        config = S.merge(defaultConfig, config);
+        S.mix(config, defaultConfig, false, undefined, true);
 
-        self._cfg = config || {};
+        self.set('cfg', config || {});
+
         //保存rule的集合
         self._storage = {};
 
@@ -491,18 +420,17 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
     };
 
     S.extend(Field, Base, {
-        _init:function (el) {
+        _init: function (el) {
             var self = this,
-                _cfg = self._cfg,
+                _cfg = self.get('cfg'),
                 _el = S.one(el),
                 _ruleCfg = S.merge({}, _cfg.rules);
 
-
             //如果为checkbox/radio则保存为数组
-            if (S.inArray(_el.attr('type'), ['checkbox','radio'])) {
+            if (S.inArray(_el.attr('type'), ['checkbox', 'radio'])) {
                 var form = _el.getDOMNode().form, elName = _el.attr('name');
                 var els = [];
-                S.each(document.getElementsByName(elName), function(item) {
+                S.each(document.getElementsByName(elName), function (item) {
                     if (item.form == form) {
                         els.push(item);
                     }
@@ -512,64 +440,20 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
                 self.set('el', el);
             }
 
-            var resetAfterValidate = function () {
-                self.fire('afterFieldValidation');
-            };
-
             //msg init
-            if (self._cfg.msg) {
-                self._msg = new Msg(_el, self._cfg.msg);
-                var style = self._cfg.style;
-
-                self.on('afterRulesValidate', function (ev) {
-                    var result = ev.result,
-                        curRule = ev.curRule,
-                        msg = self._cache[curRule].msg || EMPTY;
-
-                    //这里的value还没被当前覆盖
-                    if (self.get('result') !== result || self.get('msg') !== msg) {
-                        if (msg) {
-                            self._msg.show({
-                                style:result ? style['success'] : style['error'],
-                                msg:msg
-                            });
-                        } else {
-                            self._msg.hide();
-                        }
-                    }
-                });
+            if (_cfg.msg) {
+                self._msg = new Msg(_el, _cfg.msg);
             }
-
-            //监听校验结果
-            self.on('afterRulesValidate', function (ev) {
-                var result = ev.result,
-                    curRule = ev.curRule,
-                    msg = self._cache[curRule].msg || EMPTY;
-
-                self.set('result', result);
-                self.set('message', msg);
-
-                self.fire('validate', {
-                    result:result,
-                    msg:msg,
-                    errRule:result ? '' : curRule
-                });
-
-                //校验结束
-                self.fire('afterValidate');
-                resetAfterValidate();
-            });
 
             //add html property
             S.each(Factory.HTML_PROPERTY, function (item) {
-
                 if (_el.hasAttr(item)) {
                     //从工厂中创建属性规则
                     var rule = Factory.create(item, {
                         //属性的value必须在这里初始化
-                        propertyValue:_el.attr(item),
-                        el:self.get('el'), //bugfix for change value
-                        msg:_ruleCfg[item]
+                        propertyValue: _el.attr(item),
+                        el: self.get('el'), //bugfix for change value
+                        msg: _ruleCfg[item]
                     });
 
                     self.add(item, rule);
@@ -577,12 +461,12 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
             });
 
             //add custom rule
-            S.each(_ruleCfg, function(ruleCfg, name){
-                if(!self._storage[name] && Factory.rules[name]) {
+            S.each(_ruleCfg, function (ruleCfg, name) {
+                if (!self._storage[name] && Factory.rules[name]) {
                     //如果集合里没有，但是有配置，可以认定是自定义属性，入口为form.add
                     var rule = Factory.create(name, {
-                        el:self.get('el'), //bugfix for change value
-                        msg:ruleCfg
+                        el: self.get('el'), //bugfix for change value
+                        msg: ruleCfg
                     });
 
                     self.add(name, rule);
@@ -598,20 +482,27 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
 
         },
 
-        add:function (name, rule, cfg) {
+        add: function (name, rule, cfg) {
             var self = this,
                 _storage = self._storage;
 
-            if (rule instanceof PropertyRule || rule instanceof Rule) {
+            if (rule instanceof Rule) {
                 _storage[name] = rule;
-            } else if(S.isFunction(rule)) {
+            } else if (S.isFunction(rule)) {
                 _storage[name] = new Rule(name, rule, {
-                    el:self._el
-                    //TODO args
+                    el: self._el,
+                    msg: cfg
                 });
+            } else {
+                cfg = rule;
+                rule = Factory.create(name, {
+                    el: self.get('el'),
+                    msg: cfg
+                });
+                _storage[name] = rule;
             }
 
-            if(_storage[name]) {
+            if (_storage[name]) {
                 _storage[name].on('validate', function (ev) {
                     S.log('[after rule validate]: name:' + ev.name + ',result:' + ev.result + ',msg:' + ev.msg);
                     //set cache
@@ -625,7 +516,7 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
             return self;
         },
 
-        remove:function (name) {
+        remove: function (name) {
             var _storage = this._storage;
             delete _storage[name];
             delete this._cache[name];
@@ -636,102 +527,141 @@ KISSY.add('gallery/auth/1.4.1/lib/field/field', function (S, Event, Base, JSON, 
         /**
          *
          * @param name
-         * @param cfg {Object}
-         * @param cfg.args
-         * @param cfg.msg
-         *
-         * @return {Boolean}
          */
-        validate:function (name, cfg) {
+        validate: function (name) {
             var result = true,
                 self = this,
                 _storage = self._storage,
-                cfg = cfg||{},
                 curRule = EMPTY;
 
-            if (name) {
-                if (_storage[name]) {
-                    //校验开始
-                    self.fire('beforeValidate');
+            //校验开始
+            (function (arr, complete) {
+                var i = 0, keys = Utils.getKeys(arr), l = keys.length;
 
-                    result = _storage[name].validate(cfg.args);
-                    curRule = name;
-                }
-            } else {
-                //校验开始
-                self.fire('beforeValidate');
+                function next() {
+                    if (i < l && (!name || (name && name == keys[i]))) {
+                        curRule = arr[keys[i]];
+                        var re = curRule.validate(function (re) {
+                            processMsg(curRule, re);
+                            if (re) {
+                                i++;
+                                next();
+                            } else {
+                                result = false;
+                                complete();
+                            }
+                        });
 
-                for (var key in _storage) {
-                    curRule = key;
-                    if (!_storage[key].validate(cfg.args)) {
-                        result = false;
-                        break;
+                        if (S.isBoolean(re)) {
+                            processMsg(curRule, re);
+                            if (re) {
+                                i++;
+                                next();
+                            } else {
+                                result = false;
+                                complete();
+                            }
+                        }
+                    } else {
+                        complete();
                     }
                 }
-            }
 
-            // 保证有规则才触发
-            if (curRule) {
-                self.fire('afterRulesValidate', {
-                    result:result,
-                    curRule:curRule
+                next();
+            })(_storage, function () {
+                var msg = (curRule && self._cache[curRule._name].msg) || EMPTY;
+
+                self.set('result', result);
+                self.set('msg', msg);
+
+                if (msg) {
+                    var _cfg = self.get('cfg');
+                    self._msg && self._msg.show({
+                        style: result ? _cfg.msg.style[RULE_SUCCESS] : _cfg.msg.style[RULE_ERROR],
+                        msg: msg
+                    });
+                } else {
+                    self._msg && self._msg.hide();
+                }
+
+                self.fire('validate authValidate', {
+                    result: result,
+                    msg: msg,
+                    errRule: result ? '' : curRule
                 });
+                //校验结束
+            });
+        },
+        config: function(cfg) {
+            var self = this,
+                _cfg = self.get('cfg');
+            if(cfg) {
+                S.mix(_cfg, cfg, true, undefined, true);
+                self.set('cfg', _cfg);
+
+                if(_cfg.rules) {
+                    S.each(_cfg.rules, function (ruleCfg, name) {
+                        if (self._storage[name]) {
+                            self._storage[name].set('msg', ruleCfg);
+                        } else {
+                            self.add(name, ruleCfg);
+                        }
+                    });
+                }
+                return self;
+            } else {
+                return _cfg;
             }
-
-            //TODO GROUPS
-
-            return result;
         }
     }, {
-        ATTRS:{
-            message:{
-                value:EMPTY
+        ATTRS: {
+            msg: {
+                value: EMPTY
             },
-            result:{},
-            el:{}
+            result: {
+                value: true
+            },
+            el: {},
+            cfg: {}
         }
     });
 
     return Field;
 }, {
-    requires:[
+    requires: [
         'event',
         'base',
         'json',
         'dom',
         '../rule/ruleFactory',
         '../rule/rule',
-        '../rule/html/propertyRule',
         '../msg/base',
         '../utils'
     ]
 });
 /**
- * @fileoverview hU��{
+ * @fileoverview 表单验证类
  * @author czy88840616 <czy88840616@gmail.com>
- *
+ * config => https://gist.github.com/czy88840616/8857539
  */
-KISSY.add('gallery/auth/1.4.1/lib/base', function (S, JSON, Base, Field, Factory, Utils, undefined) {
+KISSY.add('gallery/auth/1.4.1/lib/base',function (S, JSON, Base, Field, Factory, Utils, undefined) {
 
     /**
-     * ؤMn
+     * 默认配置
      * @type {Object}
      */
     var defaultConfig = {
-        autoBind:true,
-        stopOnError:false
+        autoBind: true,
+        stopOnError: false,
+        exclude:[]
     };
 
-    var AUTH_MODE = {
-        FORM:'form',
-        OBJECT:'object'
-    };
 
     /**
      * @name Auth
-     * @class Auth��e�h
+     * @class Auth组件入口，表明
      * @version 1.2
-     * @param el {selector|htmlElement} formC 
+     * @param el {selector|htmlElement} form元素
      * @param config {object}
      * @return Auth
      * @constructor
@@ -745,7 +675,6 @@ KISSY.add('gallery/auth/1.4.1/lib/base', function (S, JSON, Base, Field, Factory
         if (!form) {
             S.log('[Auth]:form element not exist');
         } else {
-            self.mode = AUTH_MODE.FORM;
             self._init(form, S.merge(defaultConfig, config));
         }
 
@@ -756,142 +685,158 @@ KISSY.add('gallery/auth/1.4.1/lib/base', function (S, JSON, Base, Field, Factory
 
     S.extend(Auth, Base, /** @lends Auth.prototype*/ {
         /**
-         * �auth
+         * 初始化auth
          * @param el
          * @param config
          * @private
          */
-        _init:function (el, config) {
+        _init: function (el, config) {
             var forms = el.elements,
                 self = this;
 
-            if (forms && forms.length) {
-                S.each(forms, function (el, idx) {
-                    var filedConfig = S.merge(config, {event:config.autoBind ? Utils.getEvent(el) : 'none'});
-                    var f = new Field(el, filedConfig);
-                    f.addTarget(self);
-                    f.publish('validate', {
-                        bubble:1
-                    });
+            //save config
+            self.set('cfg', config);
 
-                    self.add(f);
+            if (forms && forms.length) {
+                var lastKey;
+                S.each(forms, function (el) {
+                    var _el = S.one(el),
+                        elName = _el.attr('name'),
+                        elKey =  elName || _el.attr('id'); //防止没有name导致初始化不添加
+
+                    if (!/(hidden|submit|button|reset)/.test(_el.attr('type')) && lastKey != elKey) {
+                        //不能在黑名单中
+                        if(!S.inArray(elName, config.exclude)) {
+                            //checkbox和radio只加最后一个
+                            if (S.inArray(_el.attr('type'), ['checkbox', 'radio'])) {
+                                var form = _el.getDOMNode().form,
+                                    els = [];
+
+                                S.each(document.getElementsByName(elName), function (item) {
+                                    if (item.form == form) {
+                                        els.push(item);
+                                    }
+                                });
+
+                                self.field(els.pop());
+                                lastName = elName;
+                            } else {
+                                self.field(_el);
+                            }
+                        }
+                    }
                 });
             }
 
-            //save config
-            self.AuthConfig = config;
-
-            //��/form! �O=html5,��!�>( /:�html5�!��H
-            if (self.mode === AUTH_MODE.FORM) {
-                S.one(el).attr('novalidate', 'novalidate');
-            }
-
+            //需要屏蔽html5本身的校验，放在最后是为了html5的校验能生效
+            S.one(el).attr('novalidate', 'novalidate');
         },
         /**
-         * �� * �!��hU�
+         * 添加或者返回一个需要校验的表单域
          *
-         * @param field {Field|string|htmlElement} hU��ahtmlhUC 
-         * @param config {object} �	�Mn�� �/field�a1� dMn
          * @return {*}
          */
-        add:function (field, config) {
-            var el, key, self = this;
-
-            if (field instanceof Field) {
-                //add field
-                el = field.get('el');
-                key = S.one(el).attr('id') || S.one(el).attr('name');
-                self._storages[key || Utils.guid()] = field;
+        field: function () {
+            if(arguments.length == 1 && S.isString(arguments[0]) && !S.all(arguments[0]).length) {
+                return this._storages[arguments[0]];
             } else {
-                //add html element
-                el = S.one(field);
-                if (el) {
-                    key = S.one(el).attr('id') || S.one(el).attr('name');
-                    var filedConfig = S.merge(self.AuthConfig, {event:self.AuthConfig.autoBind ? Utils.getEvent(el) : 'none'}, config);
-                    self._storages[key || Utils.guid()] = new Field(el, filedConfig);
-                }
+                var els = S.all(arguments[0]),
+                    cfg = arguments[1] || {},
+                    self = this,
+                    authCfg = self.get('cfg'),
+                    defaultCfg = {
+                        msg: authCfg.msg,
+                        rules: authCfg.rules
+                    };
+
+                S.each(els, function(el) {
+                    el = S.one(el);
+                    var key = el.attr('id') || el.attr('name');
+                    if(self._storages[key]) {
+                        self._storages[key].config(cfg);
+                    } else {
+                        S.mix(cfg, defaultCfg, false, undefined, true);
+                        self._storages[key || Utils.guid()] = new Field(el, S.merge(cfg, {event: authCfg.autoBind ? Utils.getEvent(el) : 'none'}));
+                    }
+                });
             }
 
             return self;
         },
         /**
-         * 9nkey��field�a
+         * 根据key返回field对象
          * @param name
          * @return {*}
+         * @deprecated
          */
-        getField:function (name) {
+        getField: function (name) {
             return this._storages[name];
         },
         /**
-         * �Auth�� *���SM
-��(
+         * 对Auth注册一个新的规则，当前上下文可用
          * @param name
          * @param rule
          */
-        register:function (name, rule) {
+        register: function (name, rule) {
             Factory.register(name, rule);
 
             return this;
         },
-        validate:function (group) {
-            var self = this;
+        validate: function (callback) {
+            var self = this,
+                result = true, currentField;
 
-            self.fire('beforeValidate');
+            (function (arr, complete) {
+                var i = 0, keys = Utils.getKeys(arr), l = keys.length;
 
-            var result = true, currentField;
-
-            S.each(self._storages, function (field, idx) {
-                var r = field.validate();
-                result = result && r;
-                currentField = field;
-
-                //stop on error
-                if (self.AuthConfig.stopOnError && !result) {
-                    return false;
+                function next() {
+                    if (i < l) {
+                        currentField = arr[keys[i]];
+                        currentField.on('authValidate', function (ev) {
+                            currentField.detach('authValidate');
+                            i++;
+                            if (ev.result) {
+                                next();
+                            } else {
+                                result = false;
+                                self.get('cfg').stopOnError ? complete() : next();
+                            }
+                        });
+                        currentField.validate();
+                    } else {
+                        complete();
+                    }
                 }
+
+                next();
+            })(self._storages, function () {
+                self.fire('validate', {
+                    result: result,
+                    lastField: currentField
+                });
+
+                self.set('result', result);
+
+                callback && callback(result);
             });
-
-            self.fire('validate', {
-                result:result,
-                lastField:currentField
-            });
-
-            self.set('result', result);
-
-            self.fire('afterValidate');
-
-            return result;
         }
     }, {
-        ATTRS:{
-            result:{}
+        ATTRS: {
+            result: {
+                value: true
+            },
+            cfg: {}
         }
-    });
-
-    S.mix(Auth, {
-        Field:Field
     });
 
     return Auth;
 }, {
-    requires:[
+    requires: [
         'json',
         'base',
         './field/field',
         './rule/ruleFactory',
         './utils'
-    ]
-});
-/**
- * @fileoverview auth入口
- * @author czy88840616 <czy88840616@gmail.com>
- *
- */
-KISSY.add('gallery/auth/1.4.1/lib/index', function(S, Auth){
-    return Auth;
-}, {
-    requires:[
-        './base'
     ]
 });
 /**
@@ -901,5 +846,5 @@ KISSY.add('gallery/auth/1.4.1/lib/index', function(S, Auth){
  **/
 KISSY.add('gallery/auth/1.4.1/index',function (S, Auth) {
     return Auth;
-}, {requires:['./lib/index']});
+}, {requires:['./lib/base']});
 
