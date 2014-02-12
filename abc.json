@@ -1,6 +1,6 @@
 {
     "name": "auth",
-    "version": "1.6",
+    "version": "1.4.1",
     "desc": "最强大的表单校验组件",
     "tag":"表单,表单验证",
     "author": {
