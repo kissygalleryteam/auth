@@ -61,6 +61,7 @@ module.exports = function(grunt) {
         copy: {
             main: {
                 files: [
+                	{src: ['<%= pkg.version %>/style.css'], dest: '<%= pkg.version %>/build/style.css'},
                     {src: ['<%= pkg.version %>/plugin/msgs/style.css'], dest: '<%= pkg.version %>/build/plugin/msgs/style.css'}
                 ]
             }
@@ -68,6 +69,7 @@ module.exports = function(grunt) {
         cssmin: {
             combine: {
                 files: {
+                	'<%= pkg.version %>/build/style-min.css': ['<%= pkg.version %>/build/style.css'],
                     '<%= pkg.version %>/build/plugin/msgs/style-min.css': ['<%= pkg.version %>/build/plugin/msgs/style.css']
                 }
             }
