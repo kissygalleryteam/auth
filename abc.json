@@ -1,8 +1,9 @@
 {
     "name": "auth",
-    "version": "1.4.1",
+    "version": "1.6",
     "desc": "最强大的表单校验组件",
     "tag":"表单,表单验证",
+    "cover":"http://gtms01.alicdn.com/tps/i1/T1wV8.FxBkXXaGYHwB-221-195.png",
     "author": {
         "name": "张挺/明河",
         "email": "zhangting@taobao.com",
