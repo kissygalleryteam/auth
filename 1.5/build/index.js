@@ -259,7 +259,7 @@ KISSY.add('gallery/auth/1.5/lib/rule/default',function (S) {
                 $target.each(function($el){
                     if($el.prop('checked')) value ++;
                 })
-                if(!this.msg('error')) this.msg('error','最小必须选择'+attr+'项');
+                if(!this.msg('error')) this.msg('error','至少选择'+attr+'项');
             }
             return Number(value) > Number(attr);
         },
@@ -560,7 +560,7 @@ KISSY.add('gallery/auth/1.5/lib/msg/base',function (S, Base,Node,XTemplate) {
  * */
 /**
  * @fileoverview
- * @author  : <zhangting@taobao.com>
+ * @author 张挺 <zhangting@taobao.com>
  *
  */
 KISSY.add('gallery/auth/1.5/lib/utils',function (S, DOM, undefined) {
@@ -578,7 +578,7 @@ KISSY.add('gallery/auth/1.5/lib/utils',function (S, DOM, undefined) {
             return 'AUTH_' + S.guid();
         },
         /**
-         * 9nC {�eњؤ���
+         * 根据元素类型来绑定默认的事件
          * @param els
          * @return {string}
          */
@@ -627,8 +627,8 @@ KISSY.add('gallery/auth/1.5/lib/utils',function (S, DOM, undefined) {
 },{ requires:[ 'dom' ] });
 /**
  * changelog
- * v1.5 by �
- *  - select��type^'ؤ�ы�:change
+ * v1.5 by 明河
+ *  - select增加type属性，默认触发事件为change
  * */
 /**
  * @fileoverview
@@ -939,6 +939,7 @@ KISSY.add('gallery/auth/1.5/lib/field/field',function (S, Event, Base, DOM,Node,
             }).fail(function(rule){
                 //有规则存在验证失败
                 _defer.reject(rule);
+                S.log(self.get('name')+'字段出错的规则是：'+rule.get('name'));
                 self.fire('error',{rule:rule});
             });
             return PROMISE;
@@ -1243,19 +1244,17 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
         validate:function (fields) {
             var self = this;
             var stopOnError = self.get('stopOnError');
-            var _defer = Auth._defer;
+            var _defer = new Promise.Defer();
             //获取需要验证的字段
             fields = self._filterFields(fields);
             //不存在需要验证的规则，直接投递成功消息
             if(!fields.length){
-                var _emptyDefer = new Promise.Defer();
-                var _emptyPromise = _emptyDefer.promise;
-                _emptyPromise.then(function(){
+                _defer.promise.then(function(){
                     _defer.resolve(fields);
                     self.fire('success',{fields:fields});
                 })
-                _emptyDefer.resolve();
-                return _emptyPromise;
+                _defer.resolve();
+                return _defer.promise;
             }
             var i = 0;
             var PROMISE;
@@ -1263,7 +1262,27 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
             self.fire('beforeTest',{fields:fields});
             _testField(fields[i]);
             function _testField(field){
-                if(i >= fields.length) return PROMISE;
+                //最后一个Field的PROMISE（说明所有的Field都验证了一遍）
+                if(i >= fields.length) {
+                    // fix bug: issue 20
+                    return PROMISE.then(function(){
+                        if(!errorFields.length){
+                            //所有filed验证通过
+                            _defer.resolve(fields);
+                            self.fire('success',{fields:fields});
+                        }
+                        else {
+                            //有一个Field验证失败，就可以派发auth的失败事件
+                            _defer.reject(errorFields);
+                            self.fire('error', {fields:errorFields})
+                        }
+                    }).fail(function(){
+                        //有一个Field验证失败，就可以派发auth的失败事件
+                        _defer.reject(errorFields);
+                        self.fire('error',{fields:errorFields});
+                    });
+                }
+
                 PROMISE =  field.test();
                 i++;
                 PROMISE.then(function(){
@@ -1278,18 +1297,6 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
                     errorFields.push(rule.get('field'));
                 })
             }
-            //最后一个Field的PROMISE（说明所有的Field都验证了一遍）
-            PROMISE.then(function(){
-                if(!errorFields.length){
-                    //所有filed验证通过
-                    _defer.resolve(fields);
-                    self.fire('success',{fields:fields});
-                }
-            }).fail(function(){
-                //有一个Field验证失败，就可以派发auth的失败事件
-                _defer.reject(errorFields);
-                self.fire('error',{fields:errorFields});
-            });
             return _defer.promise;
         },
         /**
@@ -1396,6 +1403,7 @@ KISSY.add('gallery/auth/1.5/lib/index',function (S, Node,JSON, Base,Promise, Fie
  *  - 增加fieldTarget方法
  *  - 增加field方法
  * */
+
 /**
  * @fileoverview Form Auth For Kissy
  * @author zhangting@taobao.com<zhangting@taobao.com>

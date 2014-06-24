@@ -205,19 +205,17 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
         validate:function (fields) {
             var self = this;
             var stopOnError = self.get('stopOnError');
-            var _defer = Auth._defer;
+            var _defer = new Promise.Defer();
             //获取需要验证的字段
             fields = self._filterFields(fields);
             //不存在需要验证的规则，直接投递成功消息
             if(!fields.length){
-                var _emptyDefer = new Promise.Defer();
-                var _emptyPromise = _emptyDefer.promise;
-                _emptyPromise.then(function(){
+                _defer.promise.then(function(){
                     _defer.resolve(fields);
                     self.fire('success',{fields:fields});
                 })
-                _emptyDefer.resolve();
-                return _emptyPromise;
+                _defer.resolve();
+                return _defer.promise;
             }
             var i = 0;
             var PROMISE;
@@ -225,7 +223,27 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
             self.fire('beforeTest',{fields:fields});
             _testField(fields[i]);
             function _testField(field){
-                if(i >= fields.length) return PROMISE;
+                //最后一个Field的PROMISE（说明所有的Field都验证了一遍）
+                if(i >= fields.length) {
+                    // fix bug: issue 20
+                    return PROMISE.then(function(){
+                        if(!errorFields.length){
+                            //所有filed验证通过
+                            _defer.resolve(fields);
+                            self.fire('success',{fields:fields});
+                        }
+                        else {
+                            //有一个Field验证失败，就可以派发auth的失败事件
+                            _defer.reject(errorFields);
+                            self.fire('error', {fields:errorFields})
+                        }
+                    }).fail(function(){
+                        //有一个Field验证失败，就可以派发auth的失败事件
+                        _defer.reject(errorFields);
+                        self.fire('error',{fields:errorFields});
+                    });
+                }
+
                 PROMISE =  field.test();
                 i++;
                 PROMISE.then(function(){
@@ -240,18 +258,6 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
                     errorFields.push(rule.get('field'));
                 })
             }
-            //最后一个Field的PROMISE（说明所有的Field都验证了一遍）
-            PROMISE.then(function(){
-                if(!errorFields.length){
-                    //所有filed验证通过
-                    _defer.resolve(fields);
-                    self.fire('success',{fields:fields});
-                }
-            }).fail(function(){
-                //有一个Field验证失败，就可以派发auth的失败事件
-                _defer.reject(errorFields);
-                self.fire('error',{fields:errorFields});
-            });
             return _defer.promise;
         },
         /**
