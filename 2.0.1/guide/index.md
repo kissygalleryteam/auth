@@ -9,19 +9,19 @@ Auth支持异步校验，支持与异步上传组件配合使用。
 ##demo汇总
 
 <ul>
-    <li><a href="http://gallery.kissyui.com/auth/2.0.1/demo/simple_form.html">一个简单表单的验证</a></li>
-    <li><a href="http://gallery.kissyui.com/auth/2.0.1/demo/add_custom_rule.html">添加自定义验证规则</a></li>
-    <li><a href="http://gallery.kissyui.com/auth/2.0.1/demo/event.html">事件举例</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/2.0.1/demo/exclude.html">exclude（可以排除验证规则）用法举例</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/2.0.1/demo/asyn_test.html">支持异步校验！</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/2.0.1/demo/uploader.html">与异步文件上传组件配合校验！</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/2.0.1/demo/rule_msg.html">规则可以设置默认消息</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/2.0.1/demo/add_field.html">可以动态添加校验字段</a>(2.0.0+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/2.0.1/demo/server_msg.html">配合服务器输出的消息</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/2.0.1/demo/msg.html">字段上消息的控制</a></li>
-    <li><a href="http://gallery.kissyui.com/auth/2.0.1/demo/rule_msg.html">给规则设置默认消息</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/2.0.1/demo/noSubmitTest.html">表单提交不默认触发验证</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/2.0.1/demo/rule_msg.html">配合butterfly使用</a>(1.5+)</li>
+    <li><a href="http://kg.kissyui.com/auth/2.0.0/demo/simple_form.html">一个简单表单的验证</a></li>
+    <li><a href="http://kg.kissyui.com/auth/2.0.0/demo/add_custom_rule.html">添加自定义验证规则</a></li>
+    <li><a href="http://kg.kissyui.com/auth/2.0.0/demo/event.html">事件举例</a>(1.5+)</li>
+    <li><a href="http://kg.kissyui.com/auth/2.0.0/demo/exclude.html">exclude（可以排除验证规则）用法举例</a>(1.5+)</li>
+    <li><a href="http://kg.kissyui.com/auth/2.0.0/demo/asyn_test.html">支持异步校验！</a>(1.5+)</li>
+    <li><a href="http://kg.kissyui.com/auth/2.0.0/demo/uploader.html">与异步文件上传组件配合校验！</a>(1.5+)</li>
+    <li><a href="http://kg.kissyui.com/auth/2.0.0/demo/rule_msg.html">规则可以设置默认消息</a>(1.5+)</li>
+    <li><a href="http://kg.kissyui.com/auth/2.0.0/demo/add_field.html">可以动态添加校验字段</a>(2.0.0+)</li>
+    <li><a href="http://kg.kissyui.com/auth/2.0.0/demo/server_msg.html">配合服务器输出的消息</a>(1.5+)</li>
+    <li><a href="http://kg.kissyui.com/auth/2.0.0/demo/msg.html">字段上消息的控制</a></li>
+    <li><a href="http://kg.kissyui.com/auth/2.0.0/demo/rule_msg.html">给规则设置默认消息</a>(1.5+)</li>
+    <li><a href="http://kg.kissyui.com/auth/2.0.0/demo/noSubmitTest.html">表单提交不默认触发验证</a>(1.5+)</li>
+    <li><a href="http://kg.kissyui.com/auth/2.0.0/demo/rule_msg.html">配合butterfly使用</a>(1.5+)</li>
 </ul>
 
 ##快速使用
@@ -61,7 +61,7 @@ Auth支持异步校验，支持与异步上传组件配合使用。
 
 ### 初始化组件
 
-    S.use('kg/auth/2.0.1/,kg/auth/2.0.1/plugin/msgs/,kg/auth/2.0.1/plugin/msgs/style.css', function (S, Auth,AuthMsgs) {
+    S.use('kg/auth/2.0.0/,kg/auth/2.0.0/plugin/msgs/,kg/auth/2.0.0/plugin/msgs/style.css', function (S, Auth,AuthMsgs) {
         var auth = new Auth('#J_Auth');
         auth.plug(new AuthMsgs());
         auth.render();
@@ -71,9 +71,9 @@ Auth的第一个参数为form目标元素。
 
 *render()*：必须调用！
 
-*kg/auth/2.0.1/plugin/msgs/*：消息插件，v2.0.0新增，*auth.plug(new AuthMsgs());*
+*kg/auth/2.0.0/plugin/msgs/*：消息插件，v2.0.0新增，*auth.plug(new AuthMsgs());*
 
-*kg/auth/2.0.1/plugin/msgs/style.css* ：为消息层样式。
+*kg/auth/2.0.0/plugin/msgs/style.css* ：为消息层样式。
 
 当提交表单前默认会触发验证，验证成功提交表单，想要去掉这个作用，请配置*submitTest:false* 。
 
@@ -118,7 +118,7 @@ date | 是否符合日期格式 |
 
 每个Field对应一个Msg。
 
-请看demo：<a href="http://gallery.kissyui.com/auth/2.0.1/demo/msg.html" target="_blank">字段上消息的控制</a>。
+请看demo：<a href="http://kg.kissyui.com/auth/2.0.0/demo/msg.html" target="_blank">字段上消息的控制</a>。
 
 ###指定消息层容器
 
@@ -135,7 +135,7 @@ msg-wrapper的值为容器钩子。
 
 ###服务器默认输出了错误消息时的处理
 
-请看demo：<a href="http://gallery.kissyui.com/auth/2.0.1/demo/server_msg.html" target="_blank">配合服务器输出的消息</a>。
+请看demo：<a href="http://kg.kissyui.com/auth/2.0.0/demo/server_msg.html" target="_blank">配合服务器输出的消息</a>。
 
     <input type="text" class="input-xlarge" id="user" msg-wrapper="#J_UseMsg" >
     <div id="J_UseMsg">
@@ -183,7 +183,7 @@ warn变成样式名auth-warn，根据场景可以随意配置。
 
 ##注册自定义规则
 
-[demo传送门](http://gallery.kissyui.com/auth/2.0.1/demo/add_custom_rule.html)
+[demo传送门](http://kg.kissyui.com/auth/2.0.0/demo/add_custom_rule.html)
 
 使用*auth.register(ruleName,function)* 注册一个自定义规则。
 
@@ -214,7 +214,7 @@ ruleFunction必须有个返回值，同步校验（区别于异步校验）返�
 
 ##异步验证的处理
 
-[demo传送门](http://gallery.kissyui.com/auth/2.0.1/demo/asyn_test.html)
+[demo传送门](http://kg.kissyui.com/auth/2.0.0/demo/asyn_test.html)
 
 这是Auth的亮点，与市面上任何一款表单验证组件都不同。
 
@@ -245,7 +245,7 @@ Auth的独特之处在于使用promise模式，保证验证的规则能够排序
 
 ## 验证事件
 
-[demo传送门](http://gallery.kissyui.com/auth/2.0.1/demo/event.html)
+[demo传送门](http://kg.kissyui.com/auth/2.0.0/demo/event.html)
 
 Auth和Field的验证事件相同，都有：beforeTest（校验前）、success（校验通过）、error（校验失败）事件，但事件的参数有所差异。
 
@@ -500,7 +500,7 @@ target | NodeList|N|""| target指向Field对应的表单元素，target是可以
 
 ##与uploader配合使用
 
-如果你的表单包含有[uploader]()异步上传组件，[demo传送门](http://gallery.kissyui.com/auth/2.0.1/demo/rule_msg.html)。
+如果你的表单包含有[uploader]()异步上传组件，[demo传送门](http://kg.kissyui.com/auth/2.0.0/demo/rule_msg.html)。
 
 由于uploader的初始化代码比较多，就不全部贴出来了。
 

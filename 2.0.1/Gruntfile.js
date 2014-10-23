@@ -35,7 +35,7 @@ module.exports = function(grunt) {
                     {
                         expand: true,
                         cwd: SRC,
-                        src: [ './*.js','!./Gruntfile.js','./plugin/**/*.js' ],
+                        src: [ './*.js','!./Gruntfile.js','./plugin/*.js' ],
                         dest: 'build/'
                     }
                 ]
