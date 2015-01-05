@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>auth</title>
+    <link rel="stylesheet" href="http://cdn.staticfile.org/twitter-bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://docs.kissyui.com/1.4/source/guideline/templates/assets/com-prettify.css">
+    <link rel="stylesheet" href="http://docs.kissyui.com/1.4/source/guideline/templates/assets/com.css">
+    <script src="http://cdn.staticfile.org/jquery/2.1.1-rc2/jquery.min.js"></script>
+    <script src="http://cdn.staticfile.org/twitter-bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="http://cdn.staticfile.org/prettify/r298/prettify.min.js"></script>
+    <script src="http://g.tbcdn.cn/kissy/k/1.4.8/seed-min.js" data-config="{combine:true}"></script>
+  </head>
+  <body data-spy="scroll" data-target=".bs-docs-sidebar">
+    <div id="header"><a href="http://docs.kissyui.com/" class="logo">kissy</a>
+      <nav><a href="http://docs.kissyui.com/1.4/docs/html/coms.html">优秀组件推荐</a></nav>
+    </div>
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span3 bs-docs-sidebar">
+          <ul data-spy="affix" data-offset-top="0" class="nav nav-list bs-docs-sidenav"></ul>
+        </div>
+        <div class="span9 bs-docs-content">
+          <h1 data-id="undefined" class="title">auth</h1>
+          <p class="author-wrapper"><span>组件有问题？旺旺联系作者：</span><a href="https://github.com/czy88840616" target="_blank" data-name="张挺" class="author"><img src="https://avatars.githubusercontent.com/u/418820?v=3&amp;s=60" alt="张挺"></a><span class="author-name">张挺</span><a href="https://github.com/minghe" target="_blank" data-name="剑平" class="author"><img src="https://avatars.githubusercontent.com/u/724588?v=3&amp;s=60" alt="剑平"></a><span class="author-name">剑平</span>
+          </p>
+          <div class="common-link"><a href="../demo/index.html" target="_blank" class="demo">示例</a><a href="https://github.com/kissygalleryteam/auth" target="_blank" class="source">源码</a></div>
+          <p class="com-info"><span class="info-label">View</span><span data-com="auth" class="J_View">2640</span></p>
+          <p class="com-info"><span class="info-label">所属分类</span><a href="http://kpm.taobao.net/list/表单">表单</a><span class="info-label tag-label">组件标签</span><a href="http://kpm.taobao.net/list/tag?tag=表单校验">表单校验</a>
+          </p>
+          <p class="com-info"><span class="info-label">kissy版本</span><span>1.4.X</span>
+          </p><h2 id="-">综述</h2>
+<p>Auth是非常强大的表单校验组件，Auth在灵活性上是无与伦比，足以满足大部分的表单场景。</p>
+<p>Auth支持异步校验，支持与异步上传组件配合使用。</p>
+<p>作者：张挺（V1.4）| 明河（V1.5+）</p>
+<h2 id="demo-">demo汇总</h2>
+<ul>
+    <li><a href="http://gallery.kissyui.com/auth/doc/demo/simple_form.html">一个简单表单的验证</a></li>
+    <li><a href="http://gallery.kissyui.com/auth/doc/demo/add_custom_rule.html">添加自定义验证规则</a></li>
+    <li><a href="http://gallery.kissyui.com/auth/doc/demo/event.html">事件举例</a>(1.5+)</li>
+    <li><a href="http://gallery.kissyui.com/auth/doc/demo/exclude.html">exclude（可以排除验证规则）用法举例</a>(1.5+)</li>
+    <li><a href="http://gallery.kissyui.com/auth/doc/demo/asyn_test.html">支持异步校验！</a>(1.5+)</li>
+    <li><a href="http://gallery.kissyui.com/auth/doc/demo/uploader.html">与异步文件上传组件配合校验！</a>(1.5+)</li>
+    <li><a href="http://gallery.kissyui.com/auth/doc/demo/rule_msg.html">规则可以设置默认消息</a>(1.5+)</li>
+    <li><a href="http://gallery.kissyui.com/auth/doc/demo/add_field.html">可以动态添加校验字段</a>(2.0.0+)</li>
+    <li><a href="http://gallery.kissyui.com/auth/doc/demo/server_msg.html">配合服务器输出的消息</a>(1.5+)</li>
+    <li><a href="http://gallery.kissyui.com/auth/doc/demo/msg.html">字段上消息的控制</a></li>
+    <li><a href="http://gallery.kissyui.com/auth/doc/demo/rule_msg.html">给规则设置默认消息</a>(1.5+)</li>
+    <li><a href="http://gallery.kissyui.com/auth/doc/demo/noSubmitTest.html">表单提交不默认触发验证</a>(1.5+)</li>
+    <li><a href="http://gallery.kissyui.com/auth/doc/demo/rule_msg.html">配合butterfly使用</a>(1.5+)</li>
+</ul>
+
+<h2 id="-">快速使用</h2>
+<h3 id="-">引用</h3>
+<pre><code>&lt;script src=&quot;http://g.tbcdn.cn/kissy/k/1.4.0/seed-min.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;http://g.tbcdn.cn/kissy/k/1.4.0/??css/dpl/base-min.css,css/dpl/forms-min.css,button/assets/dpl-min.css&quot;&gt;
+</code></pre><p>使用<a href="http://docs.kissyui.com/1.4/dpl/simpleui/forms.html">kissy dpl的form</a>结构和样式</p>
+<h3 id="html">HTML</h3>
+<p>表单的结构如下：</p>
+<pre><code>&lt;form class=&quot;form-horizontal&quot; id=&quot;J_Auth&quot;&gt;
+    &lt;div class=&quot;control-group&quot;&gt;
+        &lt;label class=&quot;control-label&quot; for=&quot;user&quot;&gt;用户名&lt;/label&gt;
+        &lt;div class=&quot;controls&quot;&gt;
+            &lt;input type=&quot;text&quot; class=&quot;input-xlarge&quot; name=&quot;user&quot; id=&quot;user&quot; required&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;form-actions&quot;&gt;
+        &lt;div class=&quot;ks-button ks-button-primary ks-button-shown&quot; id=&quot;J_TestForm&quot; role=&quot;button&quot; aria-disabled=&quot;false&quot; tabindex=&quot;0&quot; hidefocus=&quot;true&quot; aria-pressed=&quot;false&quot;&gt;提交&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/form&gt;
+</code></pre><p>验证的规则配置在元素上（采用的html5的验证配置风格）：</p>
+<pre><code>&lt;input type=&quot;text&quot; name=&quot;user&quot; required&gt;
+</code></pre><p>特别注意：元素上id可以不存在，但name必须存在！</p>
+<p>默认会有验证出错消息，也可以自己配置：</p>
+<pre><code>&lt;input type=&quot;text&quot; name=&quot;user&quot; required required-msg=&quot;用户名不可以为空！&quot;&gt;
+</code></pre><h3 id="-">初始化组件</h3>
+<pre><code>S.use(&#39;kg/auth/2.0.1/,kg/auth/2.0.1/plugin/msgs/,kg/auth/2.0.1/plugin/msgs/style.css&#39;, function (S, Auth,AuthMsgs) {
+    var auth = new Auth(&#39;#J_Auth&#39;);
+    auth.plug(new AuthMsgs());
+    auth.render();
+})
+</code></pre><p>Auth的第一个参数为form目标元素。</p>
+<p><em>render()</em>：必须调用！</p>
+<p><em>kg/auth/2.0.1/plugin/msgs/</em>：消息插件，v2.0.0新增，<em>auth.plug(new AuthMsgs());</em></p>
+<p><em>kg/auth/2.0.1/plugin/msgs/style.css</em> ：为消息层样式。</p>
+<p>当提交表单前默认会触发验证，验证成功提交表单，想要去掉这个作用，请配置<em>submitTest:false</em> 。</p>
+<p>v2.0.0新增fnFilter配置，用于过滤不需要实例化的字段：</p>
+<pre><code>var auth = new Auth(&#39;#J_Auth&#39;,{
+    //过滤掉不需要实例化的字段
+    fnFilter:function($field){
+        return $field.attr(&#39;type&#39;) == &#39;hidden&#39;;
+    }
+});
+</code></pre><p>v2.0.0新增fnConfig配置，用于控制Field的配置：</p>
+<pre><code>var auth = new Auth(&#39;#J_Auth&#39;,{
+    fnConfig:function(filedConfig,$field){
+        if($field.attr(&#39;type&#39;) == &#39;checkbox&#39;){
+            filedConfig.event = &#39;click change&#39;;
+        }
+        return filedConfig;
+    }
+});
+</code></pre><h2 id="-">默认规则</h2>
+<p>Auth默认集成了常用的验证规则，直接配置在表单元素的属性上：</p>
+<table>
+<thead>
+<tr>
+<th>规则名</th>
+<th>用途</th>
+<th>用法举例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>required</td>
+<td>值必须存在（兼容radio/checkbox/select的处理）</td>
+<td>required required-msg=&quot;用户名必须存在！&quot;</td>
+</tr>
+<tr>
+<td>pattern</td>
+<td>配置一个正则对值进行验证</td>
+<td>pattern=&quot;s$&quot; pattern-msg=&quot;email错误！&quot;</td>
+</tr>
+<tr>
+<td>max</td>
+<td>最大值校验（兼容checkbox的处理）</td>
+<td>max=&quot;3&quot; max-msg=&quot;最多选择3项！&quot;</td>
+</tr>
+<tr>
+<td>min</td>
+<td>最小值校验（兼容checkbox的处理）</td>
+<td>min=&quot;3&quot; min-msg=&quot;最小选择3项！&quot;</td>
+</tr>
+<tr>
+<td>equal</td>
+<td>value是否等于配置的值</td>
+<td>equalTo=&quot;明河&quot; equalTo-msg=&quot;请填写明河！&quot;</td>
+</tr>
+<tr>
+<td>equal-field</td>
+<td>校验二个字段的值是否相同</td>
+<td>equal-field=&quot;password&quot; equal-field-msg=&quot;密码输入不一致！&quot;</td>
+</tr>
+<tr>
+<td>number</td>
+<td>是否是数字</td>
+<td>number number-msg=&quot;必须是数字&quot;</td>
+</tr>
+<tr>
+<td>mobile</td>
+<td>是否符合手机号码格式</td>
+<td>mobile mobile-msg=&quot;手机号码不合法！&quot;</td>
+</tr>
+<tr>
+<td>email</td>
+<td>是否符合email格式</td>
+<td></td>
+</tr>
+<tr>
+<td>date</td>
+<td>是否符合日期格式</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="-">验证消息控制</h2>
+<p>每个Field对应一个Msg。</p>
+<p>请看demo：<a href="http://gallery.kissyui.com/auth/2.0.1/demo/msg.html" target="_blank">字段上消息的控制</a>。</p>
+<h3 id="-">指定消息层容器</h3>
+<p>组件默认会在表单元素后面插入个消息容器：</p>
+<pre><code>&lt;div class=&quot;msg-wrapper&quot;&gt;&lt;/div&gt;
+</code></pre><p>想要自己指定消息层容器，通过配置msg-wrapper属性：</p>
+<pre><code>&lt;input type=&quot;text&quot; class=&quot;input-xlarge&quot; id=&quot;user&quot; msg-wrapper=&quot;#J_UseMsg&quot;&gt;
+&lt;div id=&quot;J_UseMsg&quot;&gt;&lt;/div&gt;
+</code></pre><p>msg-wrapper的值为容器钩子。</p>
+<h3 id="-">服务器默认输出了错误消息时的处理</h3>
+<p>请看demo：<a href="http://gallery.kissyui.com/auth/2.0.1/demo/server_msg.html" target="_blank">配合服务器输出的消息</a>。</p>
+<pre><code>&lt;input type=&quot;text&quot; class=&quot;input-xlarge&quot; id=&quot;user&quot; msg-wrapper=&quot;#J_UseMsg&quot; &gt;
+&lt;div id=&quot;J_UseMsg&quot;&gt;
+    &lt;!--这里是服务器输出的错误消息 auth-msg样式名必须存在--&gt;
+    &lt;p class=&quot;auth-msg auth-error&quot;&gt;用户名不可以为空！&lt;/p&gt;
+&lt;/div&gt;
+</code></pre><p>组件会自动处理这种场景，不会出现怪异的二个提示层。</p>
+<h3 id="-">获取消息实例</h3>
+<pre><code>//auth为Auth实例
+//获取name为user的字段
+var userField = auth.field(&#39;user&#39;);
+//获取消息实例
+var msg = userField.get(&#39;msg&#39;);
+</code></pre><h3 id="-">显示消息</h3>
+<pre><code>msg.show(&#39;warn&#39;,&#39;用户名不可以为空！&#39;);
+</code></pre><p>生成的层结构：</p>
+<pre><code>&lt;p class=&quot;auth-msg auth-warn&quot;&gt;用户名不可以为空！&lt;/p&gt;
+</code></pre><p>warn变成样式名auth-warn，根据场景可以随意配置。</p>
+<h3 id="-">修改消息内容</h3>
+<p>可以手动修改规则对应的消息内容：</p>
+<pre><code>var userField = auth.field(&#39;user&#39;);
+var requiredRule = userField.rule(&#39;required&#39;);
+requiredRule.set(&#39;error&#39;,&#39;用户名必须是明河&#39;);
+requiredRule.set(&#39;success&#39;,&#39;校验通过&#39;);
+</code></pre><h3 id="-">隐藏消息</h3>
+<pre><code>msg.hide();
+</code></pre><h3 id="-">控制动画速度</h3>
+<pre><code>msg.set(&#39;speed&#39;,0.8);
+</code></pre><h2 id="-">注册自定义规则</h2>
+<p><a href="http://gallery.kissyui.com/auth/2.0.1/demo/add_custom_rule.html">demo传送门</a></p>
+<p>使用<em>auth.register(ruleName,function)</em> 注册一个自定义规则。</p>
+<p><em>ruleName</em>: 规则名称
+<em>ruleFunction</em>: 规则函数，有有二个核心参数，<em>value</em>为被验证元素的值，<em>attr</em>为html tag中配置的属性值。</p>
+<pre><code>auth.register(&#39;min-len&#39;, function (value,attr) {
+   var min = Number(attr);
+   this.msg(&#39;error&#39;,&#39;请您输入至少&#39;+min+&#39;个字符&#39;);
+   return value.length &gt;= Number(attr);
+});
+</code></pre><p>ruleFunction的this上下文指向对应的Rule实例，比如你要设置rule的错误消息：</p>
+<pre><code>this.msg(&#39;error&#39;,&#39;挺爷，vmarket报错了~&#39;);
+</code></pre><p>ruleFunction必须有个返回值，同步校验（区别于异步校验）返回的是Boolean值。</p>
+<p>有时你还希望获取到Field实例，调用其<em>test()</em>方法：</p>
+<pre><code>var field = this.get(&#39;field&#39;);
+</code></pre><h3 id="html-tag-">html tag中的配置</h3>
+<pre><code>&lt;input type=&quot;text&quot; class=&quot;input-xlarge&quot; min-len=&quot;5&quot;&gt;
+</code></pre><p>您也可以在tag上配置错误消息：<em>min-len-msg=&quot;出错了&quot;</em>，html上配置的消息会覆盖ruleFunction上配置的error消息。</p>
+<h2 id="-">异步验证的处理</h2>
+<p><a href="http://gallery.kissyui.com/auth/2.0.1/demo/asyn_test.html">demo传送门</a></p>
+<p>这是Auth的亮点，与市面上任何一款表单验证组件都不同。</p>
+<pre><code>auth.register(&#39;user&#39;, function (value,attr,defer,field) {
+    var self = this;
+    io.get(&quot;./user_success.json&quot;,&#39;json&#39;).then(function(result){
+        var data = result[0];
+        //用户名
+        var name = data.name;
+        if(name == &#39;minghe&#39;){
+            //验证成功，传送数据
+            defer.resolve(self);
+        }else{
+            //验证失败，一样传送数据
+            defer.reject(self);
+        }
+    });
+    //特别注意：不同于同步校验，这里返回promise
+    return defer.promise;
+});
+</code></pre><p>Auth的独特之处在于使用promise模式，保证验证的规则能够排序执行。</p>
+<p><em>ruleFunction</em>有第三个参数：<em>defer</em> （<a href="http://docs.kissyui.com/docs/html/api/component/promise/defer.html">Promise.Defer</a>的实例），在ruleFunction中，你可以自由的写异步处理逻辑，需要注意二点：</p>
+<ul>
+<li>返回值必须是<em>defer.promise</em></li>
+<li>异步加载成功后，如果校验成功调用下<em>defer.resolve(self)</em>，校验失败调用下<em>defer.reject(self)</em>。</li>
+</ul>
+<h2 id="-">验证事件</h2>
+<p><a href="http://gallery.kissyui.com/auth/2.0.1/demo/event.html">demo传送门</a></p>
+<p>Auth和Field的验证事件相同，都有：beforeTest（校验前）、success（校验通过）、error（校验失败）事件，但事件的参数有所差异。</p>
+<p>先初始化了auth：</p>
+<pre><code>var auth = new Auth(&#39;#J_Auth&#39;);
+auth.render();
+</code></pre><h3 id="auth-beforetest-">Auth的<em>beforeTest</em>演示</h3>
+<pre><code>auth.on(&#39;beforeTest&#39;,function(ev){
+    var fields = ev.fields;
+    S.log(&#39;验证的字段有：&#39;);
+    S.log(fields);
+})
+</code></pre><p><em>fields</em>：保存着需要校验的字段数组</p>
+<h3 id="auth-success-">Auth的<em>success</em>演示</h3>
+<pre><code>auth.on(&quot;success&quot;,function(){
+    S.log(&#39;全部验证通过&#39;);
+})
+</code></pre><p>参数<em>fields</em>：保存着所有触发校验的字段数组</p>
+<h3 id="auth-error-">Auth的<em>error</em>演示</h3>
+<pre><code>auth.on(&#39;error&#39;,function(ev){
+    var fields = ev.fields;
+    S.log(&#39;出错的字段是：&#39;);
+    S.log(fields);
+})
+</code></pre><p>参数<em>fields</em>：保存着所有出错的字段数组</p>
+<h3 id="-field-">来看下Field的三个事件</h3>
+<p>先获取个Field</p>
+<pre><code>var user = auth.getField(&#39;user&#39;);
+</code></pre><p>留意事件参数值的差异：Field的值为Rule规则实例。</p>
+<pre><code>user.on(&#39;beforeTest&#39;,function(ev){
+    var rules = ev.rules;
+    S.log(&#39;user字段验证的规则：&#39;);
+    S.log(rules);
+})
+user.on(&#39;success&#39;,function(ev){
+    var rules = ev.rules;
+    S.log(&#39;user字段验证成功：&#39;);
+    S.log(rules);
+})
+user.on(&#39;error&#39;,function(ev){
+    var rule = ev.rule;
+    S.log(&#39;出错的规则是：&#39;);
+    S.log(rule);
+})
+</code></pre><h2 id="auth-api-">Auth API详解</h2>
+<h3 id="-">属性/配置参数</h3>
+<table>
+<thead>
+<tr>
+<th>属性名</th>
+<th>类型</th>
+<th>只读</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>stopOnError</td>
+<td>Boolean</td>
+<td>N</td>
+<td>false</td>
+<td>设置为true时，当field校验失败时会停止后面field的校验</td>
+</tr>
+<tr>
+<td>submitTest</td>
+<td>Boolean</td>
+<td>N</td>
+<td>true</td>
+<td>设置为true时，提交表单前会先触发校验</td>
+</tr>
+<tr>
+<td>autoBind</td>
+<td>Boolean</td>
+<td>Y</td>
+<td>true</td>
+<td>设置为true时，生成field时，会自动给表单元素绑定校验事件</td>
+</tr>
+<tr>
+<td>useId</td>
+<td>Boolean</td>
+<td>Y</td>
+<td>false</td>
+<td>设置为true时，会优先使用元素的id作为field的那么，默认优先使用name</td>
+</tr>
+<tr>
+<td>fields</td>
+<td>Array</td>
+<td>Y</td>
+<td>[]</td>
+<td>auth下所有的field</td>
+</tr>
+<tr>
+<td>rules</td>
+<td>Object</td>
+<td>Y</td>
+<td>{}</td>
+<td>auth支持的所有规则</td>
+</tr>
+<tr>
+<td>target</td>
+<td>Nodelist</td>
+<td>Y</td>
+<td>&quot;&quot;</td>
+<td>auth对应的form元素</td>
+</tr>
+</tbody>
+</table>
+<h3 id="test-">test()：触发校验</h3>
+<pre><code>auth.test().then(function(){
+    //校验成功后执行
+}).fail(function(){
+    //校验失败后执行
+})
+</code></pre><p>跟field一样，支持链式调用then()和fail()方法。</p>
+<p>test()支持只校验指定的field。</p>
+<pre><code>auth.test(&#39;user,sex&#39;);
+</code></pre><h3 id="register-name-rule-">register(name, rule)：注册验证规则</h3>
+<pre><code>auth.register(&#39;max&#39;,function(value,attr){
+    return true;
+});
+</code></pre><p>当name为object时，批量添加。</p>
+<pre><code>auth.register({
+    &#39;max&#39;:function(value,attr){
+        return true;
+    }
+});
+</code></pre><h3 id="field-name-key-field-">field(name)：根据key返回field对象</h3>
+<pre><code>var user = auth.field(&#39;user&#39;);
+</code></pre><h3 id="fieldtarget-name-field-">fieldTarget(name):获取Field的目标元素</h3>
+<pre><code>var $user = auth.fieldTarget(&#39;user&#39;);
+</code></pre><p>如果你需要对表单元素进行特殊操作，不需要给元素加个钩子，直接使用这个方法即可。</p>
+<h3 id="add-field-config-field">add(field, config)：添加一个field</h3>
+<pre><code>auth.add(&quot;#new_user&quot;);
+</code></pre><p>有些表单元素是异步加载的，在auth初始化时并没有添加进去，这时候就需要<em>add()</em>手动将field添加到auth中。</p>
+<h2 id="field-api-">Field字段API详解</h2>
+<h3 id="field-">Field所有的属性说明</h3>
+<table>
+<thead>
+<tr>
+<th>属性名</th>
+<th>类型</th>
+<th>只读</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>name</td>
+<td>String</td>
+<td>Y</td>
+<td>&quot;&quot;</td>
+<td>字段名称</td>
+</tr>
+<tr>
+<td>rules</td>
+<td>Object</td>
+<td>Y</td>
+<td>{}</td>
+<td>字段上绑定的所有规则</td>
+</tr>
+<tr>
+<td>rules</td>
+<td>Object</td>
+<td>Y</td>
+<td>{}</td>
+<td>字段上绑定的所有规则</td>
+</tr>
+<tr>
+<td>host</td>
+<td>Auth</td>
+<td>Y</td>
+<td>&quot;&quot;</td>
+<td>Auth的实例</td>
+</tr>
+<tr>
+<td>msg</td>
+<td>Msg</td>
+<td>N</td>
+<td>&quot;&quot;</td>
+<td>消息实例，可以覆写自定义的消息类实例</td>
+</tr>
+<tr>
+<td>exclude</td>
+<td>String</td>
+<td>N</td>
+<td>&quot;&quot;</td>
+<td>验证时排除的规则，后面有详细演示</td>
+</tr>
+<tr>
+<td>disabledTest</td>
+<td>Boolean</td>
+<td>N</td>
+<td>false</td>
+<td>如果表单元素的disabled时，跳过验证，设置为true时，disabled的元素字段也会触发校验</td>
+</tr>
+<tr>
+<td>event</td>
+<td>String</td>
+<td>N</td>
+<td>&quot;&quot;</td>
+<td>给元素绑定指定的事件用于触发校验，比如<em>user.set(&#39;event&#39;,&#39;blur&#39;)</em></td>
+</tr>
+<tr>
+<td>target</td>
+<td>NodeList</td>
+<td>N</td>
+<td>&quot;&quot;</td>
+<td>target指向Field对应的表单元素，target是可以被改写的</td>
+</tr>
+</tbody>
+</table>
+<h3 id="-filed-">通过元素获取Filed实例</h3>
+<pre><code>&lt;input type=&quot;text&quot; name=&quot;user&quot; id=&quot;J_User&quot; required&gt;
+
+var field = KISSY.one(&#39;#J_User&#39;).data(&#39;data-field&#39;);
+</code></pre><p><em>data-field</em>：当Field实例化时会把实例缓存到表单元素上。</p>
+<h3 id="-">如何不触发字段校验</h3>
+<p>业务场景：有个input隐藏了，我们不希望触发这个input的校验。</p>
+<p>最简单方法：</p>
+<pre><code>&lt;input type=&quot;text&quot; name=&quot;user&quot; required disabled&gt;
+</code></pre><p>设置input的disabled属性，Auth校验时会自动跳过这个字段。</p>
+<p>高端方法：使用exclude属性排除该字段方法</p>
+<h3 id="exclude-">exclude属性的妙用</h3>
+<pre><code>var user = auth.field(&#39;user&#39;);
+user.set(&#39;exclude&#39;,&#39;required&#39;);
+</code></pre><p>校验时，排除required规则，如果要排除多个规则：<em>user.set(&#39;exclude&#39;,&#39;required,max&#39;)</em>。</p>
+<p>不希望排除规则：<em>user.set(&#39;exclude&#39;,&#39;&#39;)</em>。</p>
+<h3 id="-target-">重写target属性的用法</h3>
+<p>有时表单元素会移除，或重新渲染，这时候<em>target</em>已经不存在了，就需要重写下target属性，不然校验会失败。</p>
+<pre><code>KISSY.one(&#39;#user&#39;).remove();
+var user = auth.field(&#39;user&#39;);
+user.set(&#39;target&#39;,&quot;#new_user&quot;);
+S.log(KISSY.one(&#39;#new_user&#39;).data(&#39;data-field&#39;));
+</code></pre><h3 id="then-fail-">then()与fail()</h3>
+<pre><code>user.test().then(function(){
+    //校验成功后执行
+}).fail(function(){
+    //校验失败后执行
+})
+</code></pre><h3 id="rule-">rule():获取指定规则</h3>
+<pre><code>user.rule(&#39;max&#39;);
+</code></pre><h3 id="remove-">remove():删除指定规则</h3>
+<pre><code>user.remove(&#39;max&#39;);
+</code></pre><h3 id="test-">test():校验字段上绑定的规则</h3>
+<p>可以指定校验规则：</p>
+<pre><code>user.test(&#39;max,min&#39;);
+</code></pre><h2 id="rule-api-">Rule API详解</h2>
+<p>业界大部分的规则都是做成了Object配置形式，比如：</p>
+<pre><code>demo.addRule([{
+    ele:&quot;.inputxt:eq(0)&quot;,
+    datatype:&quot;zh2-4&quot;
+},
+{
+    ele:&quot;.inputxt:eq(1)&quot;,
+    datatype:&quot;*6-20&quot;
+}]);
+</code></pre><p>这种结构化的方式配置起来很简单，但遗憾的是只能满足70%的普通需求，表单的业务场景是非常复杂的，ajax异步校验，加个&quot;callback&quot;字段，如果要适用异步上传的校验呢？如果需要延迟3秒校验呢？再加个字段？</p>
+<p>结构化的设计在表单校验中是错误的，低估了表单业务复杂性。</p>
+<p>所以Auth使用Function的方式，用户可以在规则函数中写任何校验逻辑，甚至异步校验逻辑，只要保证函数的返回值符合auth要求即可。</p>
+<p>比如下面的代码：</p>
+<pre><code>auth.register(&#39;later-max&#39;,function(value,attr,defer){
+    var self = this;
+    S.later(function(){
+        if(value &lt; attr){
+            defer.resolve(self);
+        }else{
+            defer.reject(self);
+        }
+    },3000);
+    return defer.promise;
+})
+</code></pre><p>比如随意设置错误消息：</p>
+<pre><code>auth.register(&#39;min&#39;,function(value,attr,defer){
+    if(!this.msg(&#39;error&#39;)) this.msg(&#39;error&#39;,&#39;消息随便设置&#39;);
+    return Number(value) &gt; 0;
+})
+</code></pre><p>更强大的是，你可以通过rule回溯到Field和Auth。
+比如当你校验这个规则时，希望校验另外一个规则：</p>
+<pre><code>auth.register(&#39;min&#39;,function(value,attr,defer){
+    return Number(value) &gt; 0;
+})
+
+auth.register(&#39;len&#39;,function(value,attr,defer){
+    var field = this.get(&#39;field&#39;);
+    field.test(&#39;min&#39;);
+    return Number(value) &gt; 3;
+})
+</code></pre><h2 id="-uploader-">与uploader配合使用</h2>
+<p>如果你的表单包含有<a href="">uploader</a>异步上传组件，<a href="http://gallery.kissyui.com/auth/2.0.1/demo/rule_msg.html">demo传送门</a>。</p>
+<p>由于uploader的初始化代码比较多，就不全部贴出来了。</p>
+<p>Uploader（异步上传组件），需要个hidden来存储服务器返回的url，Auth进行校验时只要对这个hidden进行校验即可。</p>
+<p>Uploader自带了格式、数量等验证，一般只需验证required，有特殊验证需求可以注册个自定义规则。</p>
+<pre><code>&lt;input type=&quot;file&quot; class=&quot;g-u&quot; id=&quot;J_UploaderBtn&quot; value=&quot;上传文件&quot; name=&quot;Filedata&quot; &gt;
+&lt;input type=&quot;hidden&quot; id=&quot;J_Urls&quot; name=&quot;urls&quot; value=&quot;http://test.jpg&quot; required required-msg=&quot;必须上传一个文件！&quot;/&gt;
+</code></pre><p>来看个场景：必须上传二个文件</p>
+<pre><code>auth.register(&#39;uploader-limit&#39;,function(value,attr){
+    var limit = Number(attr);
+    var queue = uploader.get(&#39;queue&#39;);
+    var count = queue.get(&#39;files&#39;).length;
+    return count == limit;
+})
+</code></pre><p>（ps：uploader为Uploader实例）</p>
+<p>验证配置如下：</p>
+<pre><code>&lt;input type=&quot;hidden&quot; id=&quot;J_Urls&quot; name=&quot;urls&quot; value=&quot;http://test.jpg&quot; uploader-limit=&quot;2&quot; uploader-limit-msg=&quot;必须只能上传二个文件！&quot; /&gt;
+</code></pre><p>还必须监听Uploader的事件，触发验证。</p>
+<pre><code>uploader.on(&quot;success add&quot;,function(){
+    //触发hidden的验证
+    var urlHidden = auth.getField(&#39;J_Urls&#39;);
+    urlHidden.test();
+})
+</code></pre>
+          <div style="display:none;"><script type="text/javascript" src="http://tajs.qq.com/stats?sId=36378479" charset="UTF-8"></script></div>
+          <script src="http://docs.kissyui.com/1.4/source/guideline/templates/assets/com.js"></script>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
