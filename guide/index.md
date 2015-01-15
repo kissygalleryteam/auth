@@ -9,19 +9,19 @@ Auth支持异步校验，支持与异步上传组件配合使用。
 ##demo汇总
 
 <ul>
-    <li><a href="http://gallery.kissyui.com/auth/doc/demo/simple_form.html">一个简单表单的验证</a></li>
-    <li><a href="http://gallery.kissyui.com/auth/doc/demo/add_custom_rule.html">添加自定义验证规则</a></li>
-    <li><a href="http://gallery.kissyui.com/auth/doc/demo/event.html">事件举例</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/doc/demo/exclude.html">exclude（可以排除验证规则）用法举例</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/doc/demo/asyn_test.html">支持异步校验！</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/doc/demo/uploader.html">与异步文件上传组件配合校验！</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/doc/demo/rule_msg.html">规则可以设置默认消息</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/doc/demo/add_field.html">可以动态添加校验字段</a>(2.0.0+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/doc/demo/server_msg.html">配合服务器输出的消息</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/doc/demo/msg.html">字段上消息的控制</a></li>
-    <li><a href="http://gallery.kissyui.com/auth/doc/demo/rule_msg.html">给规则设置默认消息</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/doc/demo/noSubmitTest.html">表单提交不默认触发验证</a>(1.5+)</li>
-    <li><a href="http://gallery.kissyui.com/auth/doc/demo/rule_msg.html">配合butterfly使用</a>(1.5+)</li>
+    <li><a href="../demo/simple_form.html">一个简单表单的验证</a></li>
+    <li><a href="../demo/add_custom_rule.html">添加自定义验证规则</a></li>
+    <li><a href="../demo/event.html">事件举例</a>(1.5+)</li>
+    <li><a href="../demo/exclude.html">exclude（可以排除验证规则）用法举例</a>(1.5+)</li>
+    <li><a href="../demo/asyn_test.html">支持异步校验！</a>(1.5+)</li>
+    <li><a href="../demo/uploader.html">与异步文件上传组件配合校验！</a>(1.5+)</li>
+    <li><a href="../demo/rule_msg.html">规则可以设置默认消息</a>(1.5+)</li>
+    <li><a href="../demo/add_field.html">可以动态添加校验字段</a>(2.0.0+)</li>
+    <li><a href="../demo/server_msg.html">配合服务器输出的消息</a>(1.5+)</li>
+    <li><a href="../demo/msg.html">字段上消息的控制</a></li>
+    <li><a href="../demo/rule_msg.html">给规则设置默认消息</a>(1.5+)</li>
+    <li><a href="../demo/noSubmitTest.html">表单提交不默认触发验证</a>(1.5+)</li>
+    <li><a href="../demo/rule_msg.html">配合butterfly使用</a>(1.5+)</li>
 </ul>
 
 ##快速使用
