@@ -1,12 +1,12 @@
 /*
 combined files : 
 
-kg/auth/2.0.1/lib/rule/rule
-kg/auth/2.0.1/lib/rule/default
-kg/auth/2.0.1/lib/rule/ruleFactory
-kg/auth/2.0.1/lib/utils
-kg/auth/2.0.1/lib/field/field
-kg/auth/2.0.1/index
+kg/auth/2.0.3/lib/rule/rule
+kg/auth/2.0.3/lib/rule/default
+kg/auth/2.0.3/lib/rule/ruleFactory
+kg/auth/2.0.3/lib/utils
+kg/auth/2.0.3/lib/field/field
+kg/auth/2.0.3/index
 
 */
 /**
@@ -14,7 +14,7 @@ kg/auth/2.0.1/index
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('kg/auth/2.0.1/lib/rule/rule',function(S, Base,Promise) {
+KISSY.add('kg/auth/2.0.3/lib/rule/rule',function(S, Base,Promise) {
 
     /**
      * 规则类
@@ -186,7 +186,7 @@ KISSY.add('kg/auth/2.0.1/lib/rule/rule',function(S, Base,Promise) {
  * @author 明河 <minghe36@gmail.com>
  *
  */
-KISSY.add('kg/auth/2.0.1/lib/rule/default',function (S) {
+KISSY.add('kg/auth/2.0.3/lib/rule/default',function (S) {
     var EMPTY = "";
     return {
         /**
@@ -330,7 +330,7 @@ KISSY.add('kg/auth/2.0.1/lib/rule/default',function (S) {
  * @author 张挺 <zhangting@taobao.com>
  *
  */
-KISSY.add('kg/auth/2.0.1/lib/rule/ruleFactory',function (S, Node,Base, Rule, defaultRules) {
+KISSY.add('kg/auth/2.0.3/lib/rule/ruleFactory',function (S, Node,Base, Rule, defaultRules) {
     var RuleFactory = function () {
         var self = this;
         RuleFactory.superclass.constructor.call(self);
@@ -385,7 +385,7 @@ KISSY.add('kg/auth/2.0.1/lib/rule/ruleFactory',function (S, Node,Base, Rule, def
  * @author 张挺 <zhangting@taobao.com>
  *
  */
-KISSY.add('kg/auth/2.0.1/lib/utils',function (S, DOM, undefined) {
+KISSY.add('kg/auth/2.0.3/lib/utils',function (S, DOM, undefined) {
     var Utils = {
         toJSON:function (cfg) {
             cfg = cfg.replace(/'/g, '"');
@@ -457,7 +457,7 @@ KISSY.add('kg/auth/2.0.1/lib/utils',function (S, DOM, undefined) {
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('kg/auth/2.0.1/lib/field/field',function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Utils) {
+KISSY.add('kg/auth/2.0.3/lib/field/field',function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Utils) {
     var $ = Node.all;
     var EMPTY = '';
     var DATA_FIELD = 'data-field';
@@ -837,7 +837,7 @@ KISSY.add('kg/auth/2.0.1/lib/field/field',function (S, Event, Base, DOM,Node,Pro
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('kg/auth/2.0.1/index',function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
+KISSY.add('kg/auth/2.0.3/index',function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
     var $ = Node.all;
     var DATA_FIELD = 'data-field';
     /**
