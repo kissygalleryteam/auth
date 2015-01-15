@@ -4,6 +4,3 @@ npm-debug.log
 *.swp
 .sw*
 .idea/*
-*.iml
-*.ipr
-*.iws
