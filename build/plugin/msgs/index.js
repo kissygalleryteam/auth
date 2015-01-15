@@ -1,11 +1,11 @@
 /*
 combined files : 
 
-kg/auth/2.0.3/plugin/msgs/msg
-kg/auth/2.0.3/plugin/msgs/index
+kg/auth/2.0.4/plugin/msgs/msg
+kg/auth/2.0.4/plugin/msgs/index
 
 */
-KISSY.add('kg/auth/2.0.3/plugin/msgs/msg',function (S, Base,Node,XTemplate) {
+KISSY.add('kg/auth/2.0.4/plugin/msgs/msg',function (S, Base,Node,XTemplate) {
     var $ = Node.all;
     var MSG_HOOK = '.auth-msg';
 
@@ -182,7 +182,7 @@ KISSY.add('kg/auth/2.0.3/plugin/msgs/msg',function (S, Base,Node,XTemplate) {
  *  -重构消息提示
  *
  * */
-KISSY.add('kg/auth/2.0.3/plugin/msgs/index',function(S, Node, Base,Msg) {
+KISSY.add('kg/auth/2.0.4/plugin/msgs/index',function(S, Node, Base,Msg) {
     //消息集合
     return Base.extend({
         pluginInitializer:function(auth){
