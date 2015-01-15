@@ -261,6 +261,7 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
                     //并直接触发错误
                     if(stopOnError){
                         _defer.reject(errorFields);
+                        self.fire('error',{fields:errorFields});
                     }else{
                         _testField(newFields[i]);
                     }
