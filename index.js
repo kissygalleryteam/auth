@@ -254,12 +254,17 @@ KISSY.add(function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
                     //单个field验证成功，继续验证下一个field
                     _testField(newFields[i]);
                 }).fail(function(rule){
+                    errorFields.push(rule.get('field'));
+
                     //field验证失败
                     //如果配置了stopOnError，将停止下一个Field的验证
-                    if(!stopOnError){
+                    //并直接触发错误
+                    if(stopOnError){
+                        _defer.reject(errorFields);
+                        self.fire('error',{fields:errorFields});
+                    }else{
                         _testField(newFields[i]);
                     }
-                    errorFields.push(rule.get('field'));
                 })
             }
             return _defer.promise;
