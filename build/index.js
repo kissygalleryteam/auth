@@ -1057,7 +1057,7 @@ KISSY.add('kg/auth/2.0.4/index',function (S, Node,JSON, Base,Promise, Field, Fac
                 _emptyPromise.then(function(){
                     _defer.resolve(newFields);
                     self.fire('success',{fields:newFields});
-                })
+                });
                 _emptyDefer.resolve();
                 return _emptyPromise;
             }
@@ -1071,6 +1071,8 @@ KISSY.add('kg/auth/2.0.4/index',function (S, Node,JSON, Base,Promise, Field, Fac
                     //最后一个Field的PROMISE（说明所有的Field都验证了一遍）
                     PROMISE.then(function(){
                         if(!errorFields.length){
+                            self.set('hasError',false);
+                            self.set('errorFields',[]);
                             //所有filed验证通过
                             _defer.resolve(newFields);
                             self.fire('success',{fields:newFields});
@@ -1089,7 +1091,8 @@ KISSY.add('kg/auth/2.0.4/index',function (S, Node,JSON, Base,Promise, Field, Fac
                     _testField(newFields[i]);
                 }).fail(function(rule){
                     errorFields.push(rule.get('field'));
-
+                    self.set('errorFields',errorFields);
+                    self.set('hasError',true);
                     //field验证失败
                     //如果配置了stopOnError，将停止下一个Field的验证
                     //并直接触发错误
@@ -1180,7 +1183,11 @@ KISSY.add('kg/auth/2.0.4/index',function (S, Node,JSON, Base,Promise, Field, Fac
             /**
              * 提交表单前先触发验证
              */
-            submitTest:{value:true}
+            submitTest:{value:true},
+            //是否有字段出错了
+            hasError:{value: false},
+            //错误的字段集合
+            errorFields:{value:[]}
         }
     });
 
