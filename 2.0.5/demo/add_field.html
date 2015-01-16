@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>动态添加字段</title>
+    <script src="http://g.tbcdn.cn/kissy/k/1.4.7/seed-min.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="http://g.tbcdn.cn/kissy/k/1.4.7/css/dpl/??base-min.css,forms-min.css">
+    <link rel="stylesheet" href="http://g.tbcdn.cn/kissy/k/1.4.7/??css/dpl/base-min.css,css/dpl/forms-min.css,button/assets/dpl-min.css">
+</head>
+<body>
+<h2>动态添加字段</h2>
+<form class="form-horizontal" id="J_Auth" method="post" action="">
+    <div class="control-group">
+        <label class="control-label">用户名</label>
+        <div class="controls">
+            <input type="text" name="user" required>
+        </div>
+    </div>
+    <div class="J_Wrapper">
+
+    </div>
+    <div class="control-group">
+        <label class="control-label"></label>
+        <div class="controls">
+            <button class="ks-button" id="J_Add">添加一个字段</button>
+            <button class="ks-button" id="J_Test">触发校验</button>
+        </div>
+    </div>
+</form>
+
+
+<script>
+    var S = KISSY;
+
+    if (S.Config.debug) {
+        var srcPath = "../";
+        S.config({
+            packages:[
+                {
+                    name:"kg/auth/2.0.1",
+                    path:srcPath,
+                    charset:"utf-8",
+                    ignorePackageNameInUri:true
+                }
+            ]
+        });
+    }
+
+    S.use('kg/auth/2.0.5/,kg/auth/2.0.5/plugin/msgs/,kg/auth/2.0.5/plugin/msgs/style.css', function (S, Auth,AuthMsgs) {
+        var auth = new Auth('#J_Auth');
+        auth.plug(new AuthMsgs());
+        auth.render();
+        S.one('#J_Add').on('click',function(){
+            var id = 'field' + S.guid();
+            S.one('<div class="control-group"><label class="control-label">'+id+'</label> <div class="controls"> <input type="text" name="'+id+'" id="'+id+'" required></div> </div>')
+                .appendTo('.J_Wrapper');
+            auth.add(S.one('#'+id));
+        });
+        S.one('#J_Test').on('click',function(ev){
+            auth.test();
+            ev.preventDefault();
+        })
+    })
+</script>
+
+</body>
+</html>
