@@ -25,7 +25,7 @@
           <p class="author-wrapper"><span>组件有问题？旺旺联系作者：</span><a href="https://github.com/czy88840616" target="_blank" data-name="张挺" class="author"><img src="https://avatars.githubusercontent.com/u/418820?v=3&amp;s=60" alt="张挺"></a><span class="author-name">张挺</span><a href="https://github.com/minghe" target="_blank" data-name="剑平" class="author"><img src="https://avatars.githubusercontent.com/u/724588?v=3&amp;s=60" alt="剑平"></a><span class="author-name">剑平</span>
           </p>
           <div class="common-link"><a href="../demo/index.html" target="_blank" class="demo">示例</a><a href="https://github.com/kissygalleryteam/auth" target="_blank" class="source">源码</a></div>
-          <p class="com-info"><span class="info-label">View</span><span data-com="auth" class="J_View">2680</span></p>
+          <p class="com-info"><span class="info-label">View</span><span data-com="auth" class="J_View">2686</span></p>
           <p class="com-info"><span class="info-label">所属分类</span><a href="http://kpm.taobao.net/list/表单">表单</a><span class="info-label tag-label">组件标签</span><a href="http://kpm.taobao.net/list/tag?tag=表单校验">表单校验</a>
           </p>
           <p class="com-info"><span class="info-label">kissy版本</span><span>1.4.X</span>
@@ -74,15 +74,15 @@
 <p>默认会有验证出错消息，也可以自己配置：</p>
 <pre><code>&lt;input type=&quot;text&quot; name=&quot;user&quot; required required-msg=&quot;用户名不可以为空！&quot;&gt;
 </code></pre><h3 id="-">初始化组件</h3>
-<pre><code>S.use(&#39;kg/auth/2.0.4/,kg/auth/2.0.4/plugin/msgs/,kg/auth/2.0.4/plugin/msgs/style.css&#39;, function (S, Auth,AuthMsgs) {
+<pre><code>S.use(&#39;kg/auth/2.0.5/,kg/auth/2.0.5/plugin/msgs/,kg/auth/2.0.5/plugin/msgs/style.css&#39;, function (S, Auth,AuthMsgs) {
     var auth = new Auth(&#39;#J_Auth&#39;);
     auth.plug(new AuthMsgs());
     auth.render();
 })
 </code></pre><p>Auth的第一个参数为form目标元素。</p>
 <p><em>render()</em>：必须调用！</p>
-<p><em>kg/auth/2.0.4/plugin/msgs/</em>：消息插件，v2.0.0新增，<em>auth.plug(new AuthMsgs());</em></p>
-<p><em>kg/auth/2.0.4/plugin/msgs/style.css</em> ：为消息层样式。</p>
+<p><em>kg/auth/2.0.5/plugin/msgs/</em>：消息插件，v2.0.0新增，<em>auth.plug(new AuthMsgs());</em></p>
+<p><em>kg/auth/2.0.5/plugin/msgs/style.css</em> ：为消息层样式。</p>
 <p>当提交表单前默认会触发验证，验证成功提交表单，想要去掉这个作用，请配置<em>submitTest:false</em> 。</p>
 <p>v2.0.0新增fnFilter配置，用于过滤不需要实例化的字段：</p>
 <pre><code>var auth = new Auth(&#39;#J_Auth&#39;,{
@@ -165,7 +165,7 @@
 </table>
 <h2 id="-">验证消息控制</h2>
 <p>每个Field对应一个Msg。</p>
-<p>请看demo：<a href="http://gallery.kissyui.com/auth/2.0.4/demo/msg.html" target="_blank">字段上消息的控制</a>。</p>
+<p>请看demo：<a href="http://gallery.kissyui.com/auth/2.0.5/demo/msg.html" target="_blank">字段上消息的控制</a>。</p>
 <h3 id="-">指定消息层容器</h3>
 <p>组件默认会在表单元素后面插入个消息容器：</p>
 <pre><code>&lt;div class=&quot;msg-wrapper&quot;&gt;&lt;/div&gt;
@@ -174,7 +174,7 @@
 &lt;div id=&quot;J_UseMsg&quot;&gt;&lt;/div&gt;
 </code></pre><p>msg-wrapper的值为容器钩子。</p>
 <h3 id="-">服务器默认输出了错误消息时的处理</h3>
-<p>请看demo：<a href="http://gallery.kissyui.com/auth/2.0.4/demo/server_msg.html" target="_blank">配合服务器输出的消息</a>。</p>
+<p>请看demo：<a href="http://gallery.kissyui.com/auth/2.0.5/demo/server_msg.html" target="_blank">配合服务器输出的消息</a>。</p>
 <pre><code>&lt;input type=&quot;text&quot; class=&quot;input-xlarge&quot; id=&quot;user&quot; msg-wrapper=&quot;#J_UseMsg&quot; &gt;
 &lt;div id=&quot;J_UseMsg&quot;&gt;
     &lt;!--这里是服务器输出的错误消息 auth-msg样式名必须存在--&gt;
@@ -203,7 +203,7 @@ requiredRule.set(&#39;success&#39;,&#39;校验通过&#39;);
 </code></pre><h3 id="-">控制动画速度</h3>
 <pre><code>msg.set(&#39;speed&#39;,0.8);
 </code></pre><h2 id="-">注册自定义规则</h2>
-<p><a href="http://gallery.kissyui.com/auth/2.0.4/demo/add_custom_rule.html">demo传送门</a></p>
+<p><a href="http://gallery.kissyui.com/auth/2.0.5/demo/add_custom_rule.html">demo传送门</a></p>
 <p>使用<em>auth.register(ruleName,function)</em> 注册一个自定义规则。</p>
 <p><em>ruleName</em>: 规则名称
 <em>ruleFunction</em>: 规则函数，有有二个核心参数，<em>value</em>为被验证元素的值，<em>attr</em>为html tag中配置的属性值。</p>
@@ -221,7 +221,7 @@ requiredRule.set(&#39;success&#39;,&#39;校验通过&#39;);
 <pre><code>&lt;input type=&quot;text&quot; class=&quot;input-xlarge&quot; min-len=&quot;5&quot;&gt;
 </code></pre><p>您也可以在tag上配置错误消息：<em>min-len-msg=&quot;出错了&quot;</em>，html上配置的消息会覆盖ruleFunction上配置的error消息。</p>
 <h2 id="-">异步验证的处理</h2>
-<p><a href="http://gallery.kissyui.com/auth/2.0.4/demo/asyn_test.html">demo传送门</a></p>
+<p><a href="http://gallery.kissyui.com/auth/2.0.5/demo/asyn_test.html">demo传送门</a></p>
 <p>这是Auth的亮点，与市面上任何一款表单验证组件都不同。</p>
 <pre><code>auth.register(&#39;user&#39;, function (value,attr,defer,field) {
     var self = this;
@@ -247,7 +247,7 @@ requiredRule.set(&#39;success&#39;,&#39;校验通过&#39;);
 <li>异步加载成功后，如果校验成功调用下<em>defer.resolve(self)</em>，校验失败调用下<em>defer.reject(self)</em>。</li>
 </ul>
 <h2 id="-">验证事件</h2>
-<p><a href="http://gallery.kissyui.com/auth/2.0.4/demo/event.html">demo传送门</a></p>
+<p><a href="http://gallery.kissyui.com/auth/2.0.5/demo/event.html">demo传送门</a></p>
 <p>Auth和Field的验证事件相同，都有：beforeTest（校验前）、success（校验通过）、error（校验失败）事件，但事件的参数有所差异。</p>
 <p>先初始化了auth：</p>
 <pre><code>var auth = new Auth(&#39;#J_Auth&#39;);
@@ -325,6 +325,13 @@ user.on(&#39;error&#39;,function(ev){
 <td>设置为true时，生成field时，会自动给表单元素绑定校验事件</td>
 </tr>
 <tr>
+<td>hasError</td>
+<td>Boolean</td>
+<td>N</td>
+<td>true</td>
+<td>是否存在校验出错</td>
+</tr>
+<tr>
 <td>useId</td>
 <td>Boolean</td>
 <td>Y</td>
@@ -337,6 +344,13 @@ user.on(&#39;error&#39;,function(ev){
 <td>Y</td>
 <td>[]</td>
 <td>auth下所有的field</td>
+</tr>
+<tr>
+<td>errorFields</td>
+<td>Array</td>
+<td>Y</td>
+<td>[]</td>
+<td>auth下所有的出错的字段</td>
 </tr>
 <tr>
 <td>rules</td>
@@ -536,7 +550,7 @@ auth.register(&#39;len&#39;,function(value,attr,defer){
     return Number(value) &gt; 3;
 })
 </code></pre><h2 id="-uploader-">与uploader配合使用</h2>
-<p>如果你的表单包含有<a href="">uploader</a>异步上传组件，<a href="http://gallery.kissyui.com/auth/2.0.4/demo/rule_msg.html">demo传送门</a>。</p>
+<p>如果你的表单包含有<a href="">uploader</a>异步上传组件，<a href="http://gallery.kissyui.com/auth/2.0.5/demo/rule_msg.html">demo传送门</a>。</p>
 <p>由于uploader的初始化代码比较多，就不全部贴出来了。</p>
 <p>Uploader（异步上传组件），需要个hidden来存储服务器返回的url，Auth进行校验时只要对这个hidden进行校验即可。</p>
 <p>Uploader自带了格式、数量等验证，一般只需验证required，有特殊验证需求可以注册个自定义规则。</p>
