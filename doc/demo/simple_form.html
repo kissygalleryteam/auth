@@ -79,7 +79,7 @@
         S.config({
             packages:[
                 {
-                    name:"kg/auth/2.0.1",
+                    name:"kg/auth/2.0.6",
                     path:srcPath,
                     charset:"utf-8",
                     ignorePackageNameInUri:true
@@ -89,7 +89,7 @@
     }
 
 
-    S.use('kg/auth/2.0.5/,kg/auth/2.0.5/plugin/msgs/,kg/auth/2.0.5/plugin/msgs/style.css', function (S, Auth,AuthMsgs) {
+    S.use('kg/auth/2.0.6/,kg/auth/2.0.6/plugin/msgs/,kg/auth/2.0.6/plugin/msgs/style.css', function (S, Auth,AuthMsgs) {
         var auth = new Auth('#J_Auth');
         auth.plug(new AuthMsgs());
         auth.render();

@@ -61,7 +61,7 @@ Auth支持异步校验，支持与异步上传组件配合使用。
 
 ### 初始化组件
 
-    S.use('kg/auth/2.0.5/,kg/auth/2.0.5/plugin/msgs/,kg/auth/2.0.5/plugin/msgs/style.css', function (S, Auth,AuthMsgs) {
+    S.use('kg/auth/2.0.6/,kg/auth/2.0.6/plugin/msgs/,kg/auth/2.0.6/plugin/msgs/style.css', function (S, Auth,AuthMsgs) {
         var auth = new Auth('#J_Auth');
         auth.plug(new AuthMsgs());
         auth.render();
@@ -71,9 +71,9 @@ Auth的第一个参数为form目标元素。
 
 *render()*：必须调用！
 
-*kg/auth/2.0.5/plugin/msgs/*：消息插件，v2.0.0新增，*auth.plug(new AuthMsgs());*
+*kg/auth/2.0.6/plugin/msgs/*：消息插件，v2.0.0新增，*auth.plug(new AuthMsgs());*
 
-*kg/auth/2.0.5/plugin/msgs/style.css* ：为消息层样式。
+*kg/auth/2.0.6/plugin/msgs/style.css* ：为消息层样式。
 
 当提交表单前默认会触发验证，验证成功提交表单，想要去掉这个作用，请配置*submitTest:false* 。
 

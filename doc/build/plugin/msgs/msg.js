@@ -1,10 +1,10 @@
 /*
 combined files : 
 
-kg/auth/2.0.4/plugin/msgs/msg
+kg/auth/2.0.6/plugin/msgs/msg
 
 */
-KISSY.add('kg/auth/2.0.4/plugin/msgs/msg',function (S, Base,Node,XTemplate) {
+KISSY.add('kg/auth/2.0.6/plugin/msgs/msg',function (S, Base,Node,XTemplate) {
     var $ = Node.all;
     var MSG_HOOK = '.auth-msg';
 
