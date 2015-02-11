@@ -25,7 +25,7 @@
           <p class="author-wrapper"><span>组件有问题？旺旺联系作者：</span><a href="https://github.com/czy88840616" target="_blank" data-name="张挺" class="author"><img src="https://avatars.githubusercontent.com/u/418820?v=3&amp;s=60" alt="张挺"></a><span class="author-name">张挺</span><a href="https://github.com/minghe" target="_blank" data-name="剑平" class="author"><img src="https://avatars.githubusercontent.com/u/724588?v=3&amp;s=60" alt="剑平"></a><span class="author-name">剑平</span>
           </p>
           <div class="common-link"><a href="../demo/index.html" target="_blank" class="demo">示例</a><a href="https://github.com/kissygalleryteam/auth" target="_blank" class="source">源码</a></div>
-          <p class="com-info"><span class="info-label">View</span><span data-com="auth" class="J_View">2690</span></p>
+          <p class="com-info"><span class="info-label">View</span><span data-com="auth" class="J_View">2863</span></p>
           <p class="com-info"><span class="info-label">所属分类</span><a href="http://kpm.taobao.net/list/表单">表单</a><span class="info-label tag-label">组件标签</span><a href="http://kpm.taobao.net/list/tag?tag=表单校验">表单校验</a>
           </p>
           <p class="com-info"><span class="info-label">kissy版本</span><span>1.4.X</span>
@@ -74,15 +74,15 @@
 <p>默认会有验证出错消息，也可以自己配置：</p>
 <pre><code>&lt;input type=&quot;text&quot; name=&quot;user&quot; required required-msg=&quot;用户名不可以为空！&quot;&gt;
 </code></pre><h3 id="-">初始化组件</h3>
-<pre><code>S.use(&#39;kg/auth/2.0.5/,kg/auth/2.0.5/plugin/msgs/,kg/auth/2.0.5/plugin/msgs/style.css&#39;, function (S, Auth,AuthMsgs) {
+<pre><code>S.use(&#39;kg/auth/2.0.6/,kg/auth/2.0.6/plugin/msgs/,kg/auth/2.0.6/plugin/msgs/style.css&#39;, function (S, Auth,AuthMsgs) {
     var auth = new Auth(&#39;#J_Auth&#39;);
     auth.plug(new AuthMsgs());
     auth.render();
 })
 </code></pre><p>Auth的第一个参数为form目标元素。</p>
 <p><em>render()</em>：必须调用！</p>
-<p><em>kg/auth/2.0.5/plugin/msgs/</em>：消息插件，v2.0.0新增，<em>auth.plug(new AuthMsgs());</em></p>
-<p><em>kg/auth/2.0.5/plugin/msgs/style.css</em> ：为消息层样式。</p>
+<p><em>kg/auth/2.0.6/plugin/msgs/</em>：消息插件，v2.0.0新增，<em>auth.plug(new AuthMsgs());</em></p>
+<p><em>kg/auth/2.0.6/plugin/msgs/style.css</em> ：为消息层样式。</p>
 <p>当提交表单前默认会触发验证，验证成功提交表单，想要去掉这个作用，请配置<em>submitTest:false</em> 。</p>
 <p>v2.0.0新增fnFilter配置，用于过滤不需要实例化的字段：</p>
 <pre><code>var auth = new Auth(&#39;#J_Auth&#39;,{
