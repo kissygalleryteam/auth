@@ -1,12 +1,12 @@
 /*
 combined files : 
 
-kg/auth/2.0.1/lib/rule/rule
-kg/auth/2.0.1/lib/rule/default
-kg/auth/2.0.1/lib/rule/ruleFactory
-kg/auth/2.0.1/lib/utils
-kg/auth/2.0.1/lib/field/field
-kg/auth/2.0.1/index
+kg/auth/2.0.6/lib/rule/rule
+kg/auth/2.0.6/lib/rule/default
+kg/auth/2.0.6/lib/rule/ruleFactory
+kg/auth/2.0.6/lib/utils
+kg/auth/2.0.6/lib/field/field
+kg/auth/2.0.6/index
 
 */
 /**
@@ -14,7 +14,7 @@ kg/auth/2.0.1/index
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('kg/auth/2.0.1/lib/rule/rule',function(S, Base,Promise) {
+KISSY.add('kg/auth/2.0.6/lib/rule/rule',function(S, Base,Promise) {
 
     /**
      * 规则类
@@ -186,7 +186,7 @@ KISSY.add('kg/auth/2.0.1/lib/rule/rule',function(S, Base,Promise) {
  * @author 明河 <minghe36@gmail.com>
  *
  */
-KISSY.add('kg/auth/2.0.1/lib/rule/default',function (S) {
+KISSY.add('kg/auth/2.0.6/lib/rule/default',function (S) {
     var EMPTY = "";
     return {
         /**
@@ -330,7 +330,7 @@ KISSY.add('kg/auth/2.0.1/lib/rule/default',function (S) {
  * @author 张挺 <zhangting@taobao.com>
  *
  */
-KISSY.add('kg/auth/2.0.1/lib/rule/ruleFactory',function (S, Node,Base, Rule, defaultRules) {
+KISSY.add('kg/auth/2.0.6/lib/rule/ruleFactory',function (S, Node,Base, Rule, defaultRules) {
     var RuleFactory = function () {
         var self = this;
         RuleFactory.superclass.constructor.call(self);
@@ -385,7 +385,7 @@ KISSY.add('kg/auth/2.0.1/lib/rule/ruleFactory',function (S, Node,Base, Rule, def
  * @author 张挺 <zhangting@taobao.com>
  *
  */
-KISSY.add('kg/auth/2.0.1/lib/utils',function (S, DOM, undefined) {
+KISSY.add('kg/auth/2.0.6/lib/utils',function (S, DOM, undefined) {
     var Utils = {
         toJSON:function (cfg) {
             cfg = cfg.replace(/'/g, '"');
@@ -457,7 +457,7 @@ KISSY.add('kg/auth/2.0.1/lib/utils',function (S, DOM, undefined) {
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('kg/auth/2.0.1/lib/field/field',function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Utils) {
+KISSY.add('kg/auth/2.0.6/lib/field/field',function (S, Event, Base, DOM,Node,Promise, Factory, Rule, Utils) {
     var $ = Node.all;
     var EMPTY = '';
     var DATA_FIELD = 'data-field';
@@ -837,7 +837,7 @@ KISSY.add('kg/auth/2.0.1/lib/field/field',function (S, Event, Base, DOM,Node,Pro
  * @author czy88840616 <czy88840616@gmail.com>
  *
  */
-KISSY.add('kg/auth/2.0.1/index',function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
+KISSY.add('kg/auth/2.0.6/index',function (S, Node,JSON, Base,Promise, Field, Factory, Utils) {
     var $ = Node.all;
     var DATA_FIELD = 'data-field';
     /**
@@ -1057,7 +1057,7 @@ KISSY.add('kg/auth/2.0.1/index',function (S, Node,JSON, Base,Promise, Field, Fac
                 _emptyPromise.then(function(){
                     _defer.resolve(newFields);
                     self.fire('success',{fields:newFields});
-                })
+                });
                 _emptyDefer.resolve();
                 return _emptyPromise;
             }
@@ -1071,6 +1071,8 @@ KISSY.add('kg/auth/2.0.1/index',function (S, Node,JSON, Base,Promise, Field, Fac
                     //最后一个Field的PROMISE（说明所有的Field都验证了一遍）
                     PROMISE.then(function(){
                         if(!errorFields.length){
+                            self.set('hasError',false);
+                            self.set('errorFields',[]);
                             //所有filed验证通过
                             _defer.resolve(newFields);
                             self.fire('success',{fields:newFields});
@@ -1088,12 +1090,18 @@ KISSY.add('kg/auth/2.0.1/index',function (S, Node,JSON, Base,Promise, Field, Fac
                     //单个field验证成功，继续验证下一个field
                     _testField(newFields[i]);
                 }).fail(function(rule){
+                    errorFields.push(rule.get('field'));
+                    self.set('errorFields',errorFields);
+                    self.set('hasError',true);
                     //field验证失败
                     //如果配置了stopOnError，将停止下一个Field的验证
-                    if(!stopOnError){
+                    //并直接触发错误
+                    if(stopOnError){
+                        _defer.reject(errorFields);
+                        self.fire('error',{fields:errorFields});
+                    }else{
                         _testField(newFields[i]);
                     }
-                    errorFields.push(rule.get('field'));
                 })
             }
             return _defer.promise;
@@ -1175,7 +1183,11 @@ KISSY.add('kg/auth/2.0.1/index',function (S, Node,JSON, Base,Promise, Field, Fac
             /**
              * 提交表单前先触发验证
              */
-            submitTest:{value:true}
+            submitTest:{value:true},
+            //是否有字段出错了
+            hasError:{value: false},
+            //错误的字段集合
+            errorFields:{value:[]}
         }
     });
 
